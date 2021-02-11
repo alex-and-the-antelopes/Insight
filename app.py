@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect
+import User
 
 app = Flask(__name__)
 
@@ -27,7 +28,7 @@ safe_actions = {
 
 
 # Sample private function
-# We don't want all functions to bes accessible from the internet, so this function should NOT be put in the actions
+# We don't want private functions to be accessible from the internet, so this function should NOT be put in the actions
 #   array.
 def unsafe_function(n):
     # Do something that shouldn't be accessible publicly
@@ -51,6 +52,26 @@ def handle_request(bill_id, action):
     }
 
     return jsonify(output)
+
+# TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
+# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
+@app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
+def login(username, password):
+    user = User.User("sg2295", "password")  # TODO fetch the actual user, no DB setup yet :(
+    if user.verify_password(password):
+        return redirect('/logged_in')
+    else:
+        return redirect('/garbage')
+
+
+@app.route('/logged_in')
+def successful_login():
+    return "<h1> you logged in successfully </h1> nice."
+
+
+@app.route('/garbage')
+def garbage_page():
+    return "<h1> this is a garbage page </h1> If you are here, you are garbage."
 
 
 if __name__ == '__main__':
