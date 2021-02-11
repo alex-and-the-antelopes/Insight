@@ -58,10 +58,7 @@ def handle_request(bill_id, action):
 @app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
 def login(username, password):
     user = User.User("sg2295", "password")  # TODO fetch the actual user, no DB setup yet :(
-    if user.verify_password(password):
-        return redirect('/logged_in')
-    else:
-        return redirect('/garbage')
+    return redirect('/logged_in') if user.verify_password(password) else redirect('/garbage')
 
 
 @app.route('/logged_in')
