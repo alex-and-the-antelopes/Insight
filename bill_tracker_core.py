@@ -30,7 +30,7 @@ CONFIG = {
 
 # Returns the URL for the given filename
 def get_img_url(filename):
-    return CONFIG["public_res_dir"] + filename
+    return CONFIG["external_res_path"] + filename
 
 
 # Generate a hash for the given password.
@@ -69,7 +69,7 @@ class Bill:
     Has title, desc, date added, expiration, status, short_desc, photo and link.
     """
 
-    def __init__(self, title, desc, date_added, expiration, status,
+    def __init__(self, id, title, desc, date_added, expiration, status,
                  short_desc=None, photo=CONFIG["default_img"], link=CONFIG["default_url"]):
         self.link = link
         self.status = status
@@ -77,6 +77,7 @@ class Bill:
         self.date_added = date_added
         self.desc = desc
         self.title = title
+        self.id = id
 
         # Generate short desc from long desc if one isn't given
         if short_desc is None:

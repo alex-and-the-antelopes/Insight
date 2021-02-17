@@ -38,6 +38,29 @@ def find_bill(id):
     return bill.to_dict()
 
 
+def get_top_bills(range):
+    bill1 = core.Bill(
+        "id_1",
+        "Sample bill",
+        "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
+        "1/1/2021",
+        "2/1/2022",
+        "active",
+        short_desc="Sample Bill"
+    )
+    bill2 = core.Bill(
+        "id_2",
+        "Another Sample bill",
+        "This is a different sample bill: an example. Probably for testing purposes.",
+        "1/2/2121",
+        "2/1/2122",
+        "inactive",
+        short_desc="Different Sample Bill"
+    )
+
+    return [bill1.to_dict(), bill2.to_dict()]
+
+
 # endregion
 
 # Mapping of "actions" (from URL) to their respective functions
@@ -58,7 +81,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('b/<bill_id>/<action>')
+@app.route('/b/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -80,6 +103,23 @@ def handle_request(bill_id, action):
     return jsonify(output)
 
 
+@app.route('/top')
+def top():
+    result = get_top_bills(10)
+    # Construct output
+    output = {
+        "result": result
+    }
+
+    # Convert to json and return
+    return jsonify(output)
+
+
+@app.route('/')
+def landing_page():
+    return redirect(CONFIG["default_url"])
+
+
 # TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
@@ -93,7 +133,7 @@ def login(username, password):
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-@app.route(CONFIG["public_res_dir"] + '<name>')
+@app.route(CONFIG["external_res_path"] + '<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
