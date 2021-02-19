@@ -6,6 +6,17 @@ from parlpy.bills.bill_list_fetcher import BillsOverview
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
+# todo: put these in utility file for investigating database
+def print_tables_in_db(cursor):
+    cursor.execute("SHOW tables IN bills_app_db")
+    for x in cursor:
+        print(x)
+
+def print_bills_table_structure(cursor):
+    cursor.execute("DESCRIBE bills_app_db.Bills")
+    print("Bills table structure")
+    for x in cursor:
+        print(x)
 
 sql_config = {
     "user": "root",
@@ -21,16 +32,11 @@ sql_config = {
 conn = mysql.connector.connect(**sql_config)
 
 cursor = conn.cursor()
-cursor.execute("SHOW tables IN bills_app_db")
-for x in cursor:
-    print(x)
 
-cursor.execute("DESCRIBE bills_app_db.Bills")
-print("Bills table structure")
-for x in cursor:
-    print(x)
+# list_tables_in_db(cursor)
+print_bills_table_structure(cursor)
 
-cursor.execute("INSERT INTO bills_app_db.Bills (billID) VALUES (333)")
+cursor.execute("INSERT INTO bills_app_db.Bills (billID) VALUES (334)")
 conn.commit()
 
 cursor.execute("SELECT * FROM bills_app_db.Bills")
