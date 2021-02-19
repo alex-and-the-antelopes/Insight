@@ -6,3 +6,6 @@ __pycache__/
 
 # ignore certs (secret)
 periodic_scraper/certs
+
+# ignore pycharm project settings
+.idea
