@@ -26,6 +26,10 @@ def print_all_rows_of_bills_table(cursor):
     for x in cursor:
         print(x)
 
+def clear_bills_table(cursor):
+    cursor.execute("DELETE FROM bills_app_db.Bills")
+    conn.commit()
+
 def insert_all_bill_overview_data(cursor, bill_data):
     for b in bill_data.itertuples():
         print(b)
@@ -55,15 +59,15 @@ conn = mysql.connector.connect(**sql_config)
 cursor = conn.cursor()
 
 # list_tables_in_db(cursor)
-# print_bills_table_structure(cursor)
+print_bills_table_structure(cursor)
 
-bills_this_session = BillsOverview()
-bills_this_session.update_all_bills_in_session()
 
-print(bills_this_session.bills_overview_data.columns)
+#bills_this_session = BillsOverview()
+#bills_this_session.update_all_bills_in_session()
 
-insert_all_bill_overview_data(cursor, bills_this_session.bills_overview_data)
+#print(bills_this_session.bills_overview_data.columns)
 
+#insert_all_bill_overview_data(cursor, bills_this_session.bills_overview_data)
 
 
 print_all_rows_of_bills_table(cursor)
