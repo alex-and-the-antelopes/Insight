@@ -3,3 +3,6 @@
 
 # ignore bytecode
 __pycache__/
+
+# ignore certs (secret)
+periodic_scraper/certs
