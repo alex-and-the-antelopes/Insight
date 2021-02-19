@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 ParlPy = "==0.0.2"
+mysql-connector-python = "*"
 
 [dev-packages]
 
