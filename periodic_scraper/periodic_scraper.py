@@ -11,17 +11,39 @@ sql_config = {
     "user": "root",
     "password": "",
     "host": "35.223.77.43",
-    'client_flags': [ClientFlag.SSL],
+    "client_flags": [ClientFlag.SSL],
     "ssl_ca": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/server-ca.pem",
     "ssl_cert": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/client-cert.pem",
     "ssl_key": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/client-key.pem"
 }
 
 
-cnxn = mysql.connector.connect(**sql_config)
-cnxn.close()
+conn = mysql.connector.connect(**sql_config)
 
-bills_this_session = BillsOverview()
-bills_this_session.update_all_bills_in_session()
+cursor = conn.cursor()
+cursor.execute("SHOW tables IN bills_app_db")
+for x in cursor:
+    print(x)
 
-print(bills_this_session.bills_overview_data)
+cursor.execute("DESCRIBE bills_app_db.Bills")
+print("Bills table structure")
+for x in cursor:
+    print(x)
+
+cursor.execute("INSERT INTO bills_app_db.Bills (billID) VALUES (333)")
+conn.commit()
+
+cursor.execute("SELECT * FROM bills_app_db.Bills")
+print("all items in table:")
+for x in cursor:
+    print(x)
+
+cursor.close()
+conn.close()
+
+#bills_this_session = BillsOverview()
+#bills_this_session.update_all_bills_in_session()
+
+#print(bills_this_session.bills_overview_data)
+
+#print(bills_this_session.bills_overview_data.iloc[0])
