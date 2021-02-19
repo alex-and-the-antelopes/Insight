@@ -6,7 +6,6 @@ from parlpy.bills.bill_list_fetcher import BillsOverview
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
-from collections import namedtuple
 
 # todo: put these in utility file for investigating database
 def print_tables_in_db(cursor):
@@ -14,11 +13,13 @@ def print_tables_in_db(cursor):
     for x in cursor:
         print(x)
 
+
 def print_bills_table_structure(cursor):
     cursor.execute("DESCRIBE bills_app_db.Bills")
     print("Bills table structure")
     for x in cursor:
         print(x)
+
 
 def print_all_rows_of_bills_table(cursor):
     cursor.execute("SELECT * FROM bills_app_db.Bills")
@@ -26,13 +27,15 @@ def print_all_rows_of_bills_table(cursor):
     for x in cursor:
         print(x)
 
+
 # clear all rows and reset increment
-def clear_bills_table(cursor):
+def clear_bills_table(conn, cursor):
     cursor.execute("DELETE FROM bills_app_db.Bills")
     cursor.execute("ALTER TABLE bills_app_db.Bills AUTO_INCREMENT = 1")
     conn.commit()
 
-def insert_all_bill_overview_data(cursor, bill_data):
+
+def insert_all_bill_overview_data(conn, cursor, bill_data):
     for b in bill_data.itertuples():
         # this code gets govt provided bill detail path, could be used as unique id?
         # bill_detail_path_number = int(getattr(b, "bill_detail_path").rsplit("/")[-1])
@@ -44,32 +47,34 @@ def insert_all_bill_overview_data(cursor, bill_data):
 
     conn.commit()
 
+
 sql_config = {
     "user": "root",
     "password": "",
     "host": "35.223.77.43",
     "client_flags": [ClientFlag.SSL],
-    "ssl_ca": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/server-ca.pem",
-    "ssl_cert": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/client-cert.pem",
-    "ssl_key": "/home/r/PycharmProjects/BillTracker/periodic_scraper/certs/client-key.pem"
+    "ssl_ca": "certs/server-ca.pem",
+    "ssl_cert": "certs/client-cert.pem",
+    "ssl_key": "certs/client-key.pem"
 }
 
+def database_demo():
+    conn = mysql.connector.connect(**sql_config)
+    cursor = conn.cursor()
 
-conn = mysql.connector.connect(**sql_config)
+    # list_tables_in_db(cursor)
+    # print_bills_table_structure(cursor)
 
-cursor = conn.cursor()
+    bills_this_session = BillsOverview()
+    bills_this_session.update_all_bills_in_session()
 
-# list_tables_in_db(cursor)
-print_bills_table_structure(cursor)
+    # clear the table and insert everything back in
+    clear_bills_table(conn, cursor)
+    insert_all_bill_overview_data(conn, cursor, bills_this_session.bills_overview_data)
 
-bills_this_session = BillsOverview()
-bills_this_session.update_all_bills_in_session()
+    print_all_rows_of_bills_table(cursor)
 
-clear_bills_table(cursor)
+    cursor.close()
+    conn.close()
 
-insert_all_bill_overview_data(cursor, bills_this_session.bills_overview_data)
-
-print_all_rows_of_bills_table(cursor)
-
-cursor.close()
-conn.close()
+database_demo()
