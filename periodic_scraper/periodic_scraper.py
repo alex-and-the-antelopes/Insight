@@ -18,6 +18,12 @@ def print_bills_table_structure(cursor):
     for x in cursor:
         print(x)
 
+def print_all_rows_of_bills_table(cursor):
+    cursor.execute("SELECT * FROM bills_app_db.Bills")
+    print("all items in table:")
+    for x in cursor:
+        print(x)
+
 sql_config = {
     "user": "root",
     "password": "",
@@ -34,15 +40,12 @@ conn = mysql.connector.connect(**sql_config)
 cursor = conn.cursor()
 
 # list_tables_in_db(cursor)
-print_bills_table_structure(cursor)
+#print_bills_table_structure(cursor)
 
 cursor.execute("INSERT INTO bills_app_db.Bills (billID) VALUES (334)")
 conn.commit()
 
-cursor.execute("SELECT * FROM bills_app_db.Bills")
-print("all items in table:")
-for x in cursor:
-    print(x)
+print_all_rows_of_bills_table(cursor)
 
 cursor.close()
 conn.close()
