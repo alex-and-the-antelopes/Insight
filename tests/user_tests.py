@@ -4,6 +4,13 @@ from bill_tracker_core import hash_password
 
 
 class UserTestCases(unittest.TestCase):
+    """
+    Tests for User. Covered functions:
+    > verify_password
+    > to_dict
+    Depend on/Affected by:
+    > hash_password
+    """
 
     def test_username(self):
         """
