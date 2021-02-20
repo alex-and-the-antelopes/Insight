@@ -101,6 +101,7 @@ class Bill:
 
 # todo: Move this to actual unit test file
 if __name__ == "__main__":
+    print("User stuff: -------------------------------------")
     user = User("sg2295", "password")
     print(user.username)
     print(user.password_hash)
@@ -108,3 +109,14 @@ if __name__ == "__main__":
     print("Testing the wrong password, passwords match:", user.verify_password(wrong_password))
     correct_password = "password"
     print("Testing the correct password, passwords match:", user.verify_password(correct_password))
+    print("Bill stuff: -------------------------------------")
+    bill = Bill(
+        "Sample bill",
+        "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
+        "1/1/2021",
+        "2/1/2022",
+        "active",
+        short_desc="Sample Bill"
+    )
+    print(bill.desc)
+    print(bill.to_dict())
