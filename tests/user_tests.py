@@ -48,26 +48,22 @@ class UserTestCases(unittest.TestCase):
         Test the to_dict() in User
         """
         user = User("admin", "pass")
+        user_dict = user.to_dict()
         # Check for actual value:
-        self.assertEqual({'username': 'admin', 'password_hash': hash_password("pass")}, user.to_dict())
+        self.assertEqual({'username': 'admin', 'password_hash': hash_password("pass")}, user_dict)
         # Check for wrong value:
-        self.assertNotEqual({'username': 'admin', 'password_hash': hash_password("Pass")}, user.to_dict())  # Correct name, wrong pass
-        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("pass")}, user.to_dict())  # Wrong name, correct pass
-        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("Pass")}, user.to_dict())  # Both wrong values
+        self.assertNotEqual({'username': 'admin', 'password_hash': hash_password("Pass")}, user_dict)  # Correct name, wrong pass
+        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("pass")}, user_dict)  # Wrong name, correct pass
+        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("Pass")}, user_dict)  # Both wrong values
         # Check Wrong Types:
         # Partially wrong types:
-        self.assertNotEqual({'username': None, 'password_hash': hash_password("Pass")}, user.to_dict())  # None name
-        self.assertNotEqual({'username': "admin", 'password_hash': hash_password(None)}, user.to_dict())  # None pass
-        self.assertNotEqual({'username': None, 'password_hash': hash_password(None)}, user.to_dict())  # Both None
+        self.assertNotEqual({'username': None, 'password_hash': hash_password("Pass")}, user_dict)  # None name
+        self.assertNotEqual({'username': "admin", 'password_hash': hash_password(None)}, user_dict)  # None pass
+        self.assertNotEqual({'username': None, 'password_hash': hash_password(None)}, user_dict)  # Both None
         # Fully wrong types:
-        self.assertNotEqual("user", user.to_dict())
-        self.assertNotEqual(None, user.to_dict())
-        self.assertNotEqual(13.012, user.to_dict())
-
-# Check for hashed passwords etc
-# make sure it runs normally
-# think about corner cases/edge cases
-# this will run on the pipeline
+        self.assertNotEqual("user", user_dict)
+        self.assertNotEqual(None, user_dict)
+        self.assertNotEqual(13.012, user_dict)
 
 
 if __name__ == '__main__':
