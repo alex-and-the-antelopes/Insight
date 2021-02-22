@@ -30,7 +30,7 @@ CONFIG = {
 
 # Returns the URL for the given filename
 def get_img_url(filename):
-    return CONFIG["public_res_dir"] + filename
+    return CONFIG["external_res_path"] + filename
 
 
 # Generate a hash for the given password.
@@ -99,12 +99,6 @@ class Bill:
         return vars(self)
 
 
-# todo: Move this to actual unit test file
+# Tests have been moved to unit test files
 if __name__ == "__main__":
-    user = User("sg2295", "password")
-    print(user.username)
-    print(user.password_hash)
-    wrong_password = "pass"
-    print("Testing the wrong password, passwords match:", user.verify_password(wrong_password))
-    correct_password = "password"
-    print("Testing the correct password, passwords match:", user.verify_password(correct_password))
+    pass
