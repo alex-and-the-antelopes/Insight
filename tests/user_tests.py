@@ -17,7 +17,7 @@ class UserTestCases(unittest.TestCase):
         Check that username is correct
         Could remove (I realized this wasn't needed too late)
         """
-        user = User("admin", "pass")
+        user = User("admin", "pass", "notification token")
         # Check for actual value:
         self.assertEqual("admin", user.username)
         # Check for wrong values:
@@ -32,7 +32,7 @@ class UserTestCases(unittest.TestCase):
         """
         Test the verify_password() in User
         """
-        user = User("admin", "pass")
+        user = User("admin", "pass", "notification token")
         # Check for actual value:
         self.assertTrue(user.verify_password("pass"))
         # Check for wrong values:
@@ -47,19 +47,21 @@ class UserTestCases(unittest.TestCase):
         """
         Test the to_dict() in User
         """
-        user = User("admin", "pass")
+        user = User("admin", "pass", "n token")
         user_dict = user.to_dict()
         # Check for actual value:
-        self.assertEqual({'username': 'admin', 'password_hash': hash_password("pass")}, user_dict)
+        self.assertEqual({'username': 'admin', 'password_hash': hash_password("pass"), 'notification_token': "n token"}, user_dict)
         # Check for wrong value:
-        self.assertNotEqual({'username': 'admin', 'password_hash': hash_password("Pass")}, user_dict)  # Correct name, wrong pass
-        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("pass")}, user_dict)  # Wrong name, correct pass
-        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("Pass")}, user_dict)  # Both wrong values
+        self.assertNotEqual({'username': 'admin', 'password_hash': hash_password("Pass"), 'notification_token': "n token"}, user_dict)  # Correct name, wrong pass, correct token
+        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("pass"), 'notification_token': "n token"}, user_dict)  # Wrong name, correct pass, correct token
+        self.assertNotEqual({'username': 'admin', 'password_hash': hash_password("pass"), 'notification_token': "N token"}, user_dict)  # Correct name, correct pass, wrong token
+        self.assertNotEqual({'username': 'Admin', 'password_hash': hash_password("Pass"), 'notification_token': "N token"}, user_dict)  # All wrong values
         # Check Wrong Types:
         # Partially wrong types:
-        self.assertNotEqual({'username': None, 'password_hash': hash_password("Pass")}, user_dict)  # None name
-        self.assertNotEqual({'username': "admin", 'password_hash': hash_password(None)}, user_dict)  # None pass
-        self.assertNotEqual({'username': None, 'password_hash': hash_password(None)}, user_dict)  # Both None
+        self.assertNotEqual({'username': None, 'password_hash': hash_password("pass"), 'notification_token': "n token"}, user_dict)  # None name
+        self.assertNotEqual({'username': "admin", 'password_hash': hash_password(None), 'notification_token': "n token"}, user_dict)  # None pass
+        self.assertNotEqual({'username': "admin", 'password_hash': hash_password("pass"), 'notification_token': None}, user_dict)  # None token
+        self.assertNotEqual({'username': None, 'password_hash': hash_password(None), 'notification_token':None}, user_dict)  # None all
         # Fully wrong types:
         self.assertNotEqual("user", user_dict)
         self.assertNotEqual(None, user_dict)
