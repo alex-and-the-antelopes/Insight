@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, redirect, send_file, request
 import bill_tracker_core as core
 
+
 app = Flask(__name__)
 
 # Get config from core
@@ -58,7 +59,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('b/<bill_id>/<action>')
+@app.route('/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -93,7 +94,7 @@ def login(username, password):
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-@app.route(CONFIG["public_res_dir"] + '<name>')
+@app.route('/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
