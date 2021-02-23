@@ -83,9 +83,9 @@ def handle_request(bill_id, action):
 
 # TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
-def login(username, password):
-    user = core.User("sg2295", "password")  # TODO fetch the actual user, no DB setup yet :(
+@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
+def login(username, password, notification_token):
+    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
     if user.verify_password(password):
         return redirect('/logged_in')
     else:
