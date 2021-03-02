@@ -1,2 +1,8 @@
 runtime: python37
 entrypoint: gunicorn -b :$PORT app:app
+
+env_variables:
+  CLOUD_SQL_USERNAME: app
+  CLOUD_SQL_PASSWORD: password
+  CLOUD_SQL_DATABASE_NAME: bills_app_db
+  CLOUD_SQL_CONNECTION_NAME: bills-app-305000:us-central1:bills-app
