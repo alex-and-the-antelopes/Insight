@@ -46,15 +46,15 @@ def send_notification(client, title, body):
         print("PushResponseError")
 
 
-def build_notification(destination, title, message):
+def build_notification(destination, title, body):
     """
     Creates and returns a valid notification, ready to be broadcast
     :param destination: expo client notification token (str)
     :param title: notification title (str)
-    :param message: message to display (str)
+    :param body: main body of the notification (str)
     :return: built notification to broadcast (PushMessage)
     """
-    if type(destination) is not str or type(title) is not str or type(message) is not str:  # Check for type errors
+    if type(destination) is not str or type(title) is not str or type(body) is not str:  # Check for type errors
         raise TypeError("Expected type <class 'str'>")
 
     if not PushClient.is_exponent_push_token(destination):  # Check if the token is valid
@@ -62,7 +62,7 @@ def build_notification(destination, title, message):
 
     notification = PushMessage(to=destination,
                                title=title,
-                               body=message,
+                               body=body,
                                sound="default")  # Build the push message (notification)
 
     return notification
