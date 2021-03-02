@@ -18,7 +18,12 @@ def send_notification_to_all(clients, title, message):
     :return:
     """
 
-    pass
+def send_notification_to_clients(clients, title, body):
+    if type(clients) is not list:  # Check that a list is passed
+        raise TypeError("Expected type <class 'list'> got type ", type(list))
+
+    for client in clients:
+        send_notification(client, title, body)
 
 
 def send_notification(client, title, body):
@@ -69,5 +74,9 @@ def build_notification(destination, title, body):
 
 
 if __name__ == "__main__":
-    user = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
-    send_notification(user, "Test 2", "I DONT like watching the bee movie")
+    user1 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
+    user2 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
+    user3 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
+    lister = [user1, user2, user3]
+    # send_notification(user, "Test 2", "I DONT like watching the bee movie")
+    send_notification_to_clients(lister, "Testing for many clients", "lol you must be loving this")
