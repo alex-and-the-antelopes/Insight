@@ -9,20 +9,18 @@ from requests.exceptions import ConnectionError, HTTPError
 from bill_tracker_core import User
 
 
-"""
+def send_notification_to_clients(clients, title, body):
+    """
     Send a notification with the given title and body to the client.
     :param clients: list of clients to send the notification to (List of Users)
     :param title: title of the notification (str)
     :param body: body of the notification (str)
     """
-
-
-def send_notification_to_clients(clients, title, body):
     if type(clients) is not list:  # Check that a list is passed
         raise TypeError("Expected type <class 'list'> got type ", type(list))
 
-    for client in clients:
-        send_notification(client, title, body)
+    for client in clients:  # Loop through each client in the list
+        send_notification(client, title, body)  # Send message to each client
 
 
 def send_notification(client, title, body):
