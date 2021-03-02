@@ -34,12 +34,9 @@ def send_notification(client, title, message):
 
     try:
         response = PushClient().publish(
-            PushMessage(to=client.notification_token,
-                        title=title,
-                        body=message,
-                        sound="default")
-        )
-        response.validate_response()  # Check we got a valid response
+            build_notification(client.notification_token, title, message)  # Build a valid expo notification
+        )  # Send the notification
+        response.validate_response()  # Check that we got a valid response from the expo server
     except PushServerError:  # Format or validation error
         print("PushServerError, likely caused due to format or validation error")
     except (ConnectionError, HTTPError):  # Encountered some Connection or HTTP error - retry a few times in
@@ -50,6 +47,28 @@ def send_notification(client, title, message):
         print("PushResponseError")
 
 
+def build_notification(destination, title, message):
+    """
+    Creates and returns a valid notification, ready to be broadcast
+    :param destination: expo client notification token (str)
+    :param title: notification title (str)
+    :param message: message to display (str)
+    :return: built notification to broadcast (PushMessage)
+    """
+    if type(destination) is not str or type(title) is not str or type(message) is not str:  # Check for type errors
+        raise TypeError("Expected type <class 'str'>")
+
+    if not PushClient.is_exponent_push_token(destination):  # Check if the token is valid
+        raise ValueError("Not a value notification token")
+
+    notification = PushMessage(to=destination,
+                               title=title,
+                               body=message,
+                               sound="default")  # Build the push message (notification)
+
+    return notification
+
+
 if __name__ == "__main__":
     user = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
-    send_notification(user, "Test 1", "I like watching the bee movie")
+    send_notification(user, "Test 2", "I DONT like watching the bee movie")
