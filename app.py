@@ -1,5 +1,12 @@
 from flask import Flask, jsonify, redirect, send_file, request
 import bill_tracker_core as core
+import os
+import pymysql
+
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 app = Flask(__name__)
 
