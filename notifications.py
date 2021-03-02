@@ -71,9 +71,10 @@ def build_notification(destination, title, body):
 
 
 if __name__ == "__main__":
+    # Simple tests for notifications todo: remove or move to test file
     user1 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
     user2 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
     user3 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
     lister = [user1, user2, user3]
-    # send_notification(user, "Test 2", "I DONT like watching the bee movie")
-    send_notification_to_clients(lister, "Testing for many clients", "lol you must be loving this")
+    send_notification(user1, "Test 3", "Example message body")  # Send to single user
+    send_notification_to_clients(lister, "Testing for many clients", "Example message body")  # Send to list of users
