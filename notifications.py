@@ -21,20 +21,19 @@ def send_notification_to_all(clients, title, message):
     pass
 
 
-def send_notification(client, title, message):
+def send_notification(client, title, body):
     """
-
-    :param client: the user to send the notification to (User object)
-    :param title:
-    :param message:
-    :return:
+    Sends a notification with the given title and body to the client.
+    :param client: intended recipient of the notification to (User)
+    :param title: title of the notification (str)
+    :param body: body of the notification (str)
     """
     if type(client) is not User:  # Check that an instance of User is passed
         raise TypeError("Expected type <class 'User'> got type ", type(client))
 
     try:
         response = PushClient().publish(
-            build_notification(client.notification_token, title, message)  # Build a valid expo notification
+            build_notification(client.notification_token, title, body)  # Build a valid expo notification
         )  # Send the notification
         response.validate_response()  # Check that we got a valid response from the expo server
     except PushServerError:  # Format or validation error
