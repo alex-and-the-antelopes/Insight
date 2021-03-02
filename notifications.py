@@ -5,18 +5,17 @@ from exponent_server_sdk import (
     PushResponseError,
     PushServerError,
 )
-from bill_tracker_core import User
 from requests.exceptions import ConnectionError, HTTPError
+from bill_tracker_core import User
 
 
-def send_notification_to_all(clients, title, message):
+"""
+    Send a notification with the given title and body to the client.
+    :param clients: list of clients to send the notification to (List of Users)
+    :param title: title of the notification (str)
+    :param body: body of the notification (str)
     """
 
-    :param clients: list of clients to send the message to
-    :param title:
-    :param message:
-    :return:
-    """
 
 def send_notification_to_clients(clients, title, body):
     if type(clients) is not list:  # Check that a list is passed
@@ -28,7 +27,7 @@ def send_notification_to_clients(clients, title, body):
 
 def send_notification(client, title, body):
     """
-    Sends a notification with the given title and body to the client.
+    Send a notification with the given title and body to the client.
     :param client: intended recipient of the notification to (User)
     :param title: title of the notification (str)
     :param body: body of the notification (str)
