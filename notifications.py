@@ -15,7 +15,10 @@ def send_push_message(client_token, message, extra=None):
         response = PushClient().publish(
             PushMessage(to=client_token,
                         body=message,
-                        data=extra))  # Note: extra is a dictionary
+                        data=extra,
+                        sound="default"
+                        )
+        )  # Note: extra is a dictionary
         response.validate_response()  # Check we got a valid response
     except PushServerError:  # Format/validation error
         print("PushServerError, likely caused due to format or validation error")
