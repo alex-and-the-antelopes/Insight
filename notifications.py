@@ -6,6 +6,7 @@ from exponent_server_sdk import (
     PushServerError,
 )
 from requests.exceptions import ConnectionError, HTTPError
+import sys
 from bill_tracker_core import User
 
 
@@ -39,11 +40,11 @@ def send_notification(client, title, body):
         )  # Send the notification
         response.validate_response()  # Check that we got a valid response from the expo server
     except PushServerError:  # Format or validation error
-        print("PushServerError, likely caused due to format or validation error")
+        print("PushServerError, likely caused due to format or validation error", file=sys.stderr)
     except (ConnectionError, HTTPError):  # Encountered some Connection or HTTP error - retry a few times in
-        print("Connection or HTTP error")
+        print("Connection or HTTP error", file=sys.stderr)
     except DeviceNotRegisteredError:  # Device token is outdated, or wrong
-        print("Device not registered")  # Todo: Should remove device (or ignore), or request User for new token
+        print("Device not registered", file=sys.stderr)  # Todo: Should remove device (or ignore), or request new token
     except PushResponseError:  # Did not deliver the notification
         print("PushResponseError")
 
