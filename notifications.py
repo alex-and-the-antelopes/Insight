@@ -73,9 +73,16 @@ def build_notification(destination, title, body):
 
 if __name__ == "__main__":
     # Simple tests for notifications todo: remove or move to test file
-    user1 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
-    user2 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
-    user3 = User("Joe", "pass", "ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]")
-    lister = [user1, user2, user3]
-    send_notification(user1, "Test 3", "Example message body")  # Send to single user
-    send_notification_to_clients(lister, "Testing for many clients", "Example message body")  # Send to list of users
+    token = None
+    try:
+        with open("tokens.txt", "r") as file:
+            token = file.readline().strip()  # Read the test token from token file
+    except FileNotFoundError:
+        print("No tokens.txt file found. Notifications tokens need to be in the tokens.txt file", file=sys.stderr)
+    token = "ExponentPushToken[" + token + "]"  # Convert to valid format for push tokens
+    user1 = User("Rob", "pass1", token)
+    user2 = User("Joe", "pass2", token)
+    user3 = User("Alex", "pass3", token)
+    users = [user1, user2, user3]
+    send_notification(user1, "Test 4", "Example message body for user test")  # Send to single user
+    send_notification_to_clients(users, "Testing for many clients", "Example message body")  # Send to list of users
