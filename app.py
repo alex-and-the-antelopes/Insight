@@ -8,6 +8,7 @@ db_password = os.environ.get('CLOUD_SQL_PASSWORD')
 db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
 db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
+
 app = Flask(__name__)
 
 # Get config from core
@@ -65,7 +66,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('b/<bill_id>/<action>')
+@app.route('/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -89,9 +90,9 @@ def handle_request(bill_id, action):
 
 # TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
-def login(username, password):
-    user = core.User("sg2295", "password")  # TODO fetch the actual user, no DB setup yet :(
+@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
+def login(username, password, notification_token):
+    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
     if user.verify_password(password):
         return redirect('/logged_in')
     else:
@@ -100,7 +101,7 @@ def login(username, password):
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-@app.route(CONFIG["public_res_dir"] + '<name>')
+@app.route('/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
