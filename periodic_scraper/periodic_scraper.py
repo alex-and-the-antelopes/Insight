@@ -7,27 +7,6 @@ import mysql.connector
 from mysql.connector.constants import ClientFlag
 
 
-# todo: put these in utility file for investigating database
-def print_tables_in_db(cursor):
-    cursor.execute("SHOW tables IN bills_app_db")
-    for x in cursor:
-        print(x)
-
-
-def print_bills_table_structure(cursor):
-    cursor.execute("DESCRIBE bills_app_db.Bills")
-    print("Bills table structure")
-    for x in cursor:
-        print(x)
-
-
-def print_all_rows_of_bills_table(cursor):
-    cursor.execute("SELECT * FROM bills_app_db.Bills")
-    print("all items in table:")
-    for x in cursor:
-        print(x)
-
-
 # clear all rows and reset increment
 def clear_bills_table(conn, cursor):
     cursor.execute("DELETE FROM bills_app_db.Bills")
@@ -47,6 +26,11 @@ def insert_all_bill_overview_data(conn, cursor, bill_data):
 
     conn.commit()
 
+def print_all_rows_of_table(cursor, table_name):
+    cursor.execute(f"SELECT * FROM bills_app_db.{table_name}")
+    print("all items in table:")
+    for x in cursor:
+        print(x)
 
 sql_config = {
     "user": "root",
@@ -58,12 +42,9 @@ sql_config = {
     "ssl_key": "certs/client-key.pem"
 }
 
-def database_demo():
+def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor()
-
-    # list_tables_in_db(cursor)
-    # print_bills_table_structure(cursor)
 
     bills_this_session = BillsOverview()
     bills_this_session.update_all_bills_in_session()
@@ -72,7 +53,7 @@ def database_demo():
     clear_bills_table(conn, cursor)
     insert_all_bill_overview_data(conn, cursor, bills_this_session.bills_overview_data)
 
-    print_all_rows_of_bills_table(cursor)
+    print_all_rows_of_table(cursor, "Bills")
 
     cursor.close()
     conn.close()
