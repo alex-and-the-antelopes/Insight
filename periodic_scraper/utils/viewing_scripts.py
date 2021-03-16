@@ -10,14 +10,14 @@ def print_tables_in_db(cursor):
 
 def print_table_structure(cursor, table_name):
     cursor.execute(f"DESCRIBE bills_app_db.{table_name}")
-    print("Bills table structure")
+    print(f"{table_name} table structure")
     for x in cursor:
         print(x)
 
 
 def print_all_rows_of_table(cursor, table_name):
     cursor.execute(f"SELECT * FROM bills_app_db.{table_name}")
-    print("all items in table:")
+    print(f"all items in table {table_name}:")
     for x in cursor:
         print(x)
 
