@@ -9,3 +9,6 @@ periodic_scraper/certs
 
 # ignore pycharm project settings
 .idea
+
+# ignore pickle file in periodic_scraper
+periodic_scraper/*.p
