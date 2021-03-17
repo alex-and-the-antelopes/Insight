@@ -48,10 +48,11 @@ class User(object):
     Has username, password. (Other Details could include: email address and more personal data)
     """
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, notification_token):
         self.username = username
         # Hash password and save it
         self.password_hash = hash_password(password)
+        self.notification_token = notification_token
 
     # Given a password, hashes it and see if it is correct
     def verify_password(self, password):
@@ -100,12 +101,6 @@ class Bill:
         return vars(self)
 
 
-# todo: Move this to actual unit test file
+# Tests have been moved to unit test files
 if __name__ == "__main__":
-    user = User("sg2295", "password")
-    print(user.username)
-    print(user.password_hash)
-    wrong_password = "pass"
-    print("Testing the wrong password, passwords match:", user.verify_password(wrong_password))
-    correct_password = "password"
-    print("Testing the correct password, passwords match:", user.verify_password(correct_password))
+    pass

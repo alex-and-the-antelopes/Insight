@@ -1,11 +1,20 @@
-from flask import Flask, jsonify, redirect, send_file, request
+from flask import Flask, jsonify, redirect, send_file
+# from flask_cors import CORS for some reason causes error? like wont compile
 import bill_tracker_core as core
+import db_interactions as database
 
 app = Flask(__name__)
-
+# CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
+global db
+db = database.init_connection_engine()
+
+
+# initialises database pool as a global variable
+
+# example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
 
 # Add more config constants
 # CONFIG.update({
@@ -81,7 +90,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('/b/<bill_id>/<action>')
+@app.route('/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -122,9 +131,9 @@ def landing_page():
 
 # TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>')  # TODO change this it is a really bad practice
-def login(username, password):
-    user = core.User("sg2295", "password")  # TODO fetch the actual user, no DB setup yet :(
+@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
+def login(username, password, notification_token):
+    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
     if user.verify_password(password):
         return redirect('/logged_in')
     else:
@@ -133,13 +142,19 @@ def login(username, password):
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-@app.route(CONFIG["external_res_path"] + '<name>')
+('/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
     return send_file(CONFIG["img_dir"] + name)
 
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
+
+
+@app.route("/")
+def demo_table_test():
+    database.interact("INSERT INTO demo (demo_id, demo_txt) VALUES (123, 'pizza time')")
+    return database.select("SELECT * FROM demo_tbl")
 
 
 # Login was successful.
