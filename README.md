@@ -1,4 +1,4 @@
-# Bill Tracker (name pending)
+# Insight 
 A year-long project in a team of 7 to develop a system to solve a problem, for the *Integrated group-based project* unit at University of Bath 🛁
 
 Taken from the [unit description](http://www.bath.ac.uk/catalogues/2016-2017/cm/CM20257.html):
