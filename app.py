@@ -113,7 +113,7 @@ def get_res(name):
 
 @app.route("/")
 def demo_table_test():
-    database.interact("INSERT INTO demo (demo_id, demo_txt) VALUES (123, 'pizza time')")
+    database.interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
     return database.select("SELECT * FROM demo_tbl")
 
 
