@@ -1,7 +1,7 @@
 runtime: python37
 
 vpc_access_connector:
-  name: projects/bills-app-305000/locations/europe-west2/connectors/bill-app-db
+  name: projects/bills-app-305000/locations/europe-west1/connectors/db-connector
 
 env_variables:
   DB_USER: mastergk
