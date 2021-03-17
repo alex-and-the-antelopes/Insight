@@ -1,15 +1,41 @@
-from flask import Flask, jsonify, redirect, send_file
+from flask import Flask, jsonify, redirect, send_file, Response
 # from flask_cors import CORS for some reason causes error? like wont compile
 import bill_tracker_core as core
-import db_interactions as database
+import sqlalchemy
+import logging
+import os
 
 app = Flask(__name__)
+logger = logging.getLogger()
+
 # CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
-global db
-db = database.init_connection_engine()
+
+def init_connection_engine():
+    db_config = {
+        # Pool size is the maximum number of permanent connections to keep.
+        "pool_size": 5,
+        # Temporarily exceeds the set pool_size if no connections are available.
+        "max_overflow": 2,
+        # The total number of concurrent connections for your application will be
+        # a total of pool_size and max_overflow.
+
+        # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
+        # new connection from the pool. After the specified amount of time, an
+        # exception will be thrown.
+        "pool_timeout": 30,  # 30 seconds
+
+        # 'pool_recycle' is the maximum number of seconds a connection can persist.
+        # Connections that live longer than the specified amount of time will be
+        # reestablished
+        "pool_recycle": 1800,  # 30 minutes
+    }
+    return init_tcp_connection_engine(db_config)
+
+
+db = init_connection_engine()
 
 
 # initialises database pool as a global variable
@@ -153,8 +179,8 @@ def get_res(name):
 
 @app.route("/")
 def demo_table_test():
-    database.interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
-    return database.select("SELECT * FROM demo_tbl")
+    interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
+    return select("SELECT * FROM demo_tbl")
 
 
 # Login was successful.
@@ -167,6 +193,64 @@ def successful_login():
 @app.route('/garbage')
 def garbage_page():
     return "<h1> this is a garbage page </h1> If you are here, you are garbage."
+
+
+def init_tcp_connection_engine(db_config):
+    db_user = os.environ["DB_USER"]
+    db_pass = os.environ["DB_PASS"]
+    db_name = os.environ["DB_NAME"]
+    db_host = os.environ["DB_HOST"]
+
+    # Extract host and port from db_host
+    host_args = db_host.split(":")
+    db_hostname, db_port = host_args[0], int(host_args[1])
+
+    pool = sqlalchemy.create_engine(
+        # Equivalent URL:
+        # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
+        sqlalchemy.engine.url.URL(
+            drivername="mysql+pymysql",
+            username=db_user,  # e.g. "my-database-user"
+            password=db_pass,  # e.g. "my-database-password"
+            host=db_hostname,  # e.g. "127.0.0.1"
+            port=db_port,  # e.g. 3306
+            database=db_name,  # e.g. "my-database-name"
+        ),
+        **db_config
+    )
+    return pool
+
+
+def interact(statement):
+    """
+    Executes the statement passed on the db passed into the function
+
+    return: Response object containing the relevant response
+    """
+    try:
+        # Using a with statement ensures that the connection is always released
+        # back into the pool at the end of statement (even if an error occurs)
+        with db.connect() as conn:
+            conn.execute(statement)
+    except Exception as e:
+        # If something goes wrong, handle the error in this section. This might
+        # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to fulfill that request",
+        )
+    return Response(
+        status=200,
+        response="Request Successful",
+    )
+
+
+def select(statement):
+    """ Special function for select statements as we want to return a value"""
+    with db.connect() as conn:
+        return str(conn.execute(statement).fetchall())
 
 
 if __name__ == '__main__':
