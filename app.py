@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect, send_file
+from flask import Flask, jsonify, redirect, send_file, request
 # from flask_cors import CORS for some reason causes error? like wont compile
 import bill_tracker_core as core
 import db_interactions as database
@@ -129,15 +129,26 @@ def landing_page():
     return redirect(CONFIG["default_url"])
 
 
-# TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
-# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
-def login(username, password, notification_token):
-    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
+# Old (placeholder) login
+@app.route('/old_login/<username>/<password>/<notification_token>')  # TODO Delete
+def old_login(username, password, notification_token):
+    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user from DB
     if user.verify_password(password):
-        return redirect('/logged_in')
+        return redirect('/logged_in')  # Placeholder - proof of concept
     else:
-        return redirect('/garbage')
+        return redirect('/garbage')  # Placeholder - proof of concept
+
+
+# New login
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+
+    # Find user by username in the database. Look at their cookie/session, if it is expired create a new one.
+    # Otherwise return it
+
+    return jsonify({'token': 'token_placeholder'})
 
 
 # Deliver requested resource.
