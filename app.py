@@ -1,12 +1,20 @@
-from flask import Flask, jsonify, redirect, send_file, request
+from flask import Flask, jsonify, redirect, send_file
+# from flask_cors import CORS for some reason causes error? like wont compile
 import bill_tracker_core as core
-import db_interactions as db
+import db_interactions as database
 
 app = Flask(__name__)
-
+# CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
+global db
+db = database.init_connection_engine()
+
+
+# initialises database pool as a global variable
+
+# example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
 
 # Add more config constants
 # CONFIG.update({
@@ -101,6 +109,12 @@ def get_res(name):
     return send_file(CONFIG["img_dir"] + name)
 
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
+
+
+@app.route("/")
+def demo_table_test():
+    database.interact("INSERT INTO demo (demo_id, demo_txt) VALUES (123, 'pizza time')")
+    return database.select("SELECT * FROM demo_tbl")
 
 
 # Login was successful.
