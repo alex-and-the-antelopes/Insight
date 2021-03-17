@@ -1,8 +1,10 @@
 runtime: python37
-entrypoint: gunicorn -b :$PORT app:app
+
+vpc_access_connector:
+  name: projects/bills-app-305000/locations/europe-west2/connectors/bill-app-db
 
 env_variables:
-  CLOUD_SQL_USERNAME: app
-  CLOUD_SQL_PASSWORD: password
-  CLOUD_SQL_DATABASE_NAME: bills_app_db
-  CLOUD_SQL_CONNECTION_NAME: bills-app-305000:us-central1:bills-app
+  DB_USER: bill_app
+  DB_PASS: iq>9xT;Pz2vs%#6r+d3L
+  DB_NAME: demo
+  DB_HOST: "10.56.208.3:3306"

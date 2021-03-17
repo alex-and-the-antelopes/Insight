@@ -1,31 +1,90 @@
+import logging
 import os
+from flask import Flask, Response
 import sqlalchemy
 
+from app import db
 
-class DatabaseInteraction:
-    """Creates a pool of cursors (3) for the cloudsql database connected to through the env variables"""
+app = Flask(__name__)
 
-    def __init__(self):
-        self.db_user = os.environ.get('CLOUD_SQL_USERNAME')
-        self.db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-        self.db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
-        self.db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
-        # When deployed to App Engine, the `GAE_ENV` environment variable will be
-        # set to `standard`
-        if os.environ.get('GAE_ENV') == 'standard':
-            # If deployed, use the local socket interface for accessing Cloud SQL
-            unix_socket = '/cloudsql/{}'.format(self.db_connection_name)
-            engine_url = 'mysql+pymysql://{}:{}@/{}?unix_socket={}'.format(
-                self.db_user, self.db_password, self.db_name, unix_socket)
-        # The Engine object returned by create_engine() has a QueuePool integrated
-        # See https://docs.sqlalchemy.org/en/latest/core/pooling.html for more
-        # information
-        self.engine = sqlalchemy.create_engine(engine_url, pool_size=3)
+logger = logging.getLogger()
 
-    def execute(self, statement):
-        """Executes an SQL statement and returns the result of that transaction as a string """
-        cnx = self.engine.connect()
-        cursor = cnx.execute(statement)
-        result = cursor.fetchall()
-        cnx.close()
-        return str(result)
+
+def init_connection_engine():
+    db_config = {
+        # Pool size is the maximum number of permanent connections to keep.
+        "pool_size": 5,
+        # Temporarily exceeds the set pool_size if no connections are available.
+        "max_overflow": 2,
+        # The total number of concurrent connections for your application will be
+        # a total of pool_size +max_overflow.
+
+        # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
+        # new connection from the pool. After the specified amount of time, an
+        # exception will be thrown.
+        "pool_timeout": 30,  # 30 seconds
+
+        # 'pool_recycle' is the maximum number of seconds a connection can persist.
+        # Connections that live longer than the specified amount of time will be
+        # reestablished
+        "pool_recycle": 1800,  # 30 minutes
+    }
+    return init_tcp_connection_engine(db_config)
+
+
+def init_tcp_connection_engine(db_config):
+    db_user = os.environ["DB_USER"]
+    db_pass = os.environ["DB_PASS"]
+    db_name = os.environ["DB_NAME"]
+    db_host = os.environ["DB_HOST"]
+
+    # Extract host and port from db_host
+    host_args = db_host.split(":")
+    db_hostname, db_port = host_args[0], int(host_args[1])
+
+    pool = sqlalchemy.create_engine(
+        # Equivalent URL:
+        # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
+        sqlalchemy.engine.url.URL(
+            drivername="mysql+pymysql",
+            username=db_user,  # e.g. "my-database-user"
+            password=db_pass,  # e.g. "my-database-password"
+            host=db_hostname,  # e.g. "127.0.0.1"
+            port=db_port,  # e.g. 3306
+            database=db_name,  # e.g. "my-database-name"
+        ),
+        **db_config
+    )
+    return pool
+
+
+def interact(statement):
+    """
+    Executes the statement passed on the db passed into the function
+
+    return: Response object containing the relevant response
+    """
+    try:
+        # Using a with statement ensures that the connection is always released
+        # back into the pool at the end of statement (even if an error occurs)
+        with db.connect() as conn:
+            conn.execute(statement)
+    except Exception as e:
+        # If something goes wrong, handle the error in this section. This might
+        # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to fulfill that request",
+        )
+    return Response(
+        status=200,
+        response="Request Successful",
+    )
+
+
+def select(statement):
+    """ Special function for select statements as we want to return a value"""
+    with db.connect() as conn:
+        return str(conn.execute(statement).fetchall())
