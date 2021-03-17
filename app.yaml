@@ -4,7 +4,9 @@ vpc_access_connector:
   name: projects/bills-app-305000/locations/europe-west2/connectors/bill-app-db
 
 env_variables:
-  DB_USER: bill_app
-  DB_PASS: iq>9xT;Pz2vs%#6r+d3L
+  DB_USER: mastergk
+  DB_PASS: 9br*+9Fc9LX^2sy>iY,D
   DB_NAME: demo
-  DB_HOST: "10.56.208.3:3306"
+  DB_HOST: "10.56.209.3:3306"
+
+
