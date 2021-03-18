@@ -13,6 +13,32 @@ logger = logging.getLogger()
 CONFIG = core.CONFIG
 
 
+def init_tcp_connection_engine(db_config):
+    db_user = os.environ["DB_USER"]
+    db_pass = os.environ["DB_PASS"]
+    db_name = os.environ["DB_NAME"]
+    db_host = os.environ["DB_HOST"]
+
+    # Extract host and port from db_host
+    host_args = db_host.split(":")
+    db_hostname, db_port = host_args[0], int(host_args[1])
+
+    pool = sqlalchemy.create_engine(
+        # Equivalent URL:
+        # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
+        sqlalchemy.engine.url.URL(
+            drivername="mysql+pymysql",
+            username=db_user,  # e.g. "my-database-user"
+            password=db_pass,  # e.g. "my-database-password"
+            host=db_hostname,  # e.g. "127.0.0.1"
+            port=db_port,  # e.g. 3306
+            database=db_name,  # e.g. "my-database-name"
+        ),
+        **db_config
+    )
+    return pool
+
+
 def init_connection_engine():
     db_config = {
         # Pool size is the maximum number of permanent connections to keep.
@@ -169,6 +195,8 @@ def login(username, password, notification_token):
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 ('/' + CONFIG["external_res_path"] + '/<name>')
+
+
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
@@ -193,32 +221,6 @@ def successful_login():
 @app.route('/garbage')
 def garbage_page():
     return "<h1> this is a garbage page </h1> If you are here, you are garbage."
-
-
-def init_tcp_connection_engine(db_config):
-    db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
-    db_name = os.environ["DB_NAME"]
-    db_host = os.environ["DB_HOST"]
-
-    # Extract host and port from db_host
-    host_args = db_host.split(":")
-    db_hostname, db_port = host_args[0], int(host_args[1])
-
-    pool = sqlalchemy.create_engine(
-        # Equivalent URL:
-        # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
-        sqlalchemy.engine.url.URL(
-            drivername="mysql+pymysql",
-            username=db_user,  # e.g. "my-database-user"
-            password=db_pass,  # e.g. "my-database-password"
-            host=db_hostname,  # e.g. "127.0.0.1"
-            port=db_port,  # e.g. 3306
-            database=db_name,  # e.g. "my-database-name"
-        ),
-        **db_config
-    )
-    return pool
 
 
 def interact(statement):
