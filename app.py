@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, redirect, send_file, request
 # from flask_cors import CORS for some reason causes error? like wont compile
 import bill_tracker_core as core
-import db_interactions as database
+# import db_interactions as database  # TODO FIX
 
 app = Flask(__name__)
 # CORS(app)
@@ -9,7 +9,7 @@ app = Flask(__name__)
 CONFIG = core.CONFIG
 
 global db
-db = database.init_connection_engine()
+# db = database.init_connection_engine()  # TODO FIX
 
 
 # initialises database pool as a global variable
@@ -144,9 +144,25 @@ def old_login(username, password, notification_token):
 def login():
     username = request.form['username']
     password = request.form['password']
-
+    print(username, password)
     # Find user by username in the database. Look at their cookie/session, if it is expired create a new one.
     # Otherwise return it
+
+    return jsonify({'token': 'token_placeholder'})
+
+
+# New Register
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email_address']
+    notifications = request.form['notification_token']
+    postcode = request.form['postcode']
+    print(username, password, email, notifications, postcode)
+    # TODO create and store user
+
+    # log in the user and return the session token
 
     return jsonify({'token': 'token_placeholder'})
 
