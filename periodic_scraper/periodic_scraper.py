@@ -3,6 +3,7 @@
 
 from parlpy.bills.bill_list_fetcher import BillsOverview
 import parlpy.mps.mp_fetcher as mf
+import parlpy.mps.parties_fetcher as pf
 
 import mysql.connector
 from mysql.connector.constants import ClientFlag
@@ -106,8 +107,25 @@ def insert_mp_data(conn, cursor):
 
     conn.commit()
 
+def execute_mp_data_in_db(cursor, party_id, party_name):
+    insert_command_string = f"INSERT INTO bills_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
+    print(f"insert command string")
+    print(insert_command_string)
 
+    cursor.execute(insert_command_string)
+
+# clear table, execute insertions and commit Party data
+# todo: write update functionality rather than delete -> add
+def insert_party_data(conn, cursor):
+    clear_table(conn, cursor, "Party")
+
+    party_details_list = pf.get_all_parties()
+
+    for p in party_details_list:
+        execute_mp_data_in_db(cursor, p.party_id, p.party_name)
+
+    conn.commit()
 
 def insert_bills_data(conn, cursor):
     bills_this_session = BillsOverview()
@@ -123,7 +141,11 @@ def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor()
 
-    insert_mp_data(conn, cursor)
+    # todo: only run this infrequently
+    if True:
+        insert_party_data(conn, cursor)
+    #insert_mp_data(conn, cursor)
+
 
     cursor.close()
     conn.close()
