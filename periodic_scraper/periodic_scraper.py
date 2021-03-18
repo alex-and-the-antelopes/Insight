@@ -62,15 +62,13 @@ def get_names_from_full_name(name_display):
 
     return first_name, second_name
 
-def put_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
+def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
     insert_command_string = f"INSERT INTO bills_app_db.MP (firstName, lastName, partyID) VALUES (\"{first_name}\",\"{second_name}\",{party_id})"
 
-    print(f"insert command string")
+    print(f"mp insert command string")
     print(insert_command_string)
 
     cursor.execute(insert_command_string)
-
-
 
 # ('mpID', b'int(11)', 'NO', 'PRI', None, 'auto_increment')
 # ('firstName', b'text', 'YES', '', None, '')
@@ -102,15 +100,16 @@ def insert_mp_data(conn, cursor):
         party_id,
         last_updated) in current_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(name_display)
-        put_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id)
+        print("here")
+        execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id)
         #print(name_display, member_id, party_id)
 
     conn.commit()
 
-def execute_mp_data_in_db(cursor, party_id, party_name):
+def execute_party_data_in_db(cursor, party_id, party_name):
     insert_command_string = f"INSERT INTO bills_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
-    print(f"insert command string")
+    print(f"party insert command string")
     print(insert_command_string)
 
     cursor.execute(insert_command_string)
@@ -123,7 +122,7 @@ def insert_party_data(conn, cursor):
     party_details_list = pf.get_all_parties()
 
     for p in party_details_list:
-        execute_mp_data_in_db(cursor, p.party_id, p.party_name)
+        execute_party_data_in_db(cursor, p.party_id, p.party_name)
 
     conn.commit()
 
@@ -131,8 +130,7 @@ def insert_bills_data(conn, cursor):
     bills_this_session = BillsOverview()
     bills_this_session.update_all_bills_in_session()
 
-    # clear the table and insert everything back in
-    clear_table(conn, cursor, "Bills")
+    # insert everything back in
     insert_all_bill_overview_data(conn, cursor, bills_this_session.bills_overview_data)
 
     print_all_rows_of_table(cursor, "Bills")
@@ -140,11 +138,15 @@ def insert_bills_data(conn, cursor):
 def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor()
+    #clear_table(conn, cursor, "Party")
 
     # todo: only run this infrequently
+    # clear the tables in order according to foreign key constraints, then add all values back in
     if True:
+        clear_table(conn, cursor, "MP")
+        clear_table(conn, cursor, "Party")
         insert_party_data(conn, cursor)
-    #insert_mp_data(conn, cursor)
+        insert_mp_data(conn, cursor)
 
 
     cursor.close()
