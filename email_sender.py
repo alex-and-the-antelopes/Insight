@@ -3,6 +3,8 @@ import email_details
 
 
 def send_message(message=None, recipient_address=None):
+    # Message = the built email message and recipient_address = email address of recipient.
+    # Todo add error checking
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.ehlo()
@@ -11,7 +13,7 @@ def send_message(message=None, recipient_address=None):
         server.sendmail(email_details.email_address, recipient_address, message)
         server.quit()
     except:
-        print("Email failed to send.")
+        print("Email failed to send.")  # Todo use error stream using sys
 
 
 def create_email(subject="Insight message!", main_body=None):
@@ -24,5 +26,5 @@ def send_email():
 
 
 if __name__ == '__main__':
-    create_email(main_body="Dummy message")
-    send_message(create_email(main_body="Dummy message"), "sgavriilidis1@gmail.com")
+    send_email("dummyemail@gmail.com", "Title of message", "dummy text here here here one.")
+
