@@ -16,7 +16,9 @@ def send_message(message=None, recipient_address=None):
         print("Email failed to send.")  # Todo use error stream using sys
 
 
-def create_email(subject="Insight message!", main_body=None):
+def create_message(subject="Insight message!", main_body=None):
+    # Create the email message. subject = Title and main_body = main text
+    # Todo add error checking
     message = f'Subject: {subject}\n{main_body}'
     return message
 
