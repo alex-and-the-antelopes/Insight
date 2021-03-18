@@ -23,7 +23,11 @@ def create_message(subject="Insight message!", main_body=None):
     return message
 
 
-def send_email():
+def send_email(recipeint_email, email_subject, email_body):
+    # recipeint_email = email of recipient, subject and body
+    # Todo handle errors
+    message = create_message(email_subject, email_body)
+    send_message(message, recipeint_email)
     pass
 
 
