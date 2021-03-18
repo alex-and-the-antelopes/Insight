@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-ParlPy = "==0.0.2"
 mysql-connector-python = "*"
 pandas = "*"
+parlpy = "==1.1.0"
 
 [dev-packages]
 
