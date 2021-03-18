@@ -30,11 +30,13 @@ def insert_all_bill_overview_data(conn, cursor, bill_data):
 
     conn.commit()
 
+
 def print_all_rows_of_table(cursor, table_name):
     cursor.execute(f"SELECT * FROM bills_app_db.{table_name}")
     print("all items in table:")
     for x in cursor:
         print(x)
+
 
 sql_config = {
     "user": "root",
@@ -45,6 +47,7 @@ sql_config = {
     "ssl_cert": "certs/client-cert.pem",
     "ssl_key": "certs/client-key.pem"
 }
+
 
 def get_names_from_full_name(name_display):
     name_words = name_display.split(" ")
@@ -62,6 +65,7 @@ def get_names_from_full_name(name_display):
 
     return first_name, second_name
 
+
 def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
     insert_command_string = f"INSERT INTO bills_app_db.MP (firstName, lastName, partyID) VALUES (\"{first_name}\",\"{second_name}\",{party_id})"
 
@@ -69,6 +73,7 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, part
     print(insert_command_string)
 
     cursor.execute(insert_command_string)
+
 
 # ('mpID', b'int(11)', 'NO', 'PRI', None, 'auto_increment')
 # ('firstName', b'text', 'YES', '', None, '')
@@ -106,6 +111,7 @@ def insert_mp_data(conn, cursor):
 
     conn.commit()
 
+
 def execute_party_data_in_db(cursor, party_id, party_name):
     insert_command_string = f"INSERT INTO bills_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
@@ -113,6 +119,7 @@ def execute_party_data_in_db(cursor, party_id, party_name):
     print(insert_command_string)
 
     cursor.execute(insert_command_string)
+
 
 # clear table, execute insertions and commit Party data
 # todo: write update functionality rather than delete -> add
@@ -126,6 +133,7 @@ def insert_party_data(conn, cursor):
 
     conn.commit()
 
+
 def insert_bills_data(conn, cursor):
     bills_this_session = BillsOverview()
     bills_this_session.update_all_bills_in_session()
@@ -134,6 +142,7 @@ def insert_bills_data(conn, cursor):
     insert_all_bill_overview_data(conn, cursor, bills_this_session.bills_overview_data)
 
     print_all_rows_of_table(cursor, "Bills")
+
 
 def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
@@ -148,8 +157,8 @@ def insert_and_update_data():
         insert_party_data(conn, cursor)
         insert_mp_data(conn, cursor)
 
-
     cursor.close()
     conn.close()
+
 
 insert_and_update_data()
