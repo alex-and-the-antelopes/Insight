@@ -53,13 +53,19 @@ class User(object):
         self.notification_token = notification_token
         self.postcode = postcode
 
-    # Given a password, hashes it and see if it is correct
     def verify_password(self, password):
-        return hash_password(password) == self.password_hash
-        # return sha256_crypt.verify(password, self.password_hash)  # True if they match, False otherwise
+        """
+        Given a password, check if it is correct.
+        :param password: The (hashed) password to check.
+        :return: True if it is correct, False otherwise
+        """
+        return password == self.password_hash
 
-    # Return self as key-value pairs in dict
     def to_dict(self):
+        """
+        Creates and returns a dictionary representation of the current User object.
+        :return: A dictionary containing the attributes of the current User.
+        """
         return vars(self)
 
 
