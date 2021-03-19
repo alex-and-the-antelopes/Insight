@@ -266,7 +266,10 @@ def select(statement):
 
 
 def create_session_token():
-
+    """
+    Generate a unique token using a combination of random digits, lowercase and uppercase letters.
+    :return: The unique, generated token.
+    """
     token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
                     for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
     # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
