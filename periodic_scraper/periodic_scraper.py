@@ -1,4 +1,4 @@
-# WARNING - importing parlpy after mysql.connector results in error with urllib, relating to SSL certs
+# WARNING - importing parlpy after mysql.connector results in error with urllib, relating to SSL secrets
 # todo: fix this
 
 import parlpy.bills.bill_list_fetcher as blf
@@ -10,6 +10,21 @@ import mysql.connector
 from mysql.connector.constants import ClientFlag
 
 import pandas as pd
+
+public_ip = "35.190.194.63"
+
+with open("../secrets/mastergk_pass", 'r') as reader:
+    password = reader.read()
+
+sql_config = {
+    "user": "mastergk",
+    "password": password,
+    "host": public_ip,
+    "client_flags": [ClientFlag.SSL],
+    "ssl_ca": "../secrets/server-ca.pem",
+    "ssl_cert": "../secrets/client-cert.pem",
+    "ssl_key": "../secrets/client-key.pem"
+}
 
 
 # clear all rows and reset increment
@@ -24,17 +39,6 @@ def print_all_rows_of_table(cursor, table_name):
     print("all items in table:")
     for x in cursor:
         print(x)
-
-
-sql_config = {
-    "user": "root",
-    "password": "",
-    "host": "35.223.77.43",
-    "client_flags": [ClientFlag.SSL],
-    "ssl_ca": "certs/server-ca.pem",
-    "ssl_cert": "certs/client-cert.pem",
-    "ssl_key": "certs/client-key.pem"
-}
 
 
 def get_names_from_full_name(name_display):
