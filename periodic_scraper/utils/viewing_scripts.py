@@ -37,11 +37,11 @@ def investigate_db():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor()
 
-    #print_tables_in_db(cursor)
+    print_tables_in_db(cursor)
 
     print_table_structure(cursor, "MPVotes")
 
-    #print_all_rows_of_bills_table(cursor)
+    #print_all_rows_of_table(cursor, "MP")
 
     cursor.close()
     conn.close()
