@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 mysql-connector-python = "*"
 pandas = "*"
-parlpy = "==1.1.0"
+parlpy = "==2.0.0.1"
 
 [dev-packages]
 
