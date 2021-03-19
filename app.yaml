@@ -1,5 +1,7 @@
 runtime: python37
 
+entrypoint: gunicorn -b :$PORT app:app
+
 vpc_access_connector:
   name: projects/bills-app-305000/locations/europe-west1/connectors/db-connector
 
