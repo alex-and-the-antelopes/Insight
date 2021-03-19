@@ -13,7 +13,7 @@ import pandas as pd
 
 public_ip = "35.190.194.63"
 
-with open("../secrets/mastergk_pass", 'r') as reader:
+with open("secrets/mastergk_pass", 'r') as reader:
     password = reader.read()
 
 sql_config = {
@@ -21,22 +21,22 @@ sql_config = {
     "password": password,
     "host": public_ip,
     "client_flags": [ClientFlag.SSL],
-    "ssl_ca": "../secrets/server-ca.pem",
-    "ssl_cert": "../secrets/client-cert.pem",
-    "ssl_key": "../secrets/client-key.pem"
+    "ssl_ca": "secrets/server-ca.pem",
+    "ssl_cert": "secrets/client-cert.pem",
+    "ssl_key": "secrets/client-key.pem"
 }
 
 
 # clear all rows and reset increment
 def clear_table(conn, cursor, table_name):
-    cursor.execute(f"DELETE FROM bills_app_db.{table_name}")
-    cursor.execute(f"ALTER TABLE bills_app_db.{table_name} AUTO_INCREMENT = 1")
+    cursor.execute(f"DELETE FROM bill_app_db.{table_name}")
+    cursor.execute(f"ALTER TABLE bill_app_db.{table_name} AUTO_INCREMENT = 1")
     conn.commit()
 
 
 def print_all_rows_of_table(cursor, table_name):
-    cursor.execute(f"SELECT * FROM bills_app_db.{table_name}")
-    print("all items in table:")
+    cursor.execute(f"SELECT * FROM bill_app_db.{table_name}")
+    print(f"all items in table: {table_name}")
     for x in cursor:
         print(x)
 
@@ -59,7 +59,7 @@ def get_names_from_full_name(name_display):
 
 
 def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
-    insert_command_string = f"INSERT INTO bills_app_db.MP (firstName, lastName, partyID) VALUES (\"{first_name}\",\"{second_name}\",{party_id})"
+    insert_command_string = f"INSERT INTO bill_app_db.MP (mpID, firstName, lastName, partyID) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id})"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -79,7 +79,7 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, part
 def insert_mp_data(conn, cursor):
     mp_fetcher = mf.MPOverview()
 
-    mp_fetcher.get_all_members(params={"IsCurrentMember": True, "House": "Commons", "skip": 620})
+    mp_fetcher.get_all_members(params={"IsCurrentMember": True, "House": "Commons"})
     current_mp_data = mp_fetcher.mp_overview_data
     pd.set_option("display.max_columns", len(current_mp_data.columns))
 
@@ -105,7 +105,7 @@ def insert_mp_data(conn, cursor):
 
 
 def execute_party_data_in_db(cursor, party_id, party_name):
-    insert_command_string = f"INSERT INTO bills_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
+    insert_command_string = f"INSERT INTO bill_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
     print(f"party insert command string")
     print(insert_command_string)
@@ -129,7 +129,7 @@ def insert_party_data(conn, cursor):
 def execute_bill_data_in_db(conn, cursor, bills_overview):
     for b in bdi.get_bill_details(bills_overview):
         print(b.title_stripped)
-        #command_string = "INSERT INTO bills_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
+        #command_string = "INSERT INTO bill_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
         #cursor.execute(command_string)
 
     #conn.commit()
@@ -144,13 +144,10 @@ def insert_bills_data(conn, cursor):
 
     conn.commit()
 
-    #print_all_rows_of_table(cursor, "Bills")
-
 
 def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor()
-    #clear_table(conn, cursor, "Party")
 
     # todo: only run this infrequently
     # clear the tables in order according to foreign key constraints, then add all values back in
@@ -160,7 +157,10 @@ def insert_and_update_data():
         insert_party_data(conn, cursor)
         insert_mp_data(conn, cursor)
 
-    insert_bills_data(conn, cursor)
+    print_all_rows_of_table(cursor, "MP")
+    print_all_rows_of_table(cursor, "Party")
+
+    #insert_bills_data(conn, cursor)
 
     cursor.close()
     conn.close()
