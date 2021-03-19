@@ -126,18 +126,32 @@ def insert_party_data(conn, cursor):
     conn.commit()
 
 
+def bill_id_in_bills_table(conn, cursor, bill):
+    row = cursor.execute(f"SELECT billID FROM bill_app_db.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    print(f"row {row}")
+
+    return row
+
+def insert_new_bill_into_bills_table(conn, cursor, bill):
+    pass
+
+
 def execute_bill_data_in_db(conn, cursor, bills_overview):
-    for b in bdi.get_bill_details(bills_overview):
-        print(b.title_stripped)
+    for bill in bdi.get_bill_details(bills_overview):
+        print(bill.title_stripped)
         #command_string = "INSERT INTO bill_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
         #cursor.execute(command_string)
+        bill_id = bill_id_in_bills_table(conn, cursor, bill)
+        if bill_id is None:
+            insert_new_bill_into_bills_table(conn, cursor, bill)
 
     #conn.commit()
 
 
-def insert_bills_data(conn, cursor):
+def insert_bills_and_divisions_data(conn, cursor):
     bills_overview = blf.BillsOverview()
-    bills_overview.update_all_bills_in_session(session_name="2019-21")
+    # todo in final verson
+    bills_overview.update_all_bills_in_session(session_name="2005-06")
 
     # insert everything back in
     execute_bill_data_in_db(conn, cursor, bills_overview)
@@ -145,22 +159,26 @@ def insert_bills_data(conn, cursor):
     conn.commit()
 
 
+def refresh_mp_and_party_tables(conn, cursor):
+    clear_table(conn, cursor, "MP")
+    clear_table(conn, cursor, "Party")
+    insert_party_data(conn, cursor)
+    insert_mp_data(conn, cursor)
+
+
 def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
 
     # todo: only run this infrequently
     # clear the tables in order according to foreign key constraints, then add all values back in
-    if True:
-        clear_table(conn, cursor, "MP")
-        clear_table(conn, cursor, "Party")
-        insert_party_data(conn, cursor)
-        insert_mp_data(conn, cursor)
+    # commented out - data currently in db, working on inserting bill and division data
+    #refresh_mp_and_party_tables(conn, cursor)
 
     print_all_rows_of_table(cursor, "MP")
     print_all_rows_of_table(cursor, "Party")
 
-    #insert_bills_data(conn, cursor)
+    insert_bills_and_divisions_data(conn, cursor)
 
     cursor.close()
     conn.close()
