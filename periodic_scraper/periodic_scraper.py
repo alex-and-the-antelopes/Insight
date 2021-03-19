@@ -166,4 +166,4 @@ def insert_and_update_data():
     conn.close()
 
 
-insert_and_update_data()
+
