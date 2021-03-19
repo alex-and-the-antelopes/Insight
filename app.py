@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, redirect, send_file, Response
-# from flask_cors import CORS for some reason causes error? like wont compile
+from flask_cors import CORS
 import bill_tracker_core as core
 import sqlalchemy
 import logging
@@ -7,8 +7,7 @@ import os
 
 app = Flask(__name__)
 logger = logging.getLogger()
-
-# CORS(app)
+CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
