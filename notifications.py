@@ -18,7 +18,7 @@ def send_notification_to_clients(clients, title, body):
     :param body: body of the notification (str)
     """
     if type(clients) is not list:  # Check that a list is passed
-        raise TypeError("Expected type <class 'list'> got type ", type(list))
+        raise TypeError("Expected type <class 'list'> got type ", type(clients))
 
     for client in clients:  # Loop through each client in the list
         send_notification(client, title, body)  # Send message to each client

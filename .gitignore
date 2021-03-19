@@ -12,3 +12,6 @@ periodic_scraper/certs
 
 # ignore tokens
 /tokens.txt
+
+# ignore email details
+email_details.py
