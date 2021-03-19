@@ -1,7 +1,8 @@
 # WARNING - importing parlpy after mysql.connector results in error with urllib, relating to SSL certs
 # todo: fix this
 
-from parlpy.bills.bill_list_fetcher import BillsOverview
+import parlpy.bills.bill_list_fetcher as blf
+import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
 
@@ -15,19 +16,6 @@ import pandas as pd
 def clear_table(conn, cursor, table_name):
     cursor.execute(f"DELETE FROM bills_app_db.{table_name}")
     cursor.execute(f"ALTER TABLE bills_app_db.{table_name} AUTO_INCREMENT = 1")
-    conn.commit()
-
-
-def insert_all_bill_overview_data(conn, cursor, bill_data):
-    for b in bill_data.itertuples():
-        # this code gets govt provided bill detail path, could be used as unique id?
-        # bill_detail_path_number = int(getattr(b, "bill_detail_path").rsplit("/")[-1])
-        # print("int bill id: {}".format(bill_detail_path_number))
-
-        bill_name = getattr(b, "bill_title")
-        command_string = "INSERT INTO bills_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
-        cursor.execute(command_string)
-
     conn.commit()
 
 
@@ -134,14 +122,25 @@ def insert_party_data(conn, cursor):
     conn.commit()
 
 
+def execute_bill_data_in_db(conn, cursor, bills_overview):
+    for b in bdi.get_bill_details(bills_overview):
+        print(b.title_stripped)
+        #command_string = "INSERT INTO bills_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
+        #cursor.execute(command_string)
+
+    #conn.commit()
+
+
 def insert_bills_data(conn, cursor):
-    bills_this_session = BillsOverview()
-    bills_this_session.update_all_bills_in_session()
+    bills_overview = blf.BillsOverview()
+    bills_overview.update_all_bills_in_session(session_name="2019-21")
 
     # insert everything back in
-    insert_all_bill_overview_data(conn, cursor, bills_this_session.bills_overview_data)
+    execute_bill_data_in_db(conn, cursor, bills_overview)
 
-    print_all_rows_of_table(cursor, "Bills")
+    conn.commit()
+
+    #print_all_rows_of_table(cursor, "Bills")
 
 
 def insert_and_update_data():
@@ -156,6 +155,8 @@ def insert_and_update_data():
         clear_table(conn, cursor, "Party")
         insert_party_data(conn, cursor)
         insert_mp_data(conn, cursor)
+
+    insert_bills_data(conn, cursor)
 
     cursor.close()
     conn.close()
