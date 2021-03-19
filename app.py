@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect, send_file, Response
+from flask import Flask, jsonify, redirect, send_file, Response, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
@@ -6,6 +6,8 @@ import db_interactions as database
 import sqlalchemy
 import logging
 import os
+import random
+import string
 
 
 app = Flask(__name__)
@@ -93,7 +95,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('/<bill_id>/<action>')
+@app.route('/b/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -132,22 +134,43 @@ def landing_page():
     return redirect(CONFIG["default_url"])
 
 
-# TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
-def login(username, password, notification_token):
-    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
-    if user.verify_password(password):
-        return redirect('/logged_in')
-    else:
-        return redirect('/garbage')
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form['email']
+    password = request.form['password']
+
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/login_with_token', methods=['POST'])
+def login_with_token():
+    email = request.form['email']
+    session_token = request.form['session_token']
+
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    # Get new User details from form:
+    email = request.form['email']
+    password = request.form['password']
+    notifications_token = request.form['notification_token']
+    postcode = request.form['postcode']
+    # todo add error checks
+    new_user = core.User(email, password, notifications_token, postcode, create_session_token())  # Create user
+    # Return the session token
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-('/' + CONFIG["external_res_path"] + '/<name>')
-
-
+@app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
@@ -162,17 +185,25 @@ def demo_table_test():
     return database.select("SELECT * FROM demo_tbl")
 
 
-# Login was successful.
-@app.route('/logged_in')
-def successful_login():
-    return "<h1> you logged in successfully </h1> nice."
+def create_session_token():
+    """
+    Generate a unique token using a combination of random digits, lowercase and uppercase letters.
+    :return: The unique, generated token.
+    """
+    token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
+                    for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
+    return token
 
 
-# Login failed.
-@app.route('/garbage')
-def garbage_page():
-    return "<h1> this is a garbage page </h1> If you are here, you are garbage."
-
+def add_user_to_database(user):
+    """
+    Add the given User to the database.
+    :param user: User object
+    :return:
+    """
+    # todo add user to database
+    pass
 
 
 if __name__ == '__main__':
