@@ -32,7 +32,7 @@ def check_email_address(email_address=None):
     """
     if type(email_address) is not str:  # Check that the given address is a str
         return 1  # Type error
-    if not re.search('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$', email_address):  # Use regex to evaluate address
+    if not re.search('^[a-z0-9]+[._]?[a-z0-9]+[@]\w+[.]\w{2,}$', email_address):  # Use regex to evaluate address
         return 2  # Value error
     return 0  # Valid address (Correct type and value)
 
@@ -66,4 +66,7 @@ def send_email(recipient_email, email_subject, email_body):
 
 
 if __name__ == '__main__':
-    send_email("sgavriilidis1@gmail.com", "okay", "23.23")
+    # send_email("dummy@gmail.com", "okay", "23.23")
+    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", 2, [], None, ""]
+    for address in test_addresses:
+        print(check_email_address(address), address)
