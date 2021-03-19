@@ -4,8 +4,8 @@
 # ignore bytecode
 __pycache__/
 
-# ignore certs (secret)
-periodic_scraper/certs
+# ignore certs, password
+periodic_scraper/secrets
 
 # ignore pycharm project settings
 .idea
