@@ -13,13 +13,17 @@ def send_message(message=None, recipient_address=None):
         server.login(email_details.email_address, email_details.password)  # Login to the account
         server.sendmail(email_details.email_address, recipient_address, message)
         server.quit()
-    except:
+    except smtplib.SMTPResponseException:
         print("Email failed to send.")  # Todo use error stream using sys
 
 
 def create_message(subject="Insight message!", main_body=None):
     # Create the email message. subject = Title and main_body = main text
-    # Todo add error checking
+    # Check for type errors:
+    if type(subject) is not str:  # Check the email subject
+        raise TypeError("Expected type <class 'str'> got type ", type(subject), " for subject")
+    if type(main_body) is not str:  # Check the email body
+        raise TypeError("Expected type <class 'str'> got type ", type(main_body), " for main_body")
     message = f'Subject: {subject}\n{main_body}'
     return message
 
@@ -70,3 +74,4 @@ if __name__ == '__main__':
     test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", 2, [], None, ""]
     for address in test_addresses:
         print(check_email_address(address), address)
+    send_email("sgavriilidis1@gmail.com", "Okay 2", "Works?")
