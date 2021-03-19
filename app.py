@@ -232,18 +232,6 @@ def demo_table_test():
     return select("SELECT * FROM demo_tbl")
 
 
-# Login was successful.
-@app.route('/logged_in')
-def successful_login():
-    return "<h1> you logged in successfully </h1> nice."
-
-
-# Login failed.
-@app.route('/garbage')
-def garbage_page():
-    return "<h1> this is a garbage page </h1> If you are here, you are garbage."
-
-
 def interact(statement):
     """
     Executes the statement passed on the db passed into the function
