@@ -53,27 +53,38 @@ db = init_connection_engine()
 
 
 def interact(statement):
-    """
-       Executes the statement passed on the db passed into the function
-
-       return: Response object containing the relevant response
-       """
     try:
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            return str(conn.execute(statement))
+            conn.execute(statement)
     except Exception as e:
         # If something goes wrong, handle the error in this section. This might
         # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
         return Response(
             status=500,
             response="Unable to fulfill that request",
         )
+    return Response(
+        status=200,
+        response="Request Successful",
+    )
 
 def select(statement):
-    """ Special function for select statements as we want to return a value"""
-
-    with db.connect() as conn:
-        return str(conn.execute(statement).fetchall())
+    """ Special function for select or similar statements which require something to be returned from the db
+    as we want to return a value"""
+    try:
+        # Using a with statement ensures that the connection is always released
+        # back into the pool at the end of statement (even if an error occurs)
+        with db.connect() as conn:
+            return str(conn.execute(statement).fetchall())
+    except Exception as e:
+        # If something goes wrong, handle the error in this section. This might
+        # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
+        return Response(
+            status=500,
+            response="Unable to fulfill that request",
+        )
 
