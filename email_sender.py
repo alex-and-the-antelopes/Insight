@@ -1,20 +1,29 @@
 import smtplib
 import re
+import sys
 import email_details
 
 
-def send_message(message=None, recipient_address=None):
-    # Message = the built email message and recipient_address = email address of recipient.
-    # Todo add error checking
+def send_message(recipient_address, message):
+    """
+    Sends the given message (email) to the given email address. Uses smtplib to connect to the server, log in and send
+    the email. The details for the account being used are in the email_details file.
+    :param message: The message (email) to be sent.
+    :param recipient_address: The recipient's email address (destination).
+    :return: None
+    """
+    if type(recipient_address) is not str or type(message) is not str:  # Check that the arguments are str
+        return
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
-        server.starttls()
+        server.starttls()  # Connect to the server via tls
         server.login(email_details.email_address, email_details.password)  # Login to the account
-        server.sendmail(email_details.email_address, recipient_address, message)
-        server.quit()
+        server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
+        server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
-        print("Email failed to send.")  # Todo use error stream using sys
+        print("Email failed to send.", file=sys.stderr)  # Print using error stream
+    return
 
 
 def create_message(subject="Insight message!", main_body=None):
@@ -71,7 +80,7 @@ def send_email(recipient_email, email_subject, email_body):
         raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
 
     message = create_message(email_subject, email_body)  # Construct the message (Format subject and body)
-    send_message(message, recipient_email)  # Send the email to the intended recipient
+    send_message(recipient_email, message)  # Send the email to the intended recipient
     return
 
 
