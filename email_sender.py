@@ -38,6 +38,14 @@ def check_email_address(email_address=None):
 
 
 def send_email(recipient_email, email_subject, email_body):
+    """
+    Constructs and sends an email to the given email address. Includes error checking for type, value errors and
+    invalid email addresses.
+    :param recipient_email: The intended party's email address.
+    :param email_subject: The subject for the email (title/header).
+    :param email_body: The email's body.
+    :return: None
+    """
     # Check for type errors:
     if type(email_subject) is not str:  # Check the email subject
         raise TypeError("Expected type <class 'str'> got type ", type(email_subject), " for email_subject")
@@ -58,5 +66,4 @@ def send_email(recipient_email, email_subject, email_body):
 
 
 if __name__ == '__main__':
-    send_email("dummyemail@gmail.com", "Title of message", "dummy text here here here one.")
-
+    send_email("sgavriilidis1@gmail.com", "okay", "23.23")
