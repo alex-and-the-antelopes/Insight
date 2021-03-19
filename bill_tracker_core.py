@@ -30,7 +30,7 @@ CONFIG = {
 
 # Returns the URL for the given filename
 def get_img_url(filename):
-    return CONFIG["public_res_dir"] + filename
+    return CONFIG["external_res_path"] + filename
 
 
 # Generate a hash for the given password.
@@ -48,10 +48,11 @@ class User(object):
     Has username, password. (Other Details could include: email address and more personal data)
     """
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, notification_token):
         self.username = username
         # Hash password and save it
         self.password_hash = hash_password(password)
+        self.notification_token = notification_token
 
     # Given a password, hashes it and see if it is correct
     def verify_password(self, password):
@@ -69,7 +70,7 @@ class Bill:
     Has title, desc, date added, expiration, status, short_desc, photo and link.
     """
 
-    def __init__(self, title, desc, date_added, expiration, status,
+    def __init__(self, id, title, desc, date_added, expiration, status,
                  short_desc=None, photo=CONFIG["default_img"], link=CONFIG["default_url"]):
         self.link = link
         self.status = status
@@ -77,6 +78,7 @@ class Bill:
         self.date_added = date_added
         self.desc = desc
         self.title = title
+        self.id = id
 
         # Generate short desc from long desc if one isn't given
         if short_desc is None:
@@ -97,14 +99,3 @@ class Bill:
     # Return self as key-value pair dict
     def to_dict(self):
         return vars(self)
-
-
-# todo: Move this to actual unit test file
-if __name__ == "__main__":
-    user = User("sg2295", "password")
-    print(user.username)
-    print(user.password_hash)
-    wrong_password = "pass"
-    print("Testing the wrong password, passwords match:", user.verify_password(wrong_password))
-    correct_password = "password"
-    print("Testing the correct password, passwords match:", user.verify_password(correct_password))

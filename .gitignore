@@ -12,3 +12,9 @@ periodic_scraper/secrets
 
 # ignore pickle file in periodic_scraper
 periodic_scraper/*.p
+
+# ignore tokens
+/tokens.txt
+
+# ignore email details
+email_details.py
