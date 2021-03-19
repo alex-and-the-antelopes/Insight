@@ -213,7 +213,7 @@ def register():
     # todo add error checks
     new_user = core.User(email, password, notifications_token, postcode, create_session_token())  # Create user
     # Return the session token
-    return jsonify({"session_token": "session_placeholder"})
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
