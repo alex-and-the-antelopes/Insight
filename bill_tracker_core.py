@@ -1,7 +1,4 @@
 # from passlib.hash import sha256_crypt  # Uses SHA256 for storing the password. We could implement our own later
-import datetime
-import random
-import string
 
 # Configuration constants
 CONFIG = {
