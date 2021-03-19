@@ -1,4 +1,5 @@
 import smtplib
+import re
 import email_details
 
 
@@ -23,7 +24,20 @@ def create_message(subject="Insight message!", main_body=None):
     return message
 
 
-def send_email(recipeint_email, email_subject, email_body):
+def check_email_address(email_address):
+    """
+    Checks if the given email address is a valid address. Uses a regular expression to check the address' validity.
+    :param email_address: The email address to validate.
+    :return: 0 if the address is valid, 1 if it is the wrong type (not str), 2 if it is not a valid address.
+    """
+    if type(email_address) is not str:  # Check that the given address is a str
+        return 1  # Type error
+    if not re.search('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$', email_address):  # Use regex to evaluate address
+        return 2  # Value error
+    return 0  # Valid address (Correct type and value)
+
+
+def send_email(recipient_email, email_subject, email_body):
     # recipeint_email = email of recipient, subject and body
     # Todo handle errors
     message = create_message(email_subject, email_body)
