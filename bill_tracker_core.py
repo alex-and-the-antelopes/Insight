@@ -1,4 +1,7 @@
 # from passlib.hash import sha256_crypt  # Uses SHA256 for storing the password. We could implement our own later
+import datetime
+import random
+import string
 
 # Configuration constants
 CONFIG = {
@@ -45,13 +48,14 @@ def hash_password(password):
 class User(object):
     """
     Represents a User entity.
-    Has an email, password, email address, notification token and postcode.
+    Has an email, password, email address, notification, session token and postcode.
     """
-    def __init__(self, email, password, notification_token, postcode):
+    def __init__(self, email, password, notification_token, postcode, session_token):
         self.email = email
         self.password_hash = password
         self.notification_token = notification_token
         self.postcode = postcode
+        self.session_token = session_token
 
     def verify_password(self, password):
         """
