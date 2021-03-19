@@ -77,7 +77,9 @@ def send_email(recipient_email, email_subject, email_body):
 
 if __name__ == '__main__':
     # send_email("dummy@gmail.com", "okay", "23.23")
+    # Test email checker: todo move to a test file
     test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", 2, [], None, ""]
     for address in test_addresses:
         print(check_email_address(address), address)
-    send_email("sgavriilidis1@gmail.com", "Okay 2", "Works?")
+    # Test email sender
+    send_email("dummyemail@gmail.com", "EXAMPLE TITLE", "EXAMPLE TEXT FOR THE MAIN BODY HERE.")
