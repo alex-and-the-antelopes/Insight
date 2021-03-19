@@ -24,7 +24,7 @@ def create_message(subject="Insight message!", main_body=None):
     return message
 
 
-def check_email_address(email_address):
+def check_email_address(email_address=None):
     """
     Checks if the given email address is a valid address. Uses a regular expression to check the address' validity.
     :param email_address: The email address to validate.
@@ -38,11 +38,23 @@ def check_email_address(email_address):
 
 
 def send_email(recipient_email, email_subject, email_body):
-    # recipeint_email = email of recipient, subject and body
-    # Todo handle errors
-    message = create_message(email_subject, email_body)
-    send_message(message, recipeint_email)
-    pass
+    # Check for type errors:
+    if type(email_subject) is not str:  # Check the email subject
+        raise TypeError("Expected type <class 'str'> got type ", type(email_subject), " for email_subject")
+    if type(email_body) is not str:  # Check the email body
+        raise TypeError("Expected type <class 'str'> got type ", type(email_body), " for email_body")
+    if type(recipient_email) is not str:  # Check the recipient's email address
+        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+    # Check the validity of the email address
+    email_code = check_email_address(recipient_email)
+    if email_code == 1:  # Email is not a str
+        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+    if email_code == 2:  # Email is a str but is not a valid address
+        raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
+
+    message = create_message(email_subject, email_body)  # Construct the message (Format subject and body)
+    send_message(message, recipient_email)  # Send the email to the intended recipient
+    return
 
 
 if __name__ == '__main__':
