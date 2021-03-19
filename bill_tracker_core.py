@@ -99,8 +99,3 @@ class Bill:
     # Return self as key-value pair dict
     def to_dict(self):
         return vars(self)
-
-
-# Tests have been moved to unit test files
-if __name__ == "__main__":
-    pass
