@@ -4,7 +4,7 @@ steps:
   secretEnv: [ 'DB_PASS' ]
   availableSecrets:
     secretManager:
-      - versionName: projects/bills-app-305000/secrets/db-password/version/1
+      - versionName: projects/1066288800758/secrets/db-password/version/1
         env: 'DB_PASS'
 
 timeout: "1600s"
