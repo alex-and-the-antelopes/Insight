@@ -4,11 +4,14 @@
 # ignore bytecode
 __pycache__/
 
-# ignore certs (secret)
-periodic_scraper/certs
+# ignore certs, password
+periodic_scraper/secrets
 
 # ignore pycharm project settings
 .idea
+
+# ignore pickle file in periodic_scraper
+periodic_scraper/*.p
 
 # ignore tokens
 /tokens.txt
