@@ -127,31 +127,50 @@ def insert_party_data(conn, cursor):
 
 
 def bill_id_in_bills_table(conn, cursor, bill):
-    row = cursor.execute(f"SELECT billID FROM bill_app_db.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
-    print(f"row {row}")
+    bill_id = None
 
-    return row
+    cursor.execute(f"SELECT billID FROM bill_app_db.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+
+    count = 0
+    for row in cursor:
+        bill_id = row[0]
+
+        count+=1
+        if count > 2:
+            raise Exception("billID must be unique, duplicates found")
+
+    return bill_id
+
 
 def insert_new_bill_into_bills_table(conn, cursor, bill):
-    pass
+    insertion_command_string \
+        = f"INSERT INTO bill_app_db.Bills (titleStripped, billOrAct, shortDesc, link) " \
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{bill.url}\")"
+    cursor.execute(insertion_command_string)
+    conn.commit()
 
 
 def execute_bill_data_in_db(conn, cursor, bills_overview):
     for bill in bdi.get_bill_details(bills_overview):
-        print(bill.title_stripped)
-        #command_string = "INSERT INTO bill_app_db.Bills (title) VALUES (\"{0}\")".format(bill_name)
-        #cursor.execute(command_string)
+        # get the billID from DB
         bill_id = bill_id_in_bills_table(conn, cursor, bill)
+        # if there is no billID, then the bill is not in the table, hence we need to insert the bill
         if bill_id is None:
             insert_new_bill_into_bills_table(conn, cursor, bill)
+            bill_id = bill_id_in_bills_table(conn, cursor, bill)
+        # todo: otherwise, modify the row to put in the data which may have changed (we dont know what has changed, so
+        #  insert all of it
+        else:
+            pass
 
-    #conn.commit()
+        for division in bill.divisions_list:
+            pass
 
 
 def insert_bills_and_divisions_data(conn, cursor):
     bills_overview = blf.BillsOverview()
-    # todo in final verson
-    bills_overview.update_all_bills_in_session(session_name="2005-06")
+    # todo in final version the session_name must be "All" - but check the script works on Google cloud first
+    bills_overview.update_all_bills_in_session(session_name="2019-21")
 
     # insert everything back in
     execute_bill_data_in_db(conn, cursor, bills_overview)
@@ -165,7 +184,7 @@ def refresh_mp_and_party_tables(conn, cursor):
     insert_party_data(conn, cursor)
     insert_mp_data(conn, cursor)
 
-
+# function called by cron, I need to split functionality into different functions
 def insert_and_update_data():
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
