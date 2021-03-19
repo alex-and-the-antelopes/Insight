@@ -205,7 +205,7 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-@app.route("/")
+@app.route("/testdb")
 def demo_table_test():
     interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
     return select("SELECT * FROM demo_tbl")
