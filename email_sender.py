@@ -18,14 +18,20 @@ def send_message(message=None, recipient_address=None):
 
 
 def create_message(subject="Insight message!", main_body=None):
-    # Create the email message. subject = Title and main_body = main text
+    """
+    Combines the given subject and main body to formulate an email message. Returns a str capable of being transmitted
+    using smtplib and gmail.
+    :param subject: The subject (title/header) of the email.
+    :param main_body: The main body of the email.
+    :return: The constructed email to be sent.
+    """
     # Check for type errors:
     if type(subject) is not str:  # Check the email subject
         raise TypeError("Expected type <class 'str'> got type ", type(subject), " for subject")
     if type(main_body) is not str:  # Check the email body
         raise TypeError("Expected type <class 'str'> got type ", type(main_body), " for main_body")
-    message = f'Subject: {subject}\n{main_body}'
-    return message
+    message = f'Subject: {subject}\n{main_body}'  # Bundle the contents in the appropriate format
+    return message  # Return the constructed email
 
 
 def check_email_address(email_address=None):
