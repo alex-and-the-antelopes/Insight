@@ -47,11 +47,9 @@ class User(object):
     Represents a User entity.
     Has username, password. (Other Details could include: email address and more personal data)
     """
-
-    def __init__(self, username, password, notification_token):
-        self.username = username
-        # Hash password and save it
-        self.password_hash = hash_password(password)
+    def __init__(self, email, password, notification_token, postcode):
+        self.email = email
+        self.password_hash = password
         self.notification_token = notification_token
 
     # Given a password, hashes it and see if it is correct

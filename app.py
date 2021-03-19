@@ -183,7 +183,7 @@ def landing_page():
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
 
     # Get user from database using username, check if user is valid.
@@ -193,8 +193,8 @@ def login():
 
 @app.route('/login_with_token', methods=['POST'])
 def login_with_token():
-    username = request.form['username']
-    session_token = request.form['token']
+    email = request.form['email']
+    session_token = request.form['session_token']
 
     # Get user from database using username, check if user is valid.
     # Return the session token
@@ -203,9 +203,8 @@ def login_with_token():
 
 @app.route('/register', methods=['POST'])
 def register():
-    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
-    email = request.form['email_address']
     notifications = request.form['notification_token']
     postcode = request.form['postcode']
 
