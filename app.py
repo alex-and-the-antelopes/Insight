@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect, send_file, Response
+from flask import Flask, jsonify, redirect, send_file, Response, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import sqlalchemy
@@ -180,15 +180,38 @@ def landing_page():
     return redirect(CONFIG["default_url"])
 
 
-# TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
-def login(username, password, notification_token):
-    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
-    if user.verify_password(password):
-        return redirect('/logged_in')
-    else:
-        return redirect('/garbage')
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/login_with_token', methods=['POST'])
+def login_with_token():
+    username = request.form['username']
+    session_token = request.form['token']
+
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email_address']
+    notifications = request.form['notification_token']
+    postcode = request.form['postcode']
+
+    # Create user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
 
 
 # Deliver requested resource.
