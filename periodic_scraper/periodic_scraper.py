@@ -79,7 +79,7 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, part
 def insert_mp_data(conn, cursor):
     mp_fetcher = mf.MPOverview()
 
-    mp_fetcher.get_all_members(params={"IsCurrentMember": True, "House": "Commons"})
+    mp_fetcher.get_all_members(params={"House": "Commons"})
     current_mp_data = mp_fetcher.mp_overview_data
     pd.set_option("display.max_columns", len(current_mp_data.columns))
 
@@ -150,6 +150,31 @@ def insert_new_bill_into_bills_table(conn, cursor, bill):
     conn.commit()
 
 
+def division_in_mpvotes_table(conn, cursor, division_name):
+    count_command_string = f"SELECT COUNT(*) FROM bill_app_db.MPVotes WHERE title = \"{division_name}\""
+    cursor.execute(count_command_string)
+    for c in cursor:
+        print(f"type count[0] {type(c[0])}")
+        count = c[0]
+
+    if count > 0:
+        return True
+    else:
+        return False
+
+
+def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bill_id, mp_id, aye=True):
+    if aye == True:
+        positive = 1
+    else:
+        positive = 0
+
+    insert_command_string = f"INSERT INTO bill_app_db.MPVotes (positive, billID, mpID, stage, title)" \
+                            f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
+    cursor.execute(insert_command_string)
+
+
+
 def execute_bill_data_in_db(conn, cursor, bills_overview):
     for bill in bdi.get_bill_details(bills_overview):
         # get the billID from DB
@@ -164,13 +189,24 @@ def execute_bill_data_in_db(conn, cursor, bills_overview):
             pass
 
         for division in bill.divisions_list:
-            pass
+            division_title = division.division_name
+            division_stage = division.division_stage
+            # only insert if we haven't already inserted the results
+            if not division_in_mpvotes_table(conn, cursor, division.division_name):
+                print(f"division {division_title} not in MPVotes table")
+                for no in division.noes:
+                    execute_insert_new_vote_into_mpvotes_table(cursor, division_title, division_stage, bill_id, no, aye=False)
+                for aye in division.ayes:
+                    execute_insert_new_vote_into_mpvotes_table(cursor, division_title, division_stage, bill_id, aye, aye=True)
+                conn.commit()
 
 
 def insert_bills_and_divisions_data(conn, cursor):
     bills_overview = blf.BillsOverview()
     # todo in final version the session_name must be "All" - but check the script works on Google cloud first
     bills_overview.update_all_bills_in_session(session_name="2019-21")
+    print("bills overview object obtained, scraping complete")
+    print(f"{bills_overview.bills_overview_data.count()} items")
 
     # insert everything back in
     execute_bill_data_in_db(conn, cursor, bills_overview)
@@ -182,7 +218,9 @@ def refresh_mp_and_party_tables(conn, cursor):
     clear_table(conn, cursor, "MP")
     clear_table(conn, cursor, "Party")
     insert_party_data(conn, cursor)
+    insert_missing_party_data(conn, cursor)
     insert_mp_data(conn, cursor)
+
 
 # function called by cron, I need to split functionality into different functions
 def insert_and_update_data():
@@ -192,7 +230,8 @@ def insert_and_update_data():
     # todo: only run this infrequently
     # clear the tables in order according to foreign key constraints, then add all values back in
     # commented out - data currently in db, working on inserting bill and division data
-    #refresh_mp_and_party_tables(conn, cursor)
+    refresh_mp_and_party_tables(conn, cursor)
+    print("finished updating MP and Party table")
 
     print_all_rows_of_table(cursor, "MP")
     print_all_rows_of_table(cursor, "Party")
