@@ -45,12 +45,13 @@ def hash_password(password):
 class User(object):
     """
     Represents a User entity.
-    Has username, password. (Other Details could include: email address and more personal data)
+    Has an email, password, email address, notification token and postcode.
     """
     def __init__(self, email, password, notification_token, postcode):
         self.email = email
         self.password_hash = password
         self.notification_token = notification_token
+        self.postcode = postcode
 
     # Given a password, hashes it and see if it is correct
     def verify_password(self, password):
