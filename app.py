@@ -4,6 +4,8 @@ import bill_tracker_core as core
 import sqlalchemy
 import logging
 import os
+import random
+import string
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -141,7 +143,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('/<bill_id>/<action>')
+@app.route('/b/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -203,21 +205,20 @@ def login_with_token():
 
 @app.route('/register', methods=['POST'])
 def register():
+    # Get new User details from form:
     email = request.form['email']
     password = request.form['password']
-    notifications = request.form['notification_token']
+    notifications_token = request.form['notification_token']
     postcode = request.form['postcode']
-
-    # Create user from database using username, check if user is valid.
+    # todo add error checks
+    new_user = core.User(email, password, notifications_token, postcode, create_session_token())  # Create user
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
 
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-('/' + CONFIG["external_res_path"] + '/<name>')
-
-
+@app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
@@ -262,6 +263,24 @@ def select(statement):
     """ Special function for select statements as we want to return a value"""
     with db.connect() as conn:
         return str(conn.execute(statement).fetchall())
+
+
+def create_session_token():
+
+    token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
+                    for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
+    return token
+
+
+def add_user_to_database(user):
+    """
+    Add the given User to the database.
+    :param user: User object
+    :return:
+    """
+    # todo add user to database
+    pass
 
 
 if __name__ == '__main__':
