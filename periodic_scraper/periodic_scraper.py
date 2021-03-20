@@ -27,16 +27,18 @@ sql_config = {
     "ssl_key": "secrets/client-key.pem"
 }
 
+db_name = "bill_data"
+
 
 # clear all rows and reset increment
 def clear_table(conn, cursor, table_name):
-    cursor.execute(f"DELETE FROM bill_app_db.{table_name}")
-    cursor.execute(f"ALTER TABLE bill_app_db.{table_name} AUTO_INCREMENT = 1")
+    cursor.execute(f"DELETE FROM {db_name}.{table_name}")
+    cursor.execute(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
     conn.commit()
 
 
 def print_all_rows_of_table(cursor, table_name):
-    cursor.execute(f"SELECT * FROM bill_app_db.{table_name}")
+    cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
     for x in cursor:
         print(x)
@@ -60,7 +62,7 @@ def get_names_from_full_name(name_display):
 
 
 def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
-    insert_command_string = f"INSERT INTO bill_app_db.MP (mpID, firstName, lastName, partyID) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id})"
+    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id})"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -103,7 +105,7 @@ def insert_mp_data(conn, cursor, current_mp_data):
 
 
 def execute_party_data_in_db(cursor, party_id, party_name):
-    insert_command_string = f"INSERT INTO bill_app_db.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
+    insert_command_string = f"INSERT INTO {db_name}.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
     print(f"party insert command string")
     print(insert_command_string)
@@ -150,7 +152,7 @@ def refresh_mp_and_party_tables(conn, cursor):
 def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
-    cursor.execute(f"SELECT billID FROM bill_app_db.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
     count = 0
     for row in cursor:
@@ -165,14 +167,14 @@ def bill_id_in_bills_table(conn, cursor, bill):
 
 def insert_new_bill_into_bills_table(conn, cursor, bill):
     insertion_command_string \
-        = f"INSERT INTO bill_app_db.Bills (titleStripped, billOrAct, shortDesc, link) " \
+        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, link) " \
           f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{bill.url}\")"
     cursor.execute(insertion_command_string)
     conn.commit()
 
 
 def division_in_mpvotes_table(conn, cursor, division_name):
-    count_command_string = f"SELECT COUNT(*) FROM bill_app_db.MPVotes WHERE title = \"{division_name}\""
+    count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
     cursor.execute(count_command_string)
     for c in cursor:
         print(f"type count[0] {type(c[0])}")
@@ -190,7 +192,7 @@ def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bi
     else:
         positive = 0
 
-    insert_command_string = f"INSERT INTO bill_app_db.MPVotes (positive, billID, mpID, stage, title)" \
+    insert_command_string = f"INSERT INTO {db_name}.MPVotes (positive, billID, mpID, stage, title)" \
                             f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
     cursor.execute(insert_command_string)
 
@@ -255,9 +257,6 @@ def insert_and_update_data():
     # commented out - data currently in db, working on inserting bill and division data
     #refresh_mp_and_party_tables(conn, cursor)
     #print("finished updating MP and Party table")
-
-    print_all_rows_of_table(cursor, "MP")
-    print_all_rows_of_table(cursor, "Party")
 
     # todo in final version the session_name must be "All" - but check the script works on Google cloud first
     insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
