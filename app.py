@@ -217,10 +217,9 @@ def add_user_to_database(user):
     # todo add user to database
     if not user:  # Ignore None
         return
-    statement = f"INSERT INTO Users (email, password, postcode, sessionToken, notificationToken) VALUES " \
-                f"({user.email}, {user.password_hash}, {user.postcode}, {user.session_token}, {user.notification_token})"
+    statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
     database.interact(statement)
-    return database.select("SELECT * FROM Users")  # TODO remove
+    return database.select("SELECT * FROM Users;")  # TODO remove
 
 
 if __name__ == '__main__':
