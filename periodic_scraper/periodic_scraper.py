@@ -37,6 +37,13 @@ def clear_table(conn, cursor, table_name):
     conn.commit()
 
 
+def clear_all_4_tables(conn, cursor):
+    clear_table(conn, cursor, "MPVotes")
+    clear_table(conn, cursor, "Bills")
+    clear_table(conn, cursor, "MP")
+    clear_table(conn, cursor, "Party")
+
+
 def print_all_rows_of_table(cursor, table_name):
     cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
@@ -137,9 +144,6 @@ def insert_party_data(conn, cursor):
 
 
 def refresh_mp_and_party_tables(conn, cursor):
-    clear_table(conn, cursor, "MP")
-    clear_table(conn, cursor, "Party")
-
     mp_fetcher = mf.MPOverview()
 
     mp_fetcher.get_all_members(params={"House": "Commons"})
@@ -249,19 +253,29 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     conn.commit()
 
 
+# wipes tables in order, inserts all data back in
+# takes ~2hrs
+def reload_all_tables(conn, cursor):
+    clear_all_4_tables(conn, cursor)
+    refresh_mp_and_party_tables(conn, cursor)
+    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
+
 # function called by cron, I need to split functionality into different functions
-def insert_and_update_data():
+def insert_and_update_data(completely_fresh=False):
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
-    # todo: only run this infrequently
-    # clear the tables in order according to foreign key constraints, then add all values back in
-    # commented out - data currently in db, working on inserting bill and division data
-    #refresh_mp_and_party_tables(conn, cursor)
-    #print("finished updating MP and Party table")
+    if completely_fresh == True:
+        reload_all_tables(conn, cursor)
+    else:
+        # todo: only run this infrequently
+        # clear the tables in order according to foreign key constraints, then add all values back in
+        # commented out - data currently in db, working on inserting bill and division data
+        #refresh_mp_and_party_tables(conn, cursor)
+        #print("finished updating MP and Party table")
 
-    # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-    insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
+        # todo in final version the session_name must be "All" - but check the script works on Google cloud first
+        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
 
     cursor.close()
     conn.close()
