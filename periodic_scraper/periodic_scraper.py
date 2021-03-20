@@ -152,7 +152,7 @@ def upsert_mp_data(conn, cursor):
     conn.commit()
 
 
-def execute_party_data_in_db(cursor, party_id, party_name):
+def execute_insert_party_data(cursor, party_id, party_name):
     insert_command_string = f"INSERT INTO {db_name}.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
     print(f"party insert command string")
@@ -176,19 +176,31 @@ def insert_party_data(conn, cursor):
 
     for i in range(total_parties_ids_upper_estimate):
         if i in party_details_dict.keys():
-            execute_party_data_in_db(cursor, i, party_details_dict[i])
+            execute_insert_party_data(cursor, i, party_details_dict[i])
         else:
-            execute_party_data_in_db(cursor, i, "unknown")
+            execute_insert_party_data(cursor, i, "unknown")
 
     conn.commit()
 
 
 def execute_update_party_data(cursor, party_id, party_name):
+    update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id}"
 
+    cursor.execute(update_command_string)
 
 
 def upsert_party_data(conn, cursor):
     party_details_list = pf.get_all_parties()
+
+    for party in party_details_list:
+        if is_in_field(conn,cursor,"Party","partyID",party.party_id):
+            print(f"party {party.party_name} is already in")
+            execute_update_party_data(cursor, party.party_id, party.party_name)
+        else:
+            print(f"party {party.party_name} is not already in")
+            execute_insert_party_data(cursor, party.party_id, party.party_name)
+
+    conn.commit()
 
 
 # return the billID for the passed bill
@@ -299,22 +311,26 @@ def reload_all_tables(conn, cursor):
     insert_mp_data(conn, cursor)
     insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
 
+
 # function called by cron, I need to split functionality into different functions
-def insert_and_update_data(completely_fresh=False):
+def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=5, allow_party_and_mp_upsert=True):
+    # todo: remove this line when testing done
+    allow_party_and_mp_upsert = False
+
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
-    if completely_fresh == True:
+    if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
-        # update MPs and parties ~every 5 days
-        if datetime.datetime.now().day % 5 == 0:
-            #insert_party_data(conn, cursor)
+        # update MPs and parties ~every 5 days by default
+        if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
+            upsert_party_data(conn, cursor)
             upsert_mp_data(conn, cursor)
         print("finished updating MP and Party table")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        #insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
+        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
 
     cursor.close()
     conn.close()
