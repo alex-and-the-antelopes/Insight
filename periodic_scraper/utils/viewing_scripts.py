@@ -43,9 +43,15 @@ def investigate_db():
 
     print_tables_in_db(cursor)
 
+    print_table_structure(cursor, "Party")
+    print_table_structure(cursor, "MP")
+    print_table_structure(cursor, "Bills")
     print_table_structure(cursor, "MPVotes")
 
-    #print_all_rows_of_table(cursor, "MP")
+    print_all_rows_of_table(cursor, "Party")
+    print_all_rows_of_table(cursor, "MP")
+    print_all_rows_of_table(cursor, "Bills")
+    print_all_rows_of_table(cursor, "MPVotes")
 
     cursor.close()
     conn.close()
