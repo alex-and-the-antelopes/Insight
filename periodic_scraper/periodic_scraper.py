@@ -68,8 +68,12 @@ def get_names_from_full_name(name_display):
     return first_name, second_name
 
 
-def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id):
-    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id})"
+def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active):
+    if active == True:
+        current = 1
+    else:
+        current = 0
+    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -86,7 +90,21 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, part
 # ('photoPath', b'text', 'YES', '', None, '')
 # ('phoneNum', b'text', 'YES', '', None, '')
 # ('area', b'text', 'YES', '', None, '')
-def insert_mp_data(conn, cursor, current_mp_data):
+def insert_mp_data(conn, cursor):
+    mp_fetcher = mf.MPOverview()
+
+    mp_fetcher.get_all_members(params={"House": "Commons"})
+    all_mp_data = mp_fetcher.mp_overview_data
+
+    current_mp_fetcher = mf.MPOverview()
+
+    current_mp_fetcher.get_active_MPs()
+    current_mp_data = current_mp_fetcher.mp_overview_data
+
+    current_mp_id_list = []
+    for mp in current_mp_data.itertuples():
+        current_mp_id_list.append(mp.member_id)
+
     for (index,
         name_display,
         name_full_title,
@@ -95,10 +113,14 @@ def insert_mp_data(conn, cursor, current_mp_data):
         member_id,
         gender,
         party_id,
-        last_updated) in current_mp_data.itertuples():
+        last_updated) in all_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(name_display)
-        print("here")
-        execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id)
+        if member_id in current_mp_id_list:
+            print(f"{name_display} is active")
+            execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active=True)
+        else:
+            print(f"{name_display} not active")
+            execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active=False)
 
     conn.commit()
 
@@ -134,14 +156,6 @@ def insert_party_data(conn, cursor):
     conn.commit()
 
 
-def insert_mp_and_party_tables(conn, cursor):
-    mp_fetcher = mf.MPOverview()
-
-    mp_fetcher.get_all_members(params={"House": "Commons"})
-    current_mp_data = mp_fetcher.mp_overview_data
-
-    insert_party_data(conn, cursor)
-    insert_mp_data(conn, cursor, current_mp_data)
 
 
 def update_mp_and_party_tables(conn, cursor):
@@ -258,7 +272,8 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
 # takes ~2hrs
 def reload_all_tables(conn, cursor):
     clear_all_4_tables(conn, cursor)
-    insert_mp_and_party_tables(conn, cursor)
+    insert_party_data(conn, cursor)
+    insert_mp_data(conn, cursor)
     insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
 
 # function called by cron, I need to split functionality into different functions
@@ -272,7 +287,12 @@ def insert_and_update_data(completely_fresh=False):
         # todo: only run this infrequently
         # clear the tables in order according to foreign key constraints, then add all values back in
         # commented out - data currently in db, working on inserting bill and division data
-        insert_mp_and_party_tables(conn, cursor)
+        # mp and party tables can be wiped and the data all added back in as this is fairly cheap
+        # todo: uncomment
+        clear_table(conn, cursor, "MP")
+        #clear_table(conn, cursor, "Party")
+        #insert_party_data(conn, cursor)
+        insert_mp_data(conn, cursor)
         print("finished updating MP and Party table")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
