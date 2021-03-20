@@ -300,14 +300,10 @@ def insert_and_update_data(completely_fresh=False):
     if completely_fresh == True:
         reload_all_tables(conn, cursor)
     else:
-        # todo: only run this infrequently
-        # todo: need to update instead of clear and insert, foreign key constraints
-        # todo: uncomment
-        # todo: FIRST: comment clear_table, then change to upsert
-        #clear_table(conn, cursor, "MP")
-        #clear_table(conn, cursor, "Party")
-        #insert_party_data(conn, cursor)
-        upsert_mp_data(conn, cursor)
+        # update MPs and parties ~every 5 days
+        if datetime.datetime.now().day % 5 == 0:
+            #insert_party_data(conn, cursor)
+            upsert_mp_data(conn, cursor)
         print("finished updating MP and Party table")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
