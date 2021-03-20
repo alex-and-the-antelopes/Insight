@@ -172,9 +172,9 @@ def register():
         return jsonify({"error": "email_error"})
     # Todo check if email already exists in the database
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
-    add_user_to_database(new_user)
+    table_status = add_user_to_database(new_user)
     # Return the session token
-    return jsonify({"session_token": new_user.session_token})
+    return jsonify({"session_token": new_user.session_token, "status": table_status})
 
 
 # Deliver requested resource.
@@ -215,7 +215,12 @@ def add_user_to_database(user):
     :return: None
     """
     # todo add user to database
-    return
+    if not user:  # Ignore None
+        return
+    statement = f"INSERT INTO Users (email, password, postcode, sessionToken, notificationToken) VALUES " \
+                f"({user.email}, {user.password_hash}, {user.postcode}, {user.session_token}, {user.notification_token})"
+    database.interact(statement)
+    return database.select("SELECT * FROM Users")  # TODO remove
 
 
 if __name__ == '__main__':
