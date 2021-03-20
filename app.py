@@ -166,7 +166,7 @@ def register():
         return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
         return jsonify({"error": "notification_token_error"})
-    if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 9:  # Check that the postcode is valid
+    if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
@@ -221,7 +221,7 @@ def add_user_to_database(user):
     :return: None
     """
     # todo add user to database
-    pass
+    return
 
 
 if __name__ == '__main__':
