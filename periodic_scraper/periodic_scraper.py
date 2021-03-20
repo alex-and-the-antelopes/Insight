@@ -149,6 +149,8 @@ def refresh_mp_and_party_tables(conn, cursor):
     insert_mp_data(conn, cursor)
 
 
+# return the billID for the passed bill
+# todo: this needs to be more sophisticated, does not account for cases where the title is the same
 def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
