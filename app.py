@@ -161,20 +161,21 @@ def register():
     password = request.form['password']  # The given password is already hashed
     notification_token = request.form['notification_token']
     postcode = request.form['postcode']
+    status = f"{email}, {notification_token}, {postcode}, {password}"
     # Check for errors:
     if type(password) is not str:
-        return jsonify({"error": "password_error"})
+        return jsonify({"error": "password_error", "status": status})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
-        return jsonify({"error": "notification_token_error"})
+        return jsonify({"error": "notification_token_error", "status": status})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
-        return jsonify({"error": "postcode_error"})
+        return jsonify({"error": "postcode_error", "status": status})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
-        return jsonify({"error": "email_error"})
+        return jsonify({"error": "email_error", "status": status})
     # Todo check if email already exists in the database
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
     add_user_to_database(new_user)
     # Return the session token
-    return jsonify({"session_token": new_user.session_token})
+    return jsonify({"session_token": new_user.session_token, "status": status})
 
 
 # Deliver requested resource.
@@ -203,6 +204,15 @@ def create_session_token():
                     for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
     # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
     return token
+
+
+def get_user(email_address):
+    """
+    Gets the
+    :param email_address:
+    :return:
+    """
+    return
 
 
 def add_user_to_database(user):
