@@ -221,7 +221,7 @@ def bill_id_in_bills_table(conn, cursor, bill):
     return bill_id
 
 
-def insert_new_bill_into_bills_table(conn, cursor, bill):
+def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
     insertion_command_string \
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, link) " \
           f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{bill.url}\")"
@@ -253,14 +253,14 @@ def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bi
     cursor.execute(insert_command_string)
 
 
-def execute_bill_and_division_data_in_db(conn, cursor, bills_overview):
+def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
     for bill in bdi.get_bill_details(bills_overview):
         # get the billID from DB
         bill_id = bill_id_in_bills_table(conn, cursor, bill)
         # if there is no billID, then the bill is not in the table, hence we need to insert the bill
         if bill_id is None:
             print(f"bill {bill.title_stripped} not yet in Bills table")
-            insert_new_bill_into_bills_table(conn, cursor, bill)
+            execute_insert_new_bill_into_bills_table(conn, cursor, bill)
             bill_id = bill_id_in_bills_table(conn, cursor, bill)
         else:
             print(f"bill {bill.title_stripped} already in Bills table")
@@ -298,7 +298,7 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     print(f"item counts: {bills_overview.bills_overview_data.count()}")
 
     # insert everything back in
-    execute_bill_and_division_data_in_db(conn, cursor, bills_overview)
+    put_bill_and_division_data_in_db(conn, cursor, bills_overview)
 
     conn.commit()
 
@@ -313,10 +313,7 @@ def reload_all_tables(conn, cursor):
 
 
 # function called by cron, I need to split functionality into different functions
-def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=5, allow_party_and_mp_upsert=True):
-    # todo: remove this line when testing done
-    allow_party_and_mp_upsert = False
-
+def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True):
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
