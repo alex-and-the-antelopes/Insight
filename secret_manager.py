@@ -34,39 +34,6 @@ def get_version(secret_id: str, version_name: str = "latest"):
         request={"name": name}
     )
 
-def get_secret(project_id="bills-app-305000", secret_id):
-    """
-    Get information about the given secret. This only returns metadata about
-    the secret container, not any secret material.
-    """
-
-    # Import the Secret Manager client library.
-    from google.cloud import secretmanager
-
-    # Create the Secret Manager client.
-    client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the secret.
-    name = client.secret_path(project_id, secret_id)
-
-    # Get the secret.
-    response = client.get_secret(request={"name": name})
-
-    # Get the replication policy.
-    if "automatic" in response.replication:
-        replication = "AUTOMATIC"
-    elif "user_managed" in response.replication:
-        replication = "MANAGED"
-    else:
-        raise "Unknown replication {}".format(response.replication)
-
-    # Print data about the secret.
-    print("Got secret {} with replication policy {}".format(response.name, replication))
-    # [END secretmanager_get_secret]
-
-    return response
-
-
 
 def extract_payload(response: service.AccessSecretVersionResponse, encoding: str = "UTF-8") -> str:
     """
@@ -86,4 +53,4 @@ def get_version_contents(secret_id: str, version_name: str = "latest", encoding:
     :param encoding: Encoding to use
     :return: Text contents
     """
-    return extract_payload(get_secret(secret_id), encoding)
+    return extract_payload(get_version(secret_id, version_name), encoding)
