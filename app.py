@@ -202,13 +202,16 @@ def create_session_token():
     return token
 
 
-def get_user(email_address):
+def check_user_details(email_address):
     """
     Gets the
     :param email_address:
     :return:
     """
-    return
+    query = database.select(f"SELECT * FROM Users WHERE email={email_address}")  # Get the user(s) with the given email
+    if query:
+        return False  # If the query returns a populated list, return False
+    return True  # If the query returns an empty list return True
 
 
 def add_user_to_database(user):
