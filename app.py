@@ -161,21 +161,20 @@ def register():
     password = request.form['password']  # The given password is already hashed
     notification_token = request.form['notification_token']
     postcode = request.form['postcode']
-    status = f"{email}, {notification_token}, {postcode}, {password}"
     # Check for errors:
     if type(password) is not str:
-        return jsonify({"error": "password_error", "status": status})
+        return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
-        return jsonify({"error": "notification_token_error", "status": status})
+        return jsonify({"error": "notification_token_error"})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
-        return jsonify({"error": "postcode_error", "status": status})
+        return jsonify({"error": "postcode_error"})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
-        return jsonify({"error": "email_error", "status": status})
+        return jsonify({"error": "email_error"})
     # Todo check if email already exists in the database
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
-    add_user_to_database(new_user)
+    table_status = add_user_to_database(new_user)
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": status})
+    return jsonify({"session_token": new_user.session_token, "status": table_status})
 
 
 # Deliver requested resource.
@@ -187,12 +186,6 @@ def get_res(name):
     return send_file(CONFIG["img_dir"] + name)
 
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
-
-
-@app.route("/testdb")
-def demo_table_test():
-    database.interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
-    return database.select("SELECT * FROM demo_tbl")
 
 
 def create_session_token():
@@ -222,7 +215,12 @@ def add_user_to_database(user):
     :return: None
     """
     # todo add user to database
-    pass
+    if not user:  # Ignore None
+        return
+    statement = f"INSERT INTO Users (email, password, postcode, sessionToken, notificationToken) VALUES " \
+                f"({user.email}, {user.password_hash}, {user.postcode}, {user.session_token}, {user.notification_token})"
+    database.interact(statement)
+    return database.select("SELECT * FROM Users")  # TODO remove
 
 
 if __name__ == '__main__':
