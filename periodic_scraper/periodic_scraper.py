@@ -137,8 +137,7 @@ def upsert_mp_data(conn, cursor):
     mp_fetcher = mf.MPOverview()
 
     # todo: uncomment and delete below
-    mp_fetcher.get_active_MPs()
-    #mp_fetcher.get_all_members(params={"House": "Commons"})
+    mp_fetcher.get_all_members(params={"House": "Commons"})
     all_mp_data = mp_fetcher.mp_overview_data
 
     for mp in all_mp_data.itertuples():
@@ -182,6 +181,14 @@ def insert_party_data(conn, cursor):
             execute_party_data_in_db(cursor, i, "unknown")
 
     conn.commit()
+
+
+def execute_update_party_data(cursor, party_id, party_name):
+
+
+
+def upsert_party_data(conn, cursor):
+    party_details_list = pf.get_all_parties()
 
 
 # return the billID for the passed bill
