@@ -69,6 +69,16 @@ class User(object):
         """
         return vars(self)
 
+    def __str__(self):
+        """
+        Creates and returns a string representation of the current User object. The string contains the email, password
+        hash, postcode, notification and session token of the User.
+        :return: A string (str) containing the User's information.
+        """
+        user_str = f"email: {self.email}, postcode: {self.postcode}, session token: {self.session_token}, " \
+                   f"password hash: {self.password_hash}, notification token: {self.notification_token}"
+        return user_str
+
 
 class Bill:
     """
