@@ -188,12 +188,6 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-@app.route("/testdb")
-def demo_table_test():
-    database.interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
-    return database.select("SELECT * FROM demo_tbl")
-
-
 def create_session_token():
     """
     Generate a unique token using a combination of random digits, lowercase and uppercase letters.
