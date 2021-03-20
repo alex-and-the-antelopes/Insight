@@ -71,9 +71,14 @@ def interact(statement):
         response="Request Successful",
     )
 
+
 def select(statement):
     """ Special function for select or similar statements which require something to be returned from the db
-    as we want to return a value"""
+    as we want to return a value.
+    :param statement: The statement to be carried out.
+    :return: The resulting query from the database.
+    """
+
     try:
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
