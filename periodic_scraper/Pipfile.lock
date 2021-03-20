@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bebccd21b74258e7ccc506c4ae87f2c1dfc870bc391346f227376e87808b28a4"
+            "sha256": "b6987a9363024cae611af086069ccffe0e5d407a2a796b643b8c916e65695002"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -112,11 +112,11 @@
         },
         "parlpy": {
             "hashes": [
-                "sha256:4bfd2db64c6c1b086a51528118674d8d76c7097286e6ea23ffbb2232c9afdc85",
-                "sha256:fb0dbd4e49fc16b01b42c85d20a6b88dbaa1491f05f5ed158869284a51588dde"
+                "sha256:45235f8ac5064dc082aac475f3c5b69f68bc027994d643e59541aeac19254a51",
+                "sha256:721999fcc2e28f5996dc052b171d24afcbe10e4ac9afd673e3fb78677dc9de08"
             ],
             "index": "pypi",
-            "version": "==2.2.0"
+            "version": "==2.3.0"
         },
         "protobuf": {
             "hashes": [
