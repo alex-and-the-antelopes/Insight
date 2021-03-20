@@ -87,13 +87,6 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, part
 # ('phoneNum', b'text', 'YES', '', None, '')
 # ('area', b'text', 'YES', '', None, '')
 def insert_mp_data(conn, cursor, current_mp_data):
-
-    pd.set_option("display.max_columns", len(current_mp_data.columns))
-
-    print(current_mp_data)
-
-    #clear_table(conn, cursor, "MP")
-
     for (index,
         name_display,
         name_full_title,
@@ -106,7 +99,6 @@ def insert_mp_data(conn, cursor, current_mp_data):
         first_name, second_name = get_names_from_full_name(name_display)
         print("here")
         execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id)
-        #print(name_display, member_id, party_id)
 
     conn.commit()
 
@@ -121,7 +113,6 @@ def execute_party_data_in_db(cursor, party_id, party_name):
 
 
 # clear table, execute insertions and commit Party data
-# todo: write update functionality rather than delete -> add
 def insert_party_data(conn, cursor):
     party_details_list = pf.get_all_parties()
     max_id_in_use = 0
@@ -143,14 +134,24 @@ def insert_party_data(conn, cursor):
     conn.commit()
 
 
-def refresh_mp_and_party_tables(conn, cursor):
+def insert_mp_and_party_tables(conn, cursor):
     mp_fetcher = mf.MPOverview()
 
     mp_fetcher.get_all_members(params={"House": "Commons"})
     current_mp_data = mp_fetcher.mp_overview_data
 
-    insert_party_data(conn, cursor,)
-    insert_mp_data(conn, cursor)
+    insert_party_data(conn, cursor)
+    insert_mp_data(conn, cursor, current_mp_data)
+
+
+def update_mp_and_party_tables(conn, cursor):
+    mp_fetcher = mf.MPOverview()
+
+    mp_fetcher.get_all_members(params={"House": "Commons"})
+    current_mp_data = mp_fetcher.mp_overview_data
+
+    #update_party_data(conn, cursor)
+    #update_mp_data(conn, cursor)
 
 
 # return the billID for the passed bill
@@ -257,7 +258,7 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
 # takes ~2hrs
 def reload_all_tables(conn, cursor):
     clear_all_4_tables(conn, cursor)
-    refresh_mp_and_party_tables(conn, cursor)
+    insert_mp_and_party_tables(conn, cursor)
     insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
 
 # function called by cron, I need to split functionality into different functions
@@ -271,11 +272,11 @@ def insert_and_update_data(completely_fresh=False):
         # todo: only run this infrequently
         # clear the tables in order according to foreign key constraints, then add all values back in
         # commented out - data currently in db, working on inserting bill and division data
-        #refresh_mp_and_party_tables(conn, cursor)
-        #print("finished updating MP and Party table")
+        insert_mp_and_party_tables(conn, cursor)
+        print("finished updating MP and Party table")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
+        #insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
 
     cursor.close()
     conn.close()
