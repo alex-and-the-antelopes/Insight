@@ -16,22 +16,24 @@ sql_config = {
     "ssl_key": "../secrets/client-key.pem"
 }
 
+db_name = "bill_data"
+
 
 def print_tables_in_db(cursor):
-    cursor.execute("SHOW tables IN bill_app_db")
+    cursor.execute(f"SHOW tables IN {db_name}")
     for x in cursor:
         print(x)
 
 
 def print_table_structure(cursor, table_name):
-    cursor.execute(f"DESCRIBE bill_app_db.{table_name}")
+    cursor.execute(f"DESCRIBE {db_name}.{table_name}")
     print(f"{table_name} table structure")
     for x in cursor:
         print(x)
 
 
 def print_all_rows_of_table(cursor, table_name):
-    cursor.execute(f"SELECT * FROM bill_app_db.{table_name}")
+    cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table {table_name}:")
     for x in cursor:
         print(x)
