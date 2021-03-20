@@ -260,7 +260,7 @@ def insert_and_update_data():
     print_all_rows_of_table(cursor, "Party")
 
     # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
+    insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
 
     cursor.close()
     conn.close()
