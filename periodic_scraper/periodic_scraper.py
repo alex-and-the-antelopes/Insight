@@ -11,6 +11,7 @@ from mysql.connector.constants import ClientFlag
 
 import pandas as pd
 import os
+import datetime
 
 public_ip = "35.190.194.63"
 
@@ -68,7 +69,7 @@ def get_names_from_full_name(name_display):
     return first_name, second_name
 
 
-def execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active):
+def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constituency, member_id, party_id, active):
     if active == True:
         current = 1
     else:
@@ -81,47 +82,73 @@ def execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, m
     cursor.execute(insert_command_string)
 
 
-# ('mpID', b'int(11)', 'NO', 'PRI', None, 'auto_increment')
-# ('firstName', b'text', 'YES', '', None, '')
-# ('lastName', b'text', 'YES', '', None, '')
-# ('email', b'text', 'YES', '', None, '')
-# ('mpAddress', b'text', 'YES', '', None, '')
-# ('partyID', b'int(11)', 'NO', 'MUL', None, '')
-# ('photoPath', b'text', 'YES', '', None, '')
-# ('phoneNum', b'text', 'YES', '', None, '')
-# ('area', b'text', 'YES', '', None, '')
+# assumes table is empty
 def insert_mp_data(conn, cursor):
     mp_fetcher = mf.MPOverview()
 
     mp_fetcher.get_all_members(params={"House": "Commons"})
     all_mp_data = mp_fetcher.mp_overview_data
 
-    current_mp_fetcher = mf.MPOverview()
+    for mp in all_mp_data.itertuples():
+        first_name, second_name = get_names_from_full_name(mp.name_display)
 
-    current_mp_fetcher.get_active_MPs()
-    current_mp_data = current_mp_fetcher.mp_overview_data
+        print(f"{mp.name_display} is {mp.current_member} active")
+        execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
 
-    current_mp_id_list = []
-    for mp in current_mp_data.itertuples():
-        current_mp_id_list.append(mp.member_id)
+    conn.commit()
 
-    for (index,
-        name_display,
-        name_full_title,
-        name_address_as,
-        name_list_as,
-        member_id,
-        gender,
-        party_id,
-        constituency,
-        last_updated) in all_mp_data.itertuples():
-        first_name, second_name = get_names_from_full_name(name_display)
-        if member_id in current_mp_id_list:
-            print(f"{name_display} is active")
-            execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active=True)
+
+def is_in_field(conn, cursor, table, field, val):
+    cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+
+    count = 0
+    for row in cursor:
+        count+=1
+
+    if count > 0:
+        return True
+    else:
+        return True
+
+
+def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, constituency, member_id, party_id, active):
+    if active == True:
+        current = 1
+    else:
+        current = 0
+    update_command_string = f"UPDATE {db_name}.MP " \
+                            f"SET mpID = \"{member_id}\", " \
+                            f"firstName = \"{first_name}\", " \
+                            f"lastName = \"{second_name}\", " \
+                            f"email = \"{email}\", " \
+                            f"partyID = {party_id}, " \
+                            f"area = \"{constituency}\", " \
+                            f"current = {current} " \
+                            f"WHERE mpID = {member_id}"
+
+    print(f"mp update command string")
+    print(update_command_string)
+
+    cursor.execute(update_command_string)
+
+
+# does not assume table is empty
+def upsert_mp_data(conn, cursor):
+    mp_fetcher = mf.MPOverview()
+
+    # todo: uncomment and delete below
+    mp_fetcher.get_active_MPs()
+    #mp_fetcher.get_all_members(params={"House": "Commons"})
+    all_mp_data = mp_fetcher.mp_overview_data
+
+    for mp in all_mp_data.itertuples():
+        first_name, second_name = get_names_from_full_name(mp.name_display)
+        print(mp)
+        if is_in_field(conn, cursor, "MP", "mpID", mp.member_id):
+            execute_update_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
         else:
-            print(f"{name_display} not active")
-            execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active=False)
+            #execute_insert_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
+            print("should not be the case")
 
     conn.commit()
 
@@ -155,18 +182,6 @@ def insert_party_data(conn, cursor):
             execute_party_data_in_db(cursor, i, "unknown")
 
     conn.commit()
-
-
-
-
-def update_mp_and_party_tables(conn, cursor):
-    mp_fetcher = mf.MPOverview()
-
-    mp_fetcher.get_all_members(params={"House": "Commons"})
-    current_mp_data = mp_fetcher.mp_overview_data
-
-    #update_party_data(conn, cursor)
-    #update_mp_data(conn, cursor)
 
 
 # return the billID for the passed bill
@@ -286,14 +301,13 @@ def insert_and_update_data(completely_fresh=False):
         reload_all_tables(conn, cursor)
     else:
         # todo: only run this infrequently
-        # clear the tables in order according to foreign key constraints, then add all values back in
-        # commented out - data currently in db, working on inserting bill and division data
-        # mp and party tables can be wiped and the data all added back in as this is fairly cheap
+        # todo: need to update instead of clear and insert, foreign key constraints
         # todo: uncomment
-        clear_table(conn, cursor, "MP")
+        # todo: FIRST: comment clear_table, then change to upsert
+        #clear_table(conn, cursor, "MP")
         #clear_table(conn, cursor, "Party")
         #insert_party_data(conn, cursor)
-        insert_mp_data(conn, cursor)
+        upsert_mp_data(conn, cursor)
         print("finished updating MP and Party table")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
@@ -304,3 +318,9 @@ def insert_and_update_data(completely_fresh=False):
 
 
 insert_and_update_data()
+
+#conn = mysql.connector.connect(**sql_config)
+#cursor = conn.cursor(buffered=True)
+#is_in_field(conn, cursor, "MP", "mpID", 43820)
+#cursor.close()
+#conn.close()
