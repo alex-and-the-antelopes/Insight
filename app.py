@@ -174,7 +174,9 @@ def register():
         return jsonify({"error": "postcode_error"})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
-    # Todo check if email already exists in the database
+
+    if not is_unique_address(email):  # Check if the given email is already in use
+        return jsonify({"error": "email_in_use_error"})
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
