@@ -156,13 +156,17 @@ def login_with_token():
 
 @app.route('/register', methods=['POST'])
 def register():
+    """
+    Register new User. Creates a new User object, updates the database and returns the session token.
+    :return: Session token if successful, an Error otherwise.
+    """
     # Get new User details from form:
     email = request.form['email']
     password = request.form['password']  # The given password is already hashed
     notification_token = request.form['notification_token']
     postcode = request.form['postcode']
     # Check for errors:
-    if type(password) is not str:
+    if type(password) is not str or not password:
         return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
         return jsonify({"error": "notification_token_error"})
@@ -174,8 +178,8 @@ def register():
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
-    table_status = add_user_to_database(new_user)  # Todo remove status
 
+    table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
     return jsonify({"session_token": new_user.session_token, "status": table_status})  # Todo remove status
 
@@ -202,11 +206,11 @@ def create_session_token():
     return token
 
 
-def check_user_details(email_address):
+def is_unique_address(email_address):
     """
-    Gets the
-    :param email_address:
-    :return:
+    Checks the database to see if the given email address is already in use.
+    :param email_address: The email address to look up.
+    :return: True if the email address is not being used, false otherwise.
     """
     query = database.select(f"SELECT * FROM Users WHERE email={email_address}")  # Get the user(s) with the given email
     if query:
