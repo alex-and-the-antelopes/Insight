@@ -45,4 +45,14 @@ def extract_payload(response: service.AccessSecretVersionResponse, encoding: str
     return response.payload.data.decode(encoding)
 
 
-print(extract_payload(get_version("db-pass", version_name="latest")))
+def get_contents_of_version(secret_id: str, version_name: str = "latest", encoding: str = "UTF-8") -> str:
+    """
+    Gets decoded payload of version
+    :param secret_id: Secret to look up
+    :param version_name: Version of secret to look up
+    :param encoding: Encoding to use
+    :return: String of contents
+    """
+    return extract_payload(get_version(secret_id, version_name), encoding)
+
+

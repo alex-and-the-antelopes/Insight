@@ -4,6 +4,7 @@ import bill_tracker_core as core
 import sqlalchemy
 import logging
 import os
+import secret_manager as secrets
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -14,10 +15,14 @@ CONFIG = core.CONFIG
 
 
 def init_tcp_connection_engine(db_config):
-    db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
-    db_name = os.environ["DB_NAME"]
-    db_host = os.environ["DB_HOST"]
+    # Function to get secrets
+    get_secret = secrets.get_contents_of_version
+
+    # Get details and credentials
+    db_user = get_secret("db_user")
+    db_pass = get_secret("db_pass")
+    db_name = get_secret("db_name")
+    db_host = get_secret("db_host")
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
