@@ -161,21 +161,20 @@ def register():
     password = request.form['password']  # The given password is already hashed
     notification_token = request.form['notification_token']
     postcode = request.form['postcode']
-    status = f"{email}, {notification_token}, {postcode}, {password}"
     # Check for errors:
     if type(password) is not str:
-        return jsonify({"error": "password_error", "status": status})
+        return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
-        return jsonify({"error": "notification_token_error", "status": status})
+        return jsonify({"error": "notification_token_error"})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
-        return jsonify({"error": "postcode_error", "status": status})
+        return jsonify({"error": "postcode_error"})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
-        return jsonify({"error": "email_error", "status": status})
+        return jsonify({"error": "email_error"})
     # Todo check if email already exists in the database
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
     add_user_to_database(new_user)
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": status})
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
