@@ -68,12 +68,12 @@ def get_names_from_full_name(name_display):
     return first_name, second_name
 
 
-def execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active):
+def execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active):
     if active == True:
         current = 1
     else:
         current = 0
-    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{current}\")"
+    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -113,14 +113,15 @@ def insert_mp_data(conn, cursor):
         member_id,
         gender,
         party_id,
+        constituency,
         last_updated) in all_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(name_display)
         if member_id in current_mp_id_list:
             print(f"{name_display} is active")
-            execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active=True)
+            execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active=True)
         else:
             print(f"{name_display} not active")
-            execute_mp_data_in_db(cursor, conn, first_name, second_name, member_id, party_id, active=False)
+            execute_mp_data_in_db(cursor, conn, first_name, second_name, constituency, member_id, party_id, active=False)
 
     conn.commit()
 
@@ -134,7 +135,7 @@ def execute_party_data_in_db(cursor, party_id, party_name):
     cursor.execute(insert_command_string)
 
 
-# clear table, execute insertions and commit Party data
+# insert all party data and execute
 def insert_party_data(conn, cursor):
     party_details_list = pf.get_all_parties()
     max_id_in_use = 0
