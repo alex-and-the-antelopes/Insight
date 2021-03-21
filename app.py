@@ -138,7 +138,8 @@ def landing_page():
 def login():
     email = request.form['email']
     password = request.form['password']
-
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
@@ -148,7 +149,8 @@ def login():
 def login_with_token():
     email = request.form['email']
     session_token = request.form['session_token']
-
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
