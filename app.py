@@ -157,6 +157,9 @@ def login():
     user = fetch_user(email)  # Construct the user object
     if user.verify_password(password):
         return jsonify({"session_token": user.session_token})  # Return the session token
+    # Send email to user address
+    email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We're "
+                                                              "sending you this email to make sure it was you!")
     # Return the session token
     return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
@@ -207,7 +210,7 @@ def register():
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
     add_user_to_database(new_user)  # Add new User to the database
-    # Send email to user address
+    # Send email to user's email address
     email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!")
     # Return the session token
     return jsonify({"session_token": new_user.session_token})
