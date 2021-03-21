@@ -138,25 +138,22 @@ def landing_page():
 def login():
     email = request.form['email']
     password = request.form['password']
-    query = database.select(f"SELECT * FROM Users WHERE email='{email}';")  # todo remove query
-    query = "".join(query)
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
-    return jsonify({"session_token": "session_placeholder", "query":query})
+    return jsonify({"session_token": "session_placeholder"})
 
 
 @app.route('/login_with_token', methods=['POST'])
 def login_with_token():
     email = request.form['email']
     session_token = request.form['session_token']
-    query = database.select(f"SELECT * FROM Users WHERE email='{email}';")  # todo remove query
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
-    return jsonify({"session_token": "session_placeholder", "query":query})
+    return jsonify({"session_token": "session_placeholder"})
 
 
 @app.route('/register', methods=['POST'])
@@ -181,16 +178,15 @@ def register():
         return jsonify({"error": "email_error"})
 
     query = database.select(f"SELECT * FROM Users WHERE email='{email}';")  # todo remove query
-    query = "".join(query)
     if not is_new_address(email):  # Check if the given email is already in use
-        return jsonify({"error": "email_in_use_error", "query": query})
+        return jsonify({"error": "email_in_use_error"})
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
 
     table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": query})  # Todo remove extra
+    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": type(query)})  # Todo remove extra
 
 
 # Deliver requested resource.
