@@ -177,7 +177,8 @@ def register():
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
 
-    query = database.select(f"SELECT * FROM Users WHERE email={email}")  # todo remove query
+    query = database.select(f"SELECT * FROM Users WHERE email={email};")  # todo remove query
+    query = "".join(query)
     if not is_new_address(email):  # Check if the given email is already in use
         return jsonify({"error": "email_in_use_error", "query": query})
 
@@ -217,7 +218,7 @@ def is_new_address(email_address):
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email={email_address}")  # Get the user(s) with the given email
+    query = database.select(f"SELECT * FROM Users WHERE email={email_address};")  # Get the user(s) with the given email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
