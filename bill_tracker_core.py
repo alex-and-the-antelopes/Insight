@@ -58,7 +58,7 @@ class User(object):
         """
         Given a password, check if it is correct.
         :param password: The (hashed) password to check.
-        :return: True if it is correct, False otherwise
+        :return: True if it is correct, False otherwise.
         """
         return password == self.password_hash
 
