@@ -3,9 +3,8 @@ from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
 import email_sender
-import sqlalchemy
+import secret_manager as secret
 import logging
-import os
 import random
 import string
 
@@ -134,7 +133,7 @@ def landing_page():
 
 @app.route('/testdb')
 def landing_page():
-    return database.interact("SELECT * FROM Users;")
+    return secret.extract_payload(secret.get_version("db-pass", version_name="1"))
 
 
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not

@@ -16,15 +16,6 @@ def get_version(secret_id: str, version_name: str = "latest"):
     except KeyError:
         project_id = "bills-app-305000"
 
-    credentials_path = "secrets/credentials.json"
-    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ.keys():
-        if os.path.isfile(credentials_path):
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-        else:
-            raise FileNotFoundError(
-                "GOOGLE_APPLICATION_CREDENTIALS env variable not set, and couldn't find credential file."
-            )
-
     client = secretmanager.SecretManagerServiceClient()
 
     parent = f"projects/{project_id}"
@@ -45,4 +36,3 @@ def extract_payload(response: service.AccessSecretVersionResponse, encoding: str
     return response.payload.data.decode(encoding)
 
 
-print(extract_payload(get_version("db-pass", version_name="latest")))
