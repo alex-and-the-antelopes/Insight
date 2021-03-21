@@ -43,26 +43,22 @@ def create_message(subject="Insight message!", main_body=None):
     return message  # Return the constructed email
 
 
-def is_valid_email(email_address) -> int:
+def is_valid_email(email_address: str) -> bool:
     """
     Checks if the given email address is a valid address.
     :param email_address: The email address to validate.
-    :return: 0 if the address is valid, 1 if it is the wrong type (not str), 2 if it is not a valid address.
+    :return: True if email is valid
     """
     # Values that the function should return for each outcome.
     return_values = {
-        "wrong_type": 1,
-        "valid": 0,
-        "invalid": 2,
+        "valid": True,
+        "invalid": False,
     }
     # Part of email we're processing, as there are different rules for each part of the email.
     state = "local"
 
     local_legal_chars = r"[a-zA-Z0-9!#$%&'*+\-\/=?^_`{|}~]"
     domain_legal_chars = r"[a-zA-Z0-9]"
-
-    if type(email_address) is not str:
-        return return_values["wrong_type"]
 
     for i, c in enumerate(email_address):
         if state == "local":
