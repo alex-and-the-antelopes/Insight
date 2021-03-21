@@ -407,20 +407,22 @@ def test_logging_func():
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
-    set_db_params(run_on_app_engine)
+    #set_db_params(run_on_app_engine)
 
-    conn = mysql.connector.connect(**sql_config)
-    cursor = conn.cursor(buffered=True)
+    test_logging_func()
 
-    print("here")
+    #conn = mysql.connector.connect(**sql_config)
+    #cursor = conn.cursor(buffered=True)
+
+    #print("here")
 
     # todo remove
     #db_test_func(conn, cursor)
 
-    test_logging_func()
 
-    cursor.close()
-    conn.close()
+
+    #cursor.close()
+    #conn.close()
 
     return
 
