@@ -3,6 +3,7 @@ from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
 import email_sender
+import secret_manager as secret
 import logging
 import random
 import string
@@ -129,6 +130,14 @@ def top():
 @app.route('/')
 def landing_page():
     return redirect(CONFIG["default_url"])
+
+@app.route('/testdb')
+def db_testing():
+    response = database.select("SELECT * FROM Users;")
+    if response is None:
+        return "None"
+    else:
+        return str(response)
 
 
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
