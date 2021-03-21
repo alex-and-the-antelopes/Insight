@@ -138,7 +138,8 @@ def landing_page():
 def login():
     email = request.form['email']
     password = request.form['password']
-
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
@@ -148,7 +149,8 @@ def login():
 def login_with_token():
     email = request.form['email']
     session_token = request.form['session_token']
-
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
@@ -156,13 +158,17 @@ def login_with_token():
 
 @app.route('/register', methods=['POST'])
 def register():
+    """
+    Register new User. Creates a new User object, updates the database and returns the session token.
+    :return: Session token if successful, an Error otherwise.
+    """
     # Get new User details from form:
     email = request.form['email']
     password = request.form['password']  # The given password is already hashed
     notification_token = request.form['notification_token']
     postcode = request.form['postcode']
     # Check for errors:
-    if type(password) is not str:
+    if type(password) is not str or not password:
         return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
         return jsonify({"error": "notification_token_error"})
@@ -170,11 +176,17 @@ def register():
         return jsonify({"error": "postcode_error"})
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
-    # Todo check if email already exists in the database
+
+    query = database.select(f"SELECT * FROM Users WHERE email={email}")  # todo remove query
+    if not is_new_address(email):  # Check if the given email is already in use
+        return jsonify({"error": "email_in_use_error", "query": query})
+
+    # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
-    table_status = add_user_to_database(new_user)
+
+    table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status})
+    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": query})  # Todo remove extra
 
 
 # Deliver requested resource.
@@ -199,13 +211,16 @@ def create_session_token():
     return token
 
 
-def get_user(email_address):
+def is_new_address(email_address):
     """
-    Gets the
-    :param email_address:
-    :return:
+    Checks the database to see if the given email address is already in use.
+    :param email_address: The email address to look up.
+    :return: True if the email address is not being used, false otherwise.
     """
-    return
+    query = database.select(f"SELECT * FROM Users WHERE email={email_address}")  # Get the user(s) with the given email
+    if query:
+        return False  # If the query returns a populated list, return False
+    return True  # If the query returns an empty list return True
 
 
 def add_user_to_database(user):
@@ -214,12 +229,12 @@ def add_user_to_database(user):
     :param user: User object
     :return: None
     """
-    # todo add user to database
     if not user:  # Ignore None
         return
-    statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
+    statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
+                f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
     database.interact(statement)
-    return database.select("SELECT * FROM Users;")  # TODO remove
+    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
 
 
 if __name__ == '__main__':
