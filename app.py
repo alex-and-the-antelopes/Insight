@@ -3,9 +3,7 @@ from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
 import email_sender
-import sqlalchemy
 import logging
-import os
 import random
 import string
 
@@ -252,7 +250,6 @@ def fetch_user(email_address):
     query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
     user = None
     return user
-
 
 
 if __name__ == '__main__':
