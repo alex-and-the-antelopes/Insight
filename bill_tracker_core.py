@@ -62,6 +62,14 @@ class User(object):
         """
         return password == self.password_hash
 
+    def verify_token(self, token):
+        """
+        Given a token, check if it is correct.
+        :param token: The (hashed) password to check.
+        :return: True if it is correct, False otherwise.
+        """
+        return token == self.session_token
+
     def to_dict(self):
         """
         Creates and returns a dictionary representation of the current User object.
