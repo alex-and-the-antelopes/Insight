@@ -18,6 +18,8 @@ this code.
     password = "hunter2"
     ```
 6. Setup MySQL database
+
+
 > **Note:** Although config files for use with Google Cloud Platform are included, ensure `entrypoint` in `app.yaml` is 
 > set to point to `app.py`.
 
