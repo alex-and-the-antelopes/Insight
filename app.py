@@ -186,7 +186,8 @@ def register():
 
     table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": type(query)})  # Todo remove extra
+    string = "" + query.__class__.__name__
+    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": string})  # Todo remove extra
 
 
 # Deliver requested resource.
