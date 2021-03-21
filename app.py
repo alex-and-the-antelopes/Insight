@@ -136,6 +136,7 @@ def testing_database():
     return secret.get_version("db-pass", version_name="1")
 
 
+
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
