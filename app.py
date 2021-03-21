@@ -174,7 +174,7 @@ def register():
         return jsonify({"error": "notification_token_error"})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
-    if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
+    if email_sender.is_valid_email(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
 
     if not is_new_address(email):  # Check if the given email is already in use
