@@ -131,9 +131,6 @@ def top():
 def landing_page():
     return redirect(CONFIG["default_url"])
 
-@app.route('/testdb')
-def testing_database():
-    return secret.get_version("db_pass", version_name="1")
 
 
 
