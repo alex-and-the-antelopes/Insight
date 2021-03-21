@@ -2,24 +2,10 @@ import os
 import sqlalchemy
 
 
-def getSecret(secret_name, secret_version):
-    from google.cloud import secretmanager
-    client = secretmanager.SecretManagerServiceClient()
-    response = client.access_secret_version(request={"name": f"projects/491846460171/secrets/{secret_name}/versions/{secret_version}"})
-    payload = response.payload.data.decode("UTF-8")
-    return payload
-
 def init_tcp_connection_engine(db_config):
 
-    " projects/1066288800758/secrets/eggysauce13/versions/1"
-
-
-
-    # Print the secret payload.
-    # WARNING: Do not print the secret in a production environment - this
-    # snippet is showing how to access the secret material.
     db_user = os.environ["DB_USER"]
-    db_pass = getSecret("db_pass", "1")
+    db_pass = os.environ["DB_PASS"]
     db_name = os.environ["DB_NAME"]
     db_host = os.environ["DB_HOST"]
 
