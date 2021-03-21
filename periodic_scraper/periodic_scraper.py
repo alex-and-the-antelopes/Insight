@@ -14,6 +14,7 @@ import os
 import datetime
 
 import secret_manager as sm
+from google.cloud import logging
 
 
 # clear all rows and reset increment
@@ -392,7 +393,19 @@ def set_db_params(run_on_app_engine):
 
     db_name = "bill_data"
 
-# function called by cron, I need to split functionality into different functions
+
+def test_logging_func():
+    logging_client = logging.Client()
+
+    test_log_name = "test_log"
+    logger = logging_client.logger(test_log_name)
+
+    test_text = "test message"
+    logger.log_text(test_text)
+
+    print(f"logged message: {test_text}")
+
+# by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     set_db_params(run_on_app_engine)
 
@@ -403,6 +416,8 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     # todo remove
     db_test_func(conn, cursor)
+
+    test_logging_func()
 
     cursor.close()
     conn.close()
