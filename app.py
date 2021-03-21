@@ -249,6 +249,9 @@ def fetch_user(email_address):
     """
     query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
     user = None
+    if query:
+        user_info = query[0]  # Get the user information
+        user = core.User(user_info[1], user_info[2], user_info[3], user_info[5], user_info[4])  # Construct user
     return user
 
 
