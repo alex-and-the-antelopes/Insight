@@ -2,6 +2,13 @@ import os
 import sqlalchemy
 
 
+def getSecret(secret_name, secret_version):
+    from google.cloud import secretmanager
+    client = secretmanager.SecretManagerServiceClient()
+    response = client.access_secret_version(request={"name": f"projects/491846460171/secrets/{secret_name}/versions/{secret_version}"})
+    payload = response.payload.data.decode("UTF-8")
+    return payload
+
 def init_tcp_connection_engine(db_config):
 
     " projects/1066288800758/secrets/eggysauce13/versions/1"
@@ -93,9 +100,3 @@ def select(statement):
         # [START_EXCLUDE]
         return None
 
-def getSecret(secret_name, secret_version):
-    from google.cloud import secretmanager
-    client = secretmanager.SecretManagerServiceClient()
-    response = client.access_secret_version(request={"name": f"projects/491846460171/secrets/{secret_name}/versions/{secret_version}"})
-    payload = response.payload.data.decode("UTF-8")
-    return payload
