@@ -403,7 +403,6 @@ def test_logging_func():
     test_text = "test message"
     logger.log_text(test_text)
 
-    print(f"logged message: {test_text}")
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
@@ -415,7 +414,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     print("here")
 
     # todo remove
-    db_test_func(conn, cursor)
+    #db_test_func(conn, cursor)
 
     test_logging_func()
 
