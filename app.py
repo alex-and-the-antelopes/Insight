@@ -141,6 +141,8 @@ def login():
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
+    user = fetch_user(email)  # Construct the user object
+    # Todo verify that the given password matches the user's password. If yes, return the token otherwise an error
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
 
@@ -152,6 +154,8 @@ def login_with_token():
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
+    user = fetch_user(email)  # Construct the user object
+    # Todo verify that the given session token matches the user's token. If yes, return "Success" otherwise "error"
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
 
@@ -174,7 +178,7 @@ def register():
         return jsonify({"error": "notification_token_error"})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
-    if email_sender.is_valid_email(email) != 0:  # Check that the given email is a valid email address
+    if not email_sender.is_valid_email(email):  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
 
     if not is_new_address(email):  # Check if the given email is already in use
@@ -182,10 +186,10 @@ def register():
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
+    add_user_to_database(new_user)  # Add new User to the database
 
-    table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status})  # Todo remove extra
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
@@ -206,8 +210,10 @@ def create_session_token():
     """
     token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
                     for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
-    # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
-    return token
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process)
+    if database.interact(f"SELECT * FROM Users WHERE sessionToken='{token}';"):  # Check if the token is in use
+        return create_session_token()  # Repeat the process until a unique token is generated
+    return token  # Return the unique token
 
 
 def is_new_address(email_address):
@@ -230,10 +236,23 @@ def add_user_to_database(user):
     """
     if not user:  # Ignore None
         return
+    # The SQL statement to add the user into the Users table:
     statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
                 f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
-    database.interact(statement)
-    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
+    database.interact(statement)  # Carry out the SQL statement
+    return
+
+
+def fetch_user(email_address):
+    """
+    Finds the user with the given email address, constructs and returns the User object.
+    :param email_address: The email address of the user.
+    :return: The constructed User object.
+    """
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
+    user = None
+    return user
+
 
 
 if __name__ == '__main__':
