@@ -21,7 +21,7 @@ def send_message(recipient_address, message):
         email_address = secret.get_version("email_address", version_name="latest")
         email_password = secret.get_version("email_pass", version_name="latest")
         server.login(email_address, email_password)  # Login to the account
-        server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
+        server.sendmail(email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
         print("Email failed to send.", file=sys.stderr)  # Print using error stream
