@@ -15,6 +15,7 @@ import datetime
 
 import secret_manager as sm
 from google.cloud import logging
+import logging
 
 
 # clear all rows and reset increment
@@ -397,11 +398,11 @@ def set_db_params(run_on_app_engine):
 def test_logging_func():
     logging_client = logging.Client()
 
-    test_log_name = "test_log"
-    logger = logging_client.logger(test_log_name)
+    logging_client.get_default_handler()
+    logging_client.setup_logging()
 
-    test_text = "test message"
-    logger.log_text(test_text)
+    test_msg = "TEST MESSAGE"
+    logging.warning(test_msg)
 
 
 # by default assumes running on app engine
