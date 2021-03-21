@@ -249,9 +249,11 @@ def get_sessions_string(sessions):
 def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
     sessions_string = get_sessions_string(bill.sessions)
 
+    summary_sanitised = bill.summary.replace("\"", "")
+
     insertion_command_string \
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{sessions_string}\",\"{bill.url}\")"
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
     cursor.execute(insertion_command_string)
 
     # todo: remove?
@@ -342,6 +344,9 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     print("bills overview object obtained, scraping complete")
     print(f"item counts: {bills_overview.bills_overview_data.count()}")
 
+    pd.set_option('display.max_columns', 20)
+    print(bills_overview.bills_overview_data)
+
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
 
@@ -377,8 +382,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data(conn, cursor)
             upsert_mp_data(conn, cursor)
-            # this wont be needed for many years given that reload_all_tables() runs once
-            #insert_dead_mp_placeholder(conn, cursor)
             print("finished updating MP and Party table")
         else:
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
@@ -391,9 +394,3 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
 
 insert_and_update_data()
-
-#conn = mysql.connector.connect(**sql_config)
-#cursor = conn.cursor(buffered=True)
-#print(is_in_field(conn, cursor, "MP", "mpID", 4874, "int"))
-#cursor.close()
-#conn.close()
