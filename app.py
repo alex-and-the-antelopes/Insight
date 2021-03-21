@@ -240,5 +240,17 @@ def add_user_to_database(user):
     return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
 
 
+def fetch_user(email_address):
+    """
+    Finds the user with the given email address, constructs and returns the User object.
+    :param email_address: The email address of the user.
+    :return: The constructed User object.
+    """
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
+    user = None
+    return user
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=int("8080"), host="0.0.0.0")
