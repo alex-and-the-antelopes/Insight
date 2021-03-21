@@ -182,10 +182,10 @@ def register():
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
+    add_user_to_database(new_user)  # Add new User to the database
 
-    table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status})  # Todo remove extra
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
