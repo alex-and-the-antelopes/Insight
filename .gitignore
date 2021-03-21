@@ -18,3 +18,5 @@ periodic_scraper/*.p
 
 # ignore email details
 email_details.py
+
+secrets/

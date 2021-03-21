@@ -1,13 +1,15 @@
 import os
 import sqlalchemy
-from flask import Response
+import secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config):
-    db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
-    db_name = os.environ["DB_NAME"]
-    db_host = os.environ["DB_HOST"]
+
+    db_user = secret.get_version("db_user", version_name="1")
+    db_pass = secret.get_version("db_pass", version_name="1")
+    db_name = secret.get_version("db_name", version_name="2")
+    db_host = secret.get_version("db_host", version_name="1")
+
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
@@ -57,19 +59,14 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            conn.execute(statement)
+            return conn.execute(statement)
     except Exception as e:
         # If something goes wrong, handle the error in this section. This might
         # involve retrying or adjusting parameters depending on the situation.
         # [START_EXCLUDE]
-        return Response(
-            status=500,
-            response="Unable to fulfill that request",
-        )
-    return Response(
-        status=200,
-        response="Request Successful",
-    )
+        return None
+
+
 
 
 def select(statement):
@@ -89,3 +86,4 @@ def select(statement):
         # involve retrying or adjusting parameters depending on the situation.
         # [START_EXCLUDE]
         return None
+
