@@ -1,13 +1,21 @@
 import os
 import sqlalchemy
-from flask import Response
 
 
 def init_tcp_connection_engine(db_config):
+
+    " projects/1066288800758/secrets/eggysauce13/versions/1"
+
+
+
+    # Print the secret payload.
+    # WARNING: Do not print the secret in a production environment - this
+    # snippet is showing how to access the secret material.
     db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
+    db_pass = getSecret("db_pass", "1")
     db_name = os.environ["DB_NAME"]
     db_host = os.environ["DB_HOST"]
+
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
@@ -57,19 +65,14 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            conn.execute(statement)
+            return conn.execute(statement)
     except Exception as e:
         # If something goes wrong, handle the error in this section. This might
         # involve retrying or adjusting parameters depending on the situation.
         # [START_EXCLUDE]
-        return Response(
-            status=500,
-            response="Unable to fulfill that request",
-        )
-    return Response(
-        status=200,
-        response="Request Successful",
-    )
+        return None
+
+
 
 
 def select(statement):
@@ -89,3 +92,10 @@ def select(statement):
         # involve retrying or adjusting parameters depending on the situation.
         # [START_EXCLUDE]
         return None
+
+def getSecret(secret_name, secret_version):
+    from google.cloud import secretmanager
+    client = secretmanager.SecretManagerServiceClient()
+    response = client.access_secret_version(request={"name": f"projects/491846460171/secrets/{secret_name}/versions/{secret_version}"})
+    payload = response.payload.data.decode("UTF-8")
+    return payload
