@@ -98,7 +98,7 @@ def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
 
-    # Run requested action if valiid
+    # Run requested action if valid
     if action in safe_actions:
         result = safe_actions[action](bill_id)
     else:

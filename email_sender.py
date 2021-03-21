@@ -1,7 +1,6 @@
 import smtplib
 import sys
-import email_details
-import re
+import secret_manager as secret
 
 
 def send_message(recipient_address, message):
@@ -18,8 +17,10 @@ def send_message(recipient_address, message):
         server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
         server.starttls()  # Connect to the server via tls
-        server.login(email_details.email_address, email_details.password)  # Login to the account
-        server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
+        email_address = secret.get_version("email_address", version_name="latest")
+        email_password = secret.get_version("email_pass", version_name="latest")
+        server.login(email_address, email_password)  # Login to the account
+        server.sendmail(email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
         print("Email failed to send.", file=sys.stderr)  # Print using error stream
@@ -43,51 +44,15 @@ def create_message(subject="Insight message!", main_body=None):
     return message  # Return the constructed email
 
 
-def is_valid_email(email_address: str) -> bool:
+def is_valid_email(email_address=None):
     """
-    Checks if the given email address is a valid address.
+    Checks if the given email address is a valid address. Uses a regular expression to check the address' validity.
     :param email_address: The email address to validate.
-    :return: True if email is valid
+    :return: 0 if the address is valid, 1 if it is the wrong type (not str), 2 if it is not a valid address.
     """
-    # Values that the function should return for each outcome.
-    return_values = {
-        "valid": True,
-        "invalid": False,
-    }
-    # Part of email we're processing, as there are different rules for each part of the email.
-    state = "local"
-
-    local_legal_chars = r"[a-zA-Z0-9!#$%&'*+\-\/=?^_`{|}~]"
-    domain_legal_chars = r"[a-zA-Z0-9]"
-
-    for i, c in enumerate(email_address):
-        if state == "local":
-            if re.search(local_legal_chars, c):
-                pass
-            elif c == '@':
-                state = "domain"
-            elif c == '.':
-                if i == len(email_address) - 1 or email_address[i + 1] == '.':
-                    return return_values["invalid"]
-            else:
-                return return_values["invalid"]
-        elif state == "domain" or state == "tld":
-            if re.search(domain_legal_chars, c):
-                pass
-            elif c == '.':
-                if i == len(email_address) - 1 or email_address[i + 1] == '.':
-                    return return_values["invalid"]
-                state = "tld"
-            elif c == "_":
-                if email_address(i - 1) == '@' or i == len(email_address) - 1:
-                    return return_values["invalid"]
-            else:
-                return return_values["invalid"]
-
-    if state != "tld":
-        return return_values["invalid"]
-
-    return return_values["valid"]
+    # TODO validator. Return True if valid, False otherwise. (Check for types elsewhere, only check the contents. Assume str input)
+    is_valid = validate_email(email_address)
+    return is_valid
 
 
 def send_email(recipient_email, email_subject, email_body):
@@ -119,10 +84,10 @@ def send_email(recipient_email, email_subject, email_body):
 if __name__ == '__main__':
     # send_email("dummy@gmail.com", "okay", "23.23")
     # Test email checker: todo move to a test file
-    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", "dummy@bath.ac.uk",
-                      ""]
+    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", "dummy@bath.ac.uk", ""]
     for address in test_addresses:
         # print(check_email_address(address), address)
         print(is_valid_email(address), address)
     # Test email sender
     # send_email("dummyemail@gmail.com", "EXAMPLE TITLE", "EXAMPLE TEXT FOR THE MAIN BODY HERE.")
+
