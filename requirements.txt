@@ -7,4 +7,4 @@ flask-cors==3.0.10
 mysql-connector-python~=8.0.23
 requests~=2.25.1
 pandas~=1.2.3
-google
+google-cloud-secret-manager==2.2.0

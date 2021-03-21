@@ -132,6 +132,10 @@ def top():
 def landing_page():
     return redirect(CONFIG["default_url"])
 
+@app.route('/testdb')
+def landing_page():
+    return database.interact("SELECT * FROM Users;")
+
 
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
