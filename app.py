@@ -131,6 +131,9 @@ def top():
 def landing_page():
     return redirect(CONFIG["default_url"])
 
+@app.route('/testdb')
+def landing_page():
+    return database.select("SELECT * FROM Users;")
 
 
 
