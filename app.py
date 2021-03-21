@@ -133,8 +133,11 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    return database.select("SELECT * FROM Users;")
-
+    response = database.select("SELECT * FROM Users;")
+    if response is None:
+        return "None"
+    else:
+        return str(response)
 
 
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
