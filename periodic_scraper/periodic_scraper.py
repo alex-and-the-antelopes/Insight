@@ -13,22 +13,7 @@ import pandas as pd
 import os
 import datetime
 
-public_ip = "35.190.194.63"
-
-with open("secrets/mastergk_pass", 'r') as reader:
-    password = reader.read()
-
-sql_config = {
-    "user": "mastergk",
-    "password": password,
-    "host": public_ip,
-    "client_flags": [ClientFlag.SSL],
-    "ssl_ca": "secrets/server-ca.pem",
-    "ssl_cert": "secrets/client-cert.pem",
-    "ssl_key": "secrets/client-key.pem"
-}
-
-db_name = "bill_data"
+import secret_manager as sm
 
 
 # clear all rows and reset increment
@@ -367,13 +352,62 @@ def mock_datetime_pickle():
     pass
 
 
+def db_test_func(conn, cursor):
+    cursor.execute(f"SHOW tables IN {db_name}")
+    for x in cursor:
+        print(x)
+
+sql_config = {}
+db_name = ""
+
+def set_db_params(run_on_app_engine):
+    global sql_config
+    global db_name
+
+    public_ip = "35.190.194.63"
+
+    if run_on_app_engine:
+        db_user = sm.get_version("db_user", version_name="1")
+        db_pass = sm.get_version("db_pass", version_name="1")
+        db_name = sm.get_version("db_name", version_name="2")
+        db_host = sm.get_version("db_host", version_name="1")
+    else:
+        with open("secrets/user_pass", 'r') as reader:
+            db_pass = reader.read()
+
+        with open("secrets/user_username", 'r') as reader:
+            db_user = reader.read()
+
+        db_host = public_ip
+
+    sql_config = {
+        "user": db_user,
+        "password": db_pass,
+        "host": db_host,
+        "client_flags": [ClientFlag.SSL],
+        "ssl_ca": "secrets/server-ca.pem",
+        "ssl_cert": "secrets/client-cert.pem",
+        "ssl_key": "secrets/client-key.pem"
+    }
+
+    db_name = "bill_data"
+
 # function called by cron, I need to split functionality into different functions
-def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True):
-    # todo: uncomment
-    allow_party_and_mp_upsert = False
+def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
+    set_db_params(run_on_app_engine)
 
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
+
+    print("here")
+
+    # todo remove
+    db_test_func(conn, cursor)
+
+    cursor.close()
+    conn.close()
+
+    return
 
     if completely_fresh:
         reload_all_tables(conn, cursor)
@@ -391,6 +425,10 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     cursor.close()
     conn.close()
+
+
+if __name__ == "__main__":
+    insert_and_update_data(run_on_app_engine=False, allow_party_and_mp_upsert=False)
 
 
 

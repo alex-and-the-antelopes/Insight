@@ -3,7 +3,7 @@ from mysql.connector.constants import ClientFlag
 
 public_ip = "35.190.194.63"
 
-with open("../secrets/mastergk_pass", 'r') as reader:
+with open("../secrets/user_pass", 'r') as reader:
     password = reader.read()
 
 sql_config = {
