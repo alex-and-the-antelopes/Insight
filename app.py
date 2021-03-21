@@ -144,6 +144,10 @@ def db_testing():
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Log in to the application using the user's password. Checks if the email address is used, and checks the password.
+    :return: Message with the user's unique token if successful, or an error message explaining why login failed.
+    """
     # Get form information:
     email = request.form['email']
     password = request.form['password']
@@ -159,6 +163,10 @@ def login():
 
 @app.route('/login_with_token', methods=['POST'])
 def login_with_token():
+    """
+    Log in to the application using the user's token. Checks if the email address is used, and validates the token.
+    :return: Message indicating the login was successful, or an error message explaining why it was not successful.
+    """
     # Get form information:
     email = request.form['email']
     session_token = request.form['session_token']
