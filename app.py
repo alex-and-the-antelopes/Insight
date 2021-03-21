@@ -234,10 +234,11 @@ def add_user_to_database(user):
     """
     if not user:  # Ignore None
         return
+    # The SQL statement to add the user into the Users table:
     statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
                 f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
-    database.interact(statement)
-    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
+    database.interact(statement)  # Carry out the SQL statement
+    return
 
 
 def fetch_user(email_address):
