@@ -144,6 +144,10 @@ def db_testing():
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Log in to the application using the user's password. Checks if the email address is used, and checks the password.
+    :return: Message with the user's unique token if successful, or an error message explaining why login failed.
+    """
     # Get form information:
     email = request.form['email']
     password = request.form['password']
@@ -151,15 +155,18 @@ def login():
         return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
-    # Todo verify that the given password matches the user's password. If yes, return the token otherwise an error
-    if user.verify_token(password):
-        return jsonify({"session_token": user.session_token, "user": user.__str__()})  # Return the session token
+    if user.verify_password(password):
+        return jsonify({"session_token": user.session_token})  # Return the session token
     # Return the session token
-    return jsonify({"error": "incorrect_password_error", "user": user.__str__()})  # Given wrong password
+    return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
 
 @app.route('/login_with_token', methods=['POST'])
 def login_with_token():
+    """
+    Log in to the application using the user's token. Checks if the email address is used, and validates the token.
+    :return: Message indicating the login was successful, or an error message explaining why it was not successful.
+    """
     # Get form information:
     email = request.form['email']
     session_token = request.form['session_token']
@@ -168,9 +175,9 @@ def login_with_token():
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
     if user.verify_token(session_token):
-        return jsonify({"session_token": user.session_token, "user": user.__str__()})  # Return the session token Todo change to "Success"
+        return jsonify({"success": "login_successful"})  # Return success message
 
-    return jsonify({"error": "session_token_error", "user": user.__str__()})  # Given the wrong token
+    return jsonify({"error": "session_token_error"})  # Given the wrong token
 
 
 @app.route('/register', methods=['POST'])
