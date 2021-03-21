@@ -1,67 +1,18 @@
-from flask import Flask, jsonify, redirect, send_file, Response
-# from flask_cors import CORS for some reason causes error? like wont compile
+from flask import Flask, jsonify, redirect, send_file, Response, request
+from flask_cors import CORS
 import bill_tracker_core as core
-import sqlalchemy
+import db_interactions as database
+import email_sender
+import secret_manager as secret
 import logging
-import os
+import random
+import string
 
 app = Flask(__name__)
 logger = logging.getLogger()
-
-# CORS(app)
+CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-
-
-def init_tcp_connection_engine(db_config):
-    db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
-    db_name = os.environ["DB_NAME"]
-    db_host = os.environ["DB_HOST"]
-
-    # Extract host and port from db_host
-    host_args = db_host.split(":")
-    db_hostname, db_port = host_args[0], int(host_args[1])
-
-    pool = sqlalchemy.create_engine(
-        # Equivalent URL:
-        # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
-        sqlalchemy.engine.url.URL(
-            drivername="mysql+pymysql",
-            username=db_user,  # e.g. "my-database-user"
-            password=db_pass,  # e.g. "my-database-password"
-            host=db_hostname,  # e.g. "127.0.0.1"
-            port=db_port,  # e.g. 3306
-            database=db_name,  # e.g. "my-database-name"
-        ),
-        **db_config
-    )
-    return pool
-
-
-def init_connection_engine():
-    db_config = {
-        # Pool size is the maximum number of permanent connections to keep.
-        "pool_size": 5,
-        # Temporarily exceeds the set pool_size if no connections are available.
-        "max_overflow": 2,
-        # The total number of concurrent connections for your application will be
-        # a total of pool_size and max_overflow.
-
-        # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
-        # new connection from the pool. After the specified amount of time, an
-        # exception will be thrown.
-        "pool_timeout": 30,  # 30 seconds
-
-        # 'pool_recycle' is the maximum number of seconds a connection can persist.
-        # Connections that live longer than the specified amount of time will be
-        # reestablished
-        "pool_recycle": 1800,  # 30 minutes
-    }
-    return init_tcp_connection_engine(db_config)
-
-
-db = init_connection_engine()
 
 
 # initialises database pool as a global variable
@@ -142,7 +93,7 @@ def unsafe_function(n):
 
 
 # Perform action on given bill
-@app.route('/<bill_id>/<action>')
+@app.route('/b/<bill_id>/<action>')
 def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
@@ -180,23 +131,76 @@ def top():
 def landing_page():
     return redirect(CONFIG["default_url"])
 
-
-# TO MAKE IT WORK. TYPE IN THE LOGIN/USERNAME/PASSWORD and hit enter
-# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
-@app.route('/login/<username>/<password>/<notification_token>')  # TODO change this it is a really bad practice
-def login(username, password, notification_token):
-    user = core.User("sg2295", "password", "notification token")  # TODO fetch the actual user, no DB setup yet :(
-    if user.verify_password(password):
-        return redirect('/logged_in')
+@app.route('/testdb')
+def db_testing():
+    response = database.select("SELECT * FROM Users;")
+    if response is None:
+        return "None"
     else:
-        return redirect('/garbage')
+        return str(response)
+
+
+# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form['email']
+    password = request.form['password']
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/login_with_token', methods=['POST'])
+def login_with_token():
+    email = request.form['email']
+    session_token = request.form['session_token']
+    if is_new_address(email):
+        return jsonify({"error": "new_email_error"})
+    # Get user from database using username, check if user is valid.
+    # Return the session token
+    return jsonify({"session_token": "session_placeholder"})
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    """
+    Register new User. Creates a new User object, updates the database and returns the session token.
+    :return: Session token if successful, an Error otherwise.
+    """
+    # Get new User details from form:
+    email = request.form['email']
+    password = request.form['password']  # The given password is already hashed
+    notification_token = request.form['notification_token']
+    postcode = request.form['postcode']
+    # Check for errors:
+    if type(password) is not str or not password:
+        return jsonify({"error": "password_error"})
+    if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
+        return jsonify({"error": "notification_token_error"})
+    if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
+        return jsonify({"error": "postcode_error"})
+    if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
+        return jsonify({"error": "email_error"})
+
+    query = database.select(f"SELECT * FROM Users WHERE email='{email}';")  # todo remove query
+    if not is_new_address(email):  # Check if the given email is already in use
+        return jsonify({"error": "email_in_use_error"})
+
+    # Add new user to the database:
+    new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
+
+    table_status = add_user_to_database(new_user)  # Todo remove status
+    # Return the session token
+    string = "" + query.__class__.__name__
+    return {"query": string}
+    # return jsonify({"session_token": new_user.session_token, "status": table_status, "query": string})  # Todo remove extra
 
 
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
-('/' + CONFIG["external_res_path"] + '/<name>')
-
-
+@app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
@@ -205,54 +209,41 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-@app.route("/testdb")
-def demo_table_test():
-    interact("INSERT INTO demo_tbl (demo_id, demo_txt) VALUES (123, 'pizza time')")
-    return select("SELECT * FROM demo_tbl")
-
-
-# Login was successful.
-@app.route('/logged_in')
-def successful_login():
-    return "<h1> you logged in successfully </h1> nice."
-
-
-# Login failed.
-@app.route('/garbage')
-def garbage_page():
-    return "<h1> this is a garbage page </h1> If you are here, you are garbage."
-
-
-def interact(statement):
+def create_session_token():
     """
-    Executes the statement passed on the db passed into the function
-
-    return: Response object containing the relevant response
+    Generate a unique token using a combination of random digits, lowercase and uppercase letters.
+    :return: The unique, generated token.
     """
-    try:
-        # Using a with statement ensures that the connection is always released
-        # back into the pool at the end of statement (even if an error occurs)
-        with db.connect() as conn:
-            conn.execute(statement)
-    except Exception as e:
-        # If something goes wrong, handle the error in this section. This might
-        # involve retrying or adjusting parameters depending on the situation.
-        # [START_EXCLUDE]
-        logger.exception(e)
-        return Response(
-            status=500,
-            response="Unable to fulfill that request",
-        )
-    return Response(
-        status=200,
-        response="Request Successful",
-    )
+    token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
+                    for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
+    return token
 
 
-def select(statement):
-    """ Special function for select statements as we want to return a value"""
-    with db.connect() as conn:
-        return str(conn.execute(statement).fetchall())
+def is_new_address(email_address):
+    """
+    Checks the database to see if the given email address is already in use.
+    :param email_address: The email address to look up.
+    :return: True if the email address is not being used, false otherwise.
+    """
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
+    if query:
+        return False  # If the query returns a populated list, return False
+    return True  # If the query returns an empty list return True
+
+
+def add_user_to_database(user):
+    """
+    Add the given User to the database.
+    :param user: User object
+    :return: None
+    """
+    if not user:  # Ignore None
+        return
+    statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
+                f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
+    database.interact(statement)
+    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
 
 
 if __name__ == '__main__':

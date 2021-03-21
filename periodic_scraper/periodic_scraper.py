@@ -393,4 +393,4 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn.close()
 
 
-insert_and_update_data()
+

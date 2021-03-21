@@ -19,14 +19,14 @@ class UserTestCases(unittest.TestCase):
         """
         user = User("admin", "pass", "notification token")
         # Check for actual value:
-        self.assertEqual("admin", user.username)
+        self.assertEqual("admin", user.email)
         # Check for wrong values:
-        self.assertNotEqual("Admin", user.username)
-        self.assertNotEqual("", user.username)
+        self.assertNotEqual("Admin", user.email)
+        self.assertNotEqual("", user.email)
         # Checking Wrong Types:
-        self.assertNotEqual(None, user.username)
-        self.assertNotEqual(("admin", "admin"), user.username)
-        self.assertNotEqual(13.012, user.username)
+        self.assertNotEqual(None, user.email)
+        self.assertNotEqual(("admin", "admin"), user.email)
+        self.assertNotEqual(13.012, user.email)
 
     def test_verify_password(self):
         """
