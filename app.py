@@ -141,6 +141,8 @@ def login():
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
+    user = fetch_user(email)  # Construct the user object
+    # Todo verify that the given password matches the user's password. If yes, return the token otherwise an error
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
 
@@ -152,6 +154,8 @@ def login_with_token():
     if is_new_address(email):
         return jsonify({"error": "new_email_error"})
     # Get user from database using username, check if user is valid.
+    user = fetch_user(email)  # Construct the user object
+    # Todo verify that the given session token matches the user's token. If yes, return "Success" otherwise "error"
     # Return the session token
     return jsonify({"session_token": "session_placeholder"})
 
