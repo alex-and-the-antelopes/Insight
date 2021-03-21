@@ -2,7 +2,7 @@ import smtplib
 import sys
 import email_details
 import re
-
+import secret_manager as secret
 
 def send_message(recipient_address, message):
     """
@@ -18,7 +18,9 @@ def send_message(recipient_address, message):
         server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
         server.starttls()  # Connect to the server via tls
-        server.login(email_details.email_address, email_details.password)  # Login to the account
+        email_address = secret.get_version("email_address", version_name="latest")
+        email_password = secret.get_version("email_pass", version_name="latest")
+        server.login(email_address, email_password)  # Login to the account
         server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
