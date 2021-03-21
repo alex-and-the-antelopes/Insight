@@ -8,6 +8,7 @@ mysql-connector-python = "*"
 pandas = "*"
 parlpy = "==2.4.0"
 google-cloud-secret-manager = "*"
+google-cloud-logging = "*"
 
 [dev-packages]
 
