@@ -1,14 +1,13 @@
 import os
 import sqlalchemy
 from flask import Response
-import secret_manager as sm
+
 
 def init_tcp_connection_engine(db_config):
-    get_secret = sm.get_version_contents
-    db_user = get_secret("db_user")
-    db_pass = get_secret("db_pass")
-    db_name = get_secret("db_name")
-    db_host = get_secret("db_host")
+    db_user = os.environ["DB_USER"]
+    db_pass = os.environ["DB_PASS"]
+    db_name = os.environ["DB_NAME"]
+    db_host = os.environ["DB_HOST"]
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
