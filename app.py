@@ -151,11 +151,10 @@ def login():
         return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
-    # Todo verify that the given password matches the user's password. If yes, return the token otherwise an error
-    if user.verify_token(password):
-        return jsonify({"session_token": user.session_token, "user": user.__str__()})  # Return the session token
+    if user.verify_password(password):
+        return jsonify({"session_token": user.session_token})  # Return the session token
     # Return the session token
-    return jsonify({"error": "incorrect_password_error", "user": user.__str__()})  # Given wrong password
+    return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
 
 @app.route('/login_with_token', methods=['POST'])
@@ -168,9 +167,9 @@ def login_with_token():
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
     if user.verify_token(session_token):
-        return jsonify({"session_token": user.session_token, "user": user.__str__()})  # Return the session token Todo change to "Success"
+        return jsonify({"success": "login_successful"})  # Return success message
 
-    return jsonify({"error": "session_token_error", "user": user.__str__()})  # Given the wrong token
+    return jsonify({"error": "session_token_error"})  # Given the wrong token
 
 
 @app.route('/register', methods=['POST'])
