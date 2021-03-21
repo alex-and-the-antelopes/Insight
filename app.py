@@ -176,7 +176,7 @@ def register():
         return jsonify({"error": "email_error"})
 
     query = database.select(f"SELECT * FROM Users WHERE email={email}")  # todo remove query
-    if not is_unique_address(email):  # Check if the given email is already in use
+    if not is_new_address(email):  # Check if the given email is already in use
         return jsonify({"error": "email_in_use_error", "query": query})
 
     # Add new user to the database:
@@ -209,7 +209,7 @@ def create_session_token():
     return token
 
 
-def is_unique_address(email_address):
+def is_new_address(email_address):
     """
     Checks the database to see if the given email address is already in use.
     :param email_address: The email address to look up.
@@ -232,7 +232,7 @@ def add_user_to_database(user):
     statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
                 f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
     database.interact(statement)
-    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration
+    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
 
 
 if __name__ == '__main__':
