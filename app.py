@@ -175,15 +175,16 @@ def register():
     if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
 
+    query = database.select(f"SELECT * FROM Users WHERE email={email}")  # todo remove query
     if not is_unique_address(email):  # Check if the given email is already in use
-        return jsonify({"error": "email_in_use_error"})
+        return jsonify({"error": "email_in_use_error", "query": query})
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
 
     table_status = add_user_to_database(new_user)  # Todo remove status
     # Return the session token
-    return jsonify({"session_token": new_user.session_token, "status": table_status})  # Todo remove status
+    return jsonify({"session_token": new_user.session_token, "status": table_status, "query": query})  # Todo remove extra
 
 
 # Deliver requested resource.
