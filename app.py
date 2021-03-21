@@ -157,6 +157,9 @@ def login():
     user = fetch_user(email)  # Construct the user object
     if user.verify_password(password):
         return jsonify({"session_token": user.session_token})  # Return the session token
+    # Send email to user address
+    email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We're "
+                                                              "sending you this email to make sure it was you!")
     # Return the session token
     return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
@@ -207,7 +210,8 @@ def register():
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
     add_user_to_database(new_user)  # Add new User to the database
-
+    # Send email to user's email address
+    email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!")
     # Return the session token
     return jsonify({"session_token": new_user.session_token})
 
@@ -223,7 +227,7 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-def create_session_token():
+def create_session_token() -> str:
     """
     Generate a unique token using a combination of random digits, lowercase and uppercase letters.
     :return: The unique, generated token.
@@ -236,7 +240,7 @@ def create_session_token():
     return token  # Return the unique token
 
 
-def is_new_address(email_address):
+def is_new_address(email_address: str) -> bool:
     """
     Checks the database to see if the given email address is already in use.
     :param email_address: The email address to look up.
@@ -248,7 +252,7 @@ def is_new_address(email_address):
     return True  # If the query returns an empty list return True
 
 
-def add_user_to_database(user):
+def add_user_to_database(user: core.User) -> None:
     """
     Add the given User to the database.
     :param user: User object
@@ -263,7 +267,7 @@ def add_user_to_database(user):
     return
 
 
-def fetch_user(email_address):
+def fetch_user(email_address: str) -> core.User or None:
     """
     Finds the user with the given email address, constructs and returns the User object.
     :param email_address: The email address of the user.
