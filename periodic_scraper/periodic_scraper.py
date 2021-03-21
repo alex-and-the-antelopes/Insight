@@ -82,6 +82,17 @@ def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constitu
     cursor.execute(insert_command_string)
 
 
+# there are missing entries as package does not get dead members, but dead members ids may be refd in votes data
+def insert_dead_mp_placeholder(conn, cursor):
+    upper_limit_estimate = 6000
+    for i in range(upper_limit_estimate):
+        print(f"checking mpID {i} in table")
+        if not is_in_field(conn, cursor, "MP", "mpID", i, "int"):
+            print(f"mpID {i} not in table")
+            execute_insert_mp_data_in_db(conn, cursor, "missing_first_name", "missing_second_name", "unknown", i, 0, False)
+            conn.commit()
+
+
 # assumes table is empty
 def insert_mp_data(conn, cursor):
     mp_fetcher = mf.MPOverview()
@@ -98,8 +109,13 @@ def insert_mp_data(conn, cursor):
     conn.commit()
 
 
-def is_in_field(conn, cursor, table, field, val):
-    cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+def is_in_field(conn, cursor, table, field, val, type):
+    if type == "string":
+        cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+    elif type == "int":
+        cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
+    else:
+        raise ValueError("unrecog type")
 
     count = 0
     for row in cursor:
@@ -108,7 +124,7 @@ def is_in_field(conn, cursor, table, field, val):
     if count > 0:
         return True
     else:
-        return True
+        return False
 
 
 def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, constituency, member_id, party_id, active):
@@ -143,7 +159,7 @@ def upsert_mp_data(conn, cursor):
     for mp in all_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(mp.name_display)
         print(mp)
-        if is_in_field(conn, cursor, "MP", "mpID", mp.member_id):
+        if is_in_field(conn, cursor, "MP", "mpID", mp.member_id, "int"):
             execute_update_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
         else:
             #execute_insert_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
@@ -193,7 +209,7 @@ def upsert_party_data(conn, cursor):
     party_details_list = pf.get_all_parties()
 
     for party in party_details_list:
-        if is_in_field(conn,cursor,"Party","partyID",party.party_id):
+        if is_in_field(conn,cursor,"Party","partyID",party.party_id,"int"):
             print(f"party {party.party_name} is already in")
             execute_update_party_data(cursor, party.party_id, party.party_name)
         else:
@@ -221,13 +237,39 @@ def bill_id_in_bills_table(conn, cursor, bill):
     return bill_id
 
 
+def get_sessions_string(sessions):
+    sessions_string = ""
+    for s in sessions:
+        sessions_string += (s + ",")
+    sessions_string = sessions_string[:-1]
+
+    return sessions_string
+
+
 def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
+    sessions_string = get_sessions_string(bill.sessions)
+
     insertion_command_string \
-        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{bill.url}\")"
+        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.summary}\",\"{sessions_string}\",\"{bill.url}\")"
     cursor.execute(insertion_command_string)
+
+    # todo: remove?
     conn.commit()
 
+
+def execute_update_bill(conn, cursor, bill):
+    sessions_string = get_sessions_string(bill.sessions)
+
+    update_command_string = f"UPDATE {db_name}.Bills " \
+                            f"SET " \
+                            f"billOrAct = \"{bill.title_postfix}\", " \
+                            f"shortDesc = \"{bill.summary}\", " \
+                            f"sessions = \"{sessions_string}\", " \
+                            f"link = \"{bill.url}\" " \
+                            f"WHERE titleStripped = \"{bill.title_stripped}\""
+    print(f"update command string {update_command_string}")
+    cursor.execute(update_command_string)
 
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
@@ -250,6 +292,7 @@ def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bi
 
     insert_command_string = f"INSERT INTO {db_name}.MPVotes (positive, billID, mpID, stage, title)" \
                             f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
+    #print(f"insert_command_string {insert_command_string}")
     cursor.execute(insert_command_string)
 
 
@@ -264,8 +307,10 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             bill_id = bill_id_in_bills_table(conn, cursor, bill)
         else:
             print(f"bill {bill.title_stripped} already in Bills table")
+            execute_update_bill(conn, cursor, bill)
         # todo: otherwise, modify the row to put in the data which may have changed (we dont know what has changed, so
         #  insert all of it
+        conn.commit()
 
         for division in bill.divisions_list:
             division_title = division.division_name
@@ -309,11 +354,19 @@ def reload_all_tables(conn, cursor):
     clear_all_4_tables(conn, cursor)
     insert_party_data(conn, cursor)
     insert_mp_data(conn, cursor)
-    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="2019-21")
+    insert_dead_mp_placeholder(conn, cursor)
+    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="All")
+
+
+def mock_datetime_pickle():
+    pass
 
 
 # function called by cron, I need to split functionality into different functions
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True):
+    # todo: uncomment
+    allow_party_and_mp_upsert = False
+
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
@@ -324,10 +377,14 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data(conn, cursor)
             upsert_mp_data(conn, cursor)
-        print("finished updating MP and Party table")
+            # this wont be needed for many years given that reload_all_tables() runs once
+            #insert_dead_mp_placeholder(conn, cursor)
+            print("finished updating MP and Party table")
+        else:
+            print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21")
+        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
 
     cursor.close()
     conn.close()
@@ -337,6 +394,6 @@ insert_and_update_data()
 
 #conn = mysql.connector.connect(**sql_config)
 #cursor = conn.cursor(buffered=True)
-#is_in_field(conn, cursor, "MP", "mpID", 43820)
+#print(is_in_field(conn, cursor, "MP", "mpID", 4874, "int"))
 #cursor.close()
 #conn.close()
