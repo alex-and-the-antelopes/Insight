@@ -1,7 +1,7 @@
 import smtplib
-import re
 import sys
 import email_details
+from validate_email import validate_email
 
 
 def send_message(recipient_address, message):
@@ -43,17 +43,15 @@ def create_message(subject="Insight message!", main_body=None):
     return message  # Return the constructed email
 
 
-def check_email_address(email_address=None):
+def is_valid_email(email_address=None):
     """
     Checks if the given email address is a valid address. Uses a regular expression to check the address' validity.
     :param email_address: The email address to validate.
     :return: 0 if the address is valid, 1 if it is the wrong type (not str), 2 if it is not a valid address.
     """
-    if type(email_address) is not str:  # Check that the given address is a str
-        return 1  # Type error
-    if not re.search('^[a-z0-9]+[._]?[a-z0-9]+[@]\w+[.]\w{2,}$', email_address):  # Use regex to evaluate address
-        return 2  # Value error
-    return 0  # Valid address (Correct type and value)
+    # TODO validator. Return True if valid, False otherwise. (Check for types elsewhere, only check the contents. Assume str input)
+    is_valid = validate_email(email_address)
+    return is_valid
 
 
 def send_email(recipient_email, email_subject, email_body):
@@ -72,11 +70,9 @@ def send_email(recipient_email, email_subject, email_body):
         raise TypeError("Expected type <class 'str'> got type ", type(email_body), " for email_body")
     if type(recipient_email) is not str:  # Check the recipient's email address
         raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
-    # Check the validity of the email address
-    email_code = check_email_address(recipient_email)
-    if email_code == 1:  # Email is not a str
+    if type(recipient_email) is not str:  # Email is not a str
         raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
-    if email_code == 2:  # Email is a str but is not a valid address
+    if not is_valid_email(recipient_email):  # Email is a str but is not a valid address
         raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
 
     message = create_message(email_subject, email_body)  # Construct the message (Format subject and body)
@@ -87,8 +83,10 @@ def send_email(recipient_email, email_subject, email_body):
 if __name__ == '__main__':
     # send_email("dummy@gmail.com", "okay", "23.23")
     # Test email checker: todo move to a test file
-    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", 2, [], None, ""]
+    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", "dummy@bath.ac.uk", ""]
     for address in test_addresses:
-        print(check_email_address(address), address)
+        # print(check_email_address(address), address)
+        print(is_valid_email(address), address)
     # Test email sender
-    send_email("dummyemail@gmail.com", "EXAMPLE TITLE", "EXAMPLE TEXT FOR THE MAIN BODY HERE.")
+    # send_email("dummyemail@gmail.com", "EXAMPLE TITLE", "EXAMPLE TEXT FOR THE MAIN BODY HERE.")
+
