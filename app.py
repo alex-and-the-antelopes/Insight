@@ -133,7 +133,7 @@ def landing_page():
 
 @app.route('/testdb')
 def testing_database():
-    return secret.get_version("db-pass", version_name="1")
+    return secret.get_version("db_pass", version_name="1")
 
 
 
