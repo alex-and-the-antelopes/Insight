@@ -151,7 +151,7 @@ def login():
     user = fetch_user(email)  # Construct the user object
     # Todo verify that the given password matches the user's password. If yes, return the token otherwise an error
     # Return the session token
-    return jsonify({"session_token": "session_placeholder", "user": user.__str__()})
+    return jsonify({"session_token": user.session_token, "user": user.__str__()})
 
 
 @app.route('/login_with_token', methods=['POST'])
@@ -164,7 +164,7 @@ def login_with_token():
     user = fetch_user(email)  # Construct the user object
     # Todo verify that the given session token matches the user's token. If yes, return "Success" otherwise "error"
     # Return the session token
-    return jsonify({"session_token": "session_placeholder", "user": user.__str__()})
+    return jsonify({"session_token": user.session_token, "user": user.__str__()})
 
 
 @app.route('/register', methods=['POST'])
