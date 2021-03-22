@@ -156,10 +156,12 @@ def login():
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
     if user.verify_password(password):
+        # Send email to user address informing of new login
+        email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We'"
+                                                                  "re sending you this email to make sure it was you!"
+                                                                  " If it wasn't, please respond to this email letting "
+                                                                  "us know!\n-The Insight team")
         return jsonify({"session_token": user.session_token})  # Return the session token
-    # Send email to user address
-    email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We're "
-                                                              "sending you this email to make sure it was you!")
     # Return the session token
     return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
