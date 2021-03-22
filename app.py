@@ -299,5 +299,20 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
     return parliament_member
 
 
+def verify_user(email: str, session_token: str) -> bool:
+    """
+
+    :param email: The email address of the user.
+    :param session_token: The session token of the user.
+    :return: True if the user was verified, False otherwise.
+    """
+    if is_new_address(email):  # Check if the email corresponds to a User
+        return False
+    user = fetch_user(email)  # Get the user form the database using their email
+    if user.verify_token(session_token):
+        return True  # Login successful
+    return False  # Tokens do not match
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=int("8080"), host="0.0.0.0")
