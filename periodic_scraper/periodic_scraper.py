@@ -32,11 +32,15 @@ def clear_all_4_tables(conn, cursor):
     clear_table(conn, cursor, "Party")
 
 
-def print_all_rows_of_table(cursor, table_name):
+def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
     cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
-    for x in cursor:
-        print(x)
+    if run_on_app_engine:
+        for x in cursor:
+            test_logging_func(x)
+    else:
+        for x in cursor:
+            print(x)
 
 
 def get_names_from_full_name(name_display):
@@ -412,21 +416,10 @@ import email_sender
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     set_db_params(run_on_app_engine)
 
-    #email_sender.send_email("1robertchambers@gmail.com", "test subject", "test message from app engine")
+    conn = mysql.connector.connect(**sql_config)
+    cursor = conn.cursor(buffered=True)
 
-
-    #conn = mysql.connector.connect(**sql_config)
-    #cursor = conn.cursor(buffered=True)
-
-    #print("here")
-
-    # todo remove
-    #db_test_func(conn, cursor)
-
-
-
-    #cursor.close()
-    #conn.close()
+    print_all_rows_of_table(cursor, "MP", run_on_app_engine=True)
 
     return
 
