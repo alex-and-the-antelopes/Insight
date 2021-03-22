@@ -214,6 +214,20 @@ def register():
     return jsonify({"session_token": new_user.session_token})
 
 
+@app.route('/message', methods=['POST'])
+def send_message():
+    email = request.form['email']
+    session_token = request.form['session_token']
+
+    mp_id = request.form['mp_id']
+    message = request.form['message']
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verifications unsuccessful
+
+    return
+
+
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
