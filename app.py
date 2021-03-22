@@ -118,7 +118,7 @@ def unsafe_function(n):
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
-    if response is None:
+    if not response:
         return jsonify({"error": "query_error"})
     return jsonify(str(response))
 
@@ -126,7 +126,7 @@ def get_bill(bill_id):
 @app.route('/bills')
 def get_bills():
     response = database.select("SELECT * FROM Bills;")
-    if response is None:
+    if not response:
         return jsonify({"error": "query_error"})
     return jsonify(str(response))
 
