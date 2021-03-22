@@ -18,7 +18,7 @@ def send_message(recipient_address, message):
         server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
         server.starttls()  # Connect to the server via tls
-        server.login(email_details.email_address, email_details.password)  # Login to the account
+        server.login(email_details.email_address, email_details.email_password)  # Login to the account
         server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
