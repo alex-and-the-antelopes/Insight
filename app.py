@@ -92,27 +92,48 @@ def unsafe_function(n):
     print("oh dear!")
 
 
-# Perform action on given bill
-@app.route('/b/<bill_id>/<action>')
-def handle_request(bill_id, action):
+# # Perform action on given bill
+# @app.route('/b/<bill_id>/<action>')
+# def handle_request(bill_id, action):
+#     # not case-sensitive
+#     action = action.lower()
+#
+#     # Run requested action if valid
+#     if action in safe_actions:
+#         result = safe_actions[action](bill_id)
+#     else:
+#         result = f"unknown or forbidden action: {action}"
+#
+#     # Construct output
+#     output = {
+#         "bill_id": bill_id,
+#         "action": action,
+#         "result": result
+#     }
+#
+#     # Convert to json and return
+#     return jsonify(output)
+
+
+@app.route('/b/<bill_id>/get')
+def handle_request(bill_id):
     # not case-sensitive
-    action = action.lower()
 
-    # Run requested action if valid
-    if action in safe_actions:
-        result = safe_actions[action](bill_id)
+    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
+    if response is None:
+        return jsonify({"error": "Query failed"})
     else:
-        result = f"unknown or forbidden action: {action}"
+        return jsonify(response)
 
-    # Construct output
-    output = {
-        "bill_id": bill_id,
-        "action": action,
-        "result": result
-    }
+@app.route('/bills')
+def handle_request(bill_id):
+    # not case-sensitive
 
-    # Convert to json and return
-    return jsonify(output)
+    response = database.select("SELECT * FROM Bills;")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        return jsonify(response)
 
 
 @app.route('/top')
