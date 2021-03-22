@@ -385,6 +385,7 @@ def set_db_params(run_on_app_engine):
         db_pass = sm.get_version("db_pass", version_name="1")
         db_name = sm.get_version("db_name", version_name="2")
         db_host = sm.get_version("db_host", version_name="1")
+        db_ip = db_host.split(":")[0]
         test_logging_func(db_user)
         test_logging_func(db_pass)
         test_logging_func(db_name)
@@ -396,12 +397,12 @@ def set_db_params(run_on_app_engine):
         with open("secrets/user_username", 'r') as reader:
             db_user = reader.read()
 
-        db_host = public_ip
+        db_ip = public_ip
 
     sql_config = {
         "user": db_user,
         "password": db_pass,
-        "host": db_host,
+        "host": db_ip,
         "client_flags": [ClientFlag.SSL],
         "ssl_ca": "secrets/server-ca.pem",
         "ssl_cert": "secrets/client-cert.pem",
