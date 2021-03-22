@@ -376,11 +376,12 @@ def mock_datetime_pickle():
     pass
 
 
-def db_test_func(conn, cursor):
+def db_test_func():
     table_name = "MP"
-    cursor.execute(f"DESCRIBE {table_name}")
+
+    description = db_agent.select(f"DESCRIBE {table_name}")
     print(f"{table_name} table structure")
-    for x in cursor:
+    for x in description:
         print(x)
 
 
