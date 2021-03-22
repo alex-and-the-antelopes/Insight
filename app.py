@@ -160,11 +160,8 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    response = database.select("SELECT * FROM Users FOR JSON AUTO;")
-    if response is None:
-        return "None"
-    else:
-        return str(response)
+    database.interact("INSERT INTO Users VALUES ('smellypete@gmail.com', 'johncenalover2', 'ExponentPushToken[smd]', '213131321', 'BA2 1BY');")
+    return database.select("SELECT * FROM Users;")
 
 
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
