@@ -6,6 +6,8 @@ import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
 
+import db_interactions as dbi
+
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
@@ -20,9 +22,11 @@ import logging
 
 # clear all rows and reset increment
 def clear_table(conn, cursor, table_name):
-    cursor.execute(f"DELETE FROM {db_name}.{table_name}")
-    cursor.execute(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
-    conn.commit()
+    #cursor.execute(f"DELETE FROM {db_name}.{table_name}")
+    #cursor.execute(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
+    #conn.commit()
+    dbi.interact(f"DELETE FROM {db_name}.{table_name}")
+    dbi.interact(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
 
 
 def clear_all_4_tables(conn, cursor):
@@ -33,7 +37,8 @@ def clear_all_4_tables(conn, cursor):
 
 
 def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
-    cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
+    #cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
+    cursor = dbi.select(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
     if run_on_app_engine:
         for x in cursor:
@@ -78,7 +83,8 @@ def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constitu
     print(f"mp insert command string")
     print(insert_command_string)
 
-    cursor.execute(insert_command_string)
+    #cursor.execute(insert_command_string)
+    dbi.interact(insert_command_string)
 
 
 # there are missing entries as package does not get dead members, but dead members ids may be refd in votes data
@@ -89,7 +95,7 @@ def insert_dead_mp_placeholder(conn, cursor):
         if not is_in_field(conn, cursor, "MP", "mpID", i, "int"):
             print(f"mpID {i} not in table")
             execute_insert_mp_data_in_db(conn, cursor, "missing_first_name", "missing_second_name", "unknown", i, 0, False)
-            conn.commit()
+            #conn.commit()
 
 
 # assumes table is empty
@@ -105,14 +111,16 @@ def insert_mp_data(conn, cursor):
         print(f"{mp.name_display} is {mp.current_member} active")
         execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
 
-    conn.commit()
+    #conn.commit()
 
 
 def is_in_field(conn, cursor, table, field, val, type):
     if type == "string":
-        cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+        #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+        cursor = dbi.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
     elif type == "int":
-        cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
+        #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
+        cursor = dbi.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
     else:
         raise ValueError("unrecog type")
 
@@ -144,7 +152,8 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
     print(f"mp update command string")
     print(update_command_string)
 
-    cursor.execute(update_command_string)
+    #cursor.execute(update_command_string)
+    dbi.interact(update_command_string)
 
 
 # does not assume table is empty
@@ -164,7 +173,7 @@ def upsert_mp_data(conn, cursor):
             #execute_insert_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
             print("should not be the case")
 
-    conn.commit()
+    #conn.commit()
 
 
 def execute_insert_party_data(cursor, party_id, party_name):
@@ -173,7 +182,8 @@ def execute_insert_party_data(cursor, party_id, party_name):
     print(f"party insert command string")
     print(insert_command_string)
 
-    cursor.execute(insert_command_string)
+    #cursor.execute(insert_command_string)
+    dbi.interact(insert_command_string)
 
 
 # insert all party data and execute
@@ -195,13 +205,14 @@ def insert_party_data(conn, cursor):
         else:
             execute_insert_party_data(cursor, i, "unknown")
 
-    conn.commit()
+    #conn.commit()
 
 
 def execute_update_party_data(cursor, party_id, party_name):
     update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id}"
 
-    cursor.execute(update_command_string)
+    #cursor.execute(update_command_string)
+    dbi.interact(update_command_string)
 
 
 def upsert_party_data(conn, cursor):
@@ -215,7 +226,7 @@ def upsert_party_data(conn, cursor):
             print(f"party {party.party_name} is not already in")
             execute_insert_party_data(cursor, party.party_id, party.party_name)
 
-    conn.commit()
+    #conn.commit()
 
 
 # return the billID for the passed bill
@@ -223,7 +234,8 @@ def upsert_party_data(conn, cursor):
 def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
-    cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    dbi.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
     count = 0
     for row in cursor:
@@ -253,10 +265,11 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
     insertion_command_string \
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
           f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
-    cursor.execute(insertion_command_string)
+    #cursor.execute(insertion_command_string)
+    dbi.interact(insertion_command_string)
 
     # todo: remove?
-    conn.commit()
+    #conn.commit()
 
 
 def execute_update_bill(conn, cursor, bill):
@@ -270,11 +283,13 @@ def execute_update_bill(conn, cursor, bill):
                             f"link = \"{bill.url}\" " \
                             f"WHERE titleStripped = \"{bill.title_stripped}\""
     print(f"update command string {update_command_string}")
-    cursor.execute(update_command_string)
+    #cursor.execute(update_command_string)
+    dbi.interact(update_command_string)
 
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
-    cursor.execute(count_command_string)
+    #cursor.execute(count_command_string)
+    dbi.select(count_command_string)
     for c in cursor:
         print(f"type count[0] {type(c[0])}")
         count = c[0]
@@ -294,7 +309,8 @@ def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bi
     insert_command_string = f"INSERT INTO {db_name}.MPVotes (positive, billID, mpID, stage, title)" \
                             f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
     #print(f"insert_command_string {insert_command_string}")
-    cursor.execute(insert_command_string)
+    #cursor.execute(insert_command_string)
+    dbi.interact(insert_command_string)
 
 
 def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
@@ -311,7 +327,7 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             execute_update_bill(conn, cursor, bill)
         # todo: otherwise, modify the row to put in the data which may have changed (we dont know what has changed, so
         #  insert all of it
-        conn.commit()
+        #conn.commit()
 
         for division in bill.divisions_list:
             division_title = division.division_name
@@ -326,7 +342,7 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             else:
                 print(f"division {division_title} already in MPVotes table")
 
-            conn.commit()
+            #conn.commit()
 
 
 def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"):
@@ -349,7 +365,7 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
 
-    conn.commit()
+    #conn.commit()
 
 
 # wipes tables in order, inserts all data back in
@@ -367,49 +383,17 @@ def mock_datetime_pickle():
 
 
 def db_test_func(conn, cursor):
-    cursor.execute(f"SHOW tables IN {db_name}")
+    #cursor.execute(f"SHOW tables IN {db_name}")
+    dbi.select(f"SHOW tables IN {db_name}")
     for x in cursor:
         print(x)
 
 sql_config = {}
 db_name = ""
 
-def set_db_params(run_on_app_engine):
-    global sql_config
-    global db_name
 
-    public_ip = "35.190.194.63"
 
-    if run_on_app_engine:
-        db_user = sm.get_version("db_user", version_name="1")
-        db_pass = sm.get_version("db_pass", version_name="1")
-        db_name = sm.get_version("db_name", version_name="2")
-        db_host = sm.get_version("db_host", version_name="1")
-        db_ip = db_host.split(":")[0]
-        test_logging_func(db_user)
-        test_logging_func(db_pass)
-        test_logging_func(db_name)
-        test_logging_func(db_host)
-    else:
-        with open("secrets/user_pass", 'r') as reader:
-            db_pass = reader.read()
-
-        with open("secrets/user_username", 'r') as reader:
-            db_user = reader.read()
-
-        db_ip = public_ip
-
-    sql_config = {
-        "user": db_user,
-        "password": db_pass,
-        "host": db_ip,
-        "client_flags": [ClientFlag.SSL],
-        "ssl_ca": "secrets/server-ca.pem",
-        "ssl_cert": "secrets/client-cert.pem",
-        "ssl_key": "secrets/client-key.pem"
-    }
-
-    db_name = "bill_data"
+db_name = "bill_data"
 
 
 def test_logging_func(message):
@@ -420,20 +404,19 @@ def test_logging_func(message):
 
     logging.warning(message)
 
-import email_sender
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
-    set_db_params(run_on_app_engine)
+    #set_db_params(run_on_app_engine)
 
-    conn = mysql.connector.connect(**sql_config)
-    cursor = conn.cursor(buffered=True)
+    conn = None#mysql.connector.connect(**sql_config)
+    cursor = None#conn.cursor(buffered=True)
 
     execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0,
                                  False)
-    conn.commit()
 
-    cursor.close()
-    conn.close()
+
+    #cursor.close()
+    #conn.close()
 
     return
 
@@ -451,8 +434,8 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
         insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
 
-    cursor.close()
-    conn.close()
+    #cursor.close()
+    #conn.close()
 
 
 if __name__ == "__main__":
