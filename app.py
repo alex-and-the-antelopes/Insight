@@ -247,7 +247,7 @@ def create_session_token() -> str:
     token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
                     for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
     # Look if it's unique i.e. does not appear already in the db (if not repeat the process)
-    if database.interact(f"SELECT * FROM Users WHERE sessionToken='{token}';"):  # Check if the token is in use
+    if database.select(f"SELECT * FROM Users WHERE sessionToken='{token}';"):  # Check if the token is in use
         return create_session_token()  # Repeat the process until a unique token is generated
     return token  # Return the unique token
 
