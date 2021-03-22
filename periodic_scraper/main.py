@@ -12,4 +12,5 @@ def test_logging_func():
     test_msg = "TEST MESSAGE"
     logging.warning(test_msg)
 
-test_logging_func()
+def main(data, context):
+    test_logging_func()
