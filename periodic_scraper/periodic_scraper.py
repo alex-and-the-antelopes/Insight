@@ -389,11 +389,8 @@ def db_test_func(conn, cursor):
         print(x)
 
 sql_config = {}
+
 db_name = ""
-
-
-
-db_name = "bill_data"
 
 
 def test_logging_func(message):
@@ -406,12 +403,15 @@ def test_logging_func(message):
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
+    global db_name
+    db_name = "bill_data"
     #set_db_params(run_on_app_engine)
 
     conn = None#mysql.connector.connect(**sql_config)
     cursor = None#conn.cursor(buffered=True)
 
-    execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
+    #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
+    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
 
     test_logging_func("execute_update_mp_data_in_db called")
 
