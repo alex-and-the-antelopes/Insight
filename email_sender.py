@@ -81,7 +81,7 @@ def is_valid_email(email_address: str) -> bool:
                     return return_values["invalid"]
                 state = "tld"
             elif c == "_":
-                if email_address(i - 1) == '@' or i == len(email_address) - 1:
+                if email_address[i - 1] == '@' or i == len(email_address) - 1:
                     return return_values["invalid"]
             else:
                 return return_values["invalid"]
