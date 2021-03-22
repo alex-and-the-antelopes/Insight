@@ -232,14 +232,22 @@ def register():
 
 @app.route('/message', methods=['POST'])
 def send_message():
+    """
+    Sends an email to a member of parliament specified by the user.
+    Requires user verification, MP id and the message itself.
+    :return: A success message, if the email was sent successfully, otherwise an error message
+    """
+    # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
-
+    # Get information to send email
     mp_id = request.form['mp_id']
     message = request.form['message']
     # Verify the user:
-    if not verify_user(email, session_token):
-        return jsonify({"error": "invalid_credentials"})  # Verifications unsuccessful
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
 
     return
 
