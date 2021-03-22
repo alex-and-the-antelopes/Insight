@@ -404,12 +404,12 @@ def test_logging_func():
     test_msg = "TEST MESSAGE"
     logging.warning(test_msg)
 
-
+import email_sender
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     #set_db_params(run_on_app_engine)
 
-    test_logging_func()
+    email_sender.send_message("1robertchambers", "test message")
 
     #conn = mysql.connector.connect(**sql_config)
     #cursor = conn.cursor(buffered=True)
