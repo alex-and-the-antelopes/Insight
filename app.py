@@ -126,7 +126,7 @@ def get_bill(bill_id):
         return jsonify(response)
 
 @app.route('/bills')
-def get_bills(bill_id):
+def get_bills():
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills;")
