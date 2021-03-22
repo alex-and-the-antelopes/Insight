@@ -13,7 +13,7 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-database = db_interactions.DBAgent("bill_data")
+database = db_interactions.DBAgent()
 
 # initialises database pool as a global variable
 
