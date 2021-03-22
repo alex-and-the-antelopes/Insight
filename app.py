@@ -129,7 +129,7 @@ def get_bill(bill_id):
 def get_bills():
     # not case-sensitive
 
-    response = database.select("SELECT * FROM demo_tbl;")
+    response = database.select("SELECT * FROM Bills WHERE billID = 1;")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
