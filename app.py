@@ -98,7 +98,7 @@ def handle_request(bill_id, action):
     # not case-sensitive
     action = action.lower()
 
-    # Run requested action if valiid
+    # Run requested action if valid
     if action in safe_actions:
         result = safe_actions[action](bill_id)
     else:
@@ -131,6 +131,7 @@ def top():
 def landing_page():
     return redirect(CONFIG["default_url"])
 
+
 @app.route('/testdb')
 def db_testing():
     response = database.select("SELECT * FROM Users;")
@@ -143,24 +144,45 @@ def db_testing():
 # It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Log in to the application using the user's password. Checks if the email address is used, and checks the password.
+    :return: Message with the user's unique token if successful, or an error message explaining why login failed.
+    """
+    # Get form information:
     email = request.form['email']
     password = request.form['password']
     if is_new_address(email):
-        return jsonify({"error": "new_email_error"})
+        return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
     # Get user from database using username, check if user is valid.
+    user = fetch_user(email)  # Construct the user object
+    if user.verify_password(password):
+        # Send email to user address informing of new login
+        email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We'"
+                                                                  "re sending you this email to make sure it was you!"
+                                                                  " If it wasn't, please respond to this email letting "
+                                                                  "us know!\n-The Insight team")
+        return jsonify({"session_token": user.session_token})  # Return the session token
     # Return the session token
-    return jsonify({"session_token": "session_placeholder"})
+    return jsonify({"error": "incorrect_password_error"})  # Given wrong password
 
 
 @app.route('/login_with_token', methods=['POST'])
 def login_with_token():
+    """
+    Log in to the application using the user's token. Checks if the email address is used, and validates the token.
+    :return: Message indicating the login was successful, or an error message explaining why it was not successful.
+    """
+    # Get form information:
     email = request.form['email']
     session_token = request.form['session_token']
     if is_new_address(email):
-        return jsonify({"error": "new_email_error"})
+        return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
     # Get user from database using username, check if user is valid.
-    # Return the session token
-    return jsonify({"session_token": "session_placeholder"})
+    user = fetch_user(email)  # Construct the user object
+    if user.verify_token(session_token):
+        return jsonify({"success": "login_successful"})  # Return success message
+
+    return jsonify({"error": "session_token_error"})  # Given the wrong token
 
 
 @app.route('/register', methods=['POST'])
@@ -181,21 +203,20 @@ def register():
         return jsonify({"error": "notification_token_error"})
     if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
-    if email_sender.check_email_address(email) != 0:  # Check that the given email is a valid email address
+    if not email_sender.is_valid_email(email):  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
 
-    query = database.select(f"SELECT * FROM Users WHERE email='{email}';")  # todo remove query
     if not is_new_address(email):  # Check if the given email is already in use
         return jsonify({"error": "email_in_use_error"})
 
     # Add new user to the database:
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
-
-    table_status = add_user_to_database(new_user)  # Todo remove status
+    add_user_to_database(new_user)  # Add new User to the database
+    # Send email to user's email address
+    email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!"
+                                                                     "\n-The Insight team")
     # Return the session token
-    string = "" + query.__class__.__name__
-    return {"query": string}
-    # return jsonify({"session_token": new_user.session_token, "status": table_status, "query": string})  # Todo remove extra
+    return jsonify({"session_token": new_user.session_token})
 
 
 # Deliver requested resource.
@@ -209,18 +230,20 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-def create_session_token():
+def create_session_token() -> str:
     """
     Generate a unique token using a combination of random digits, lowercase and uppercase letters.
     :return: The unique, generated token.
     """
     token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
                     for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
-    # Look if it's unique i.e. does not appear already in the db (if not repeat the process) todo
-    return token
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process)
+    if database.interact(f"SELECT * FROM Users WHERE sessionToken='{token}';"):  # Check if the token is in use
+        return create_session_token()  # Repeat the process until a unique token is generated
+    return token  # Return the unique token
 
 
-def is_new_address(email_address):
+def is_new_address(email_address: str) -> bool:
     """
     Checks the database to see if the given email address is already in use.
     :param email_address: The email address to look up.
@@ -232,7 +255,7 @@ def is_new_address(email_address):
     return True  # If the query returns an empty list return True
 
 
-def add_user_to_database(user):
+def add_user_to_database(user: core.User) -> None:
     """
     Add the given User to the database.
     :param user: User object
@@ -240,10 +263,25 @@ def add_user_to_database(user):
     """
     if not user:  # Ignore None
         return
+    # The SQL statement to add the user into the Users table:
     statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
                 f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
-    database.interact(statement)
-    return database.select("SELECT * FROM Users;")  # TODO remove in final iteration (remove none)
+    database.interact(statement)  # Carry out the SQL statement
+    return
+
+
+def fetch_user(email_address: str) -> core.User or None:
+    """
+    Finds the user with the given email address, constructs and returns the User object.
+    :param email_address: The email address of the user.
+    :return: The constructed User object.
+    """
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
+    user = None
+    if query:
+        user_info = query[0]  # Get the user information
+        user = core.User(user_info[1], user_info[2], user_info[3], user_info[5], user_info[4])  # Construct user
+    return user
 
 
 if __name__ == '__main__':

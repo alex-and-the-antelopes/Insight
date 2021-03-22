@@ -13,3 +13,4 @@ def test_logging_func():
     logging.warning(test_msg)
 
 test_logging_func()
+

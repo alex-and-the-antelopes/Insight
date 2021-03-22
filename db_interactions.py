@@ -5,11 +5,10 @@ import secret_manager as secret
 
 def init_tcp_connection_engine(db_config):
 
-    db_user = secret.get_version("db_user", version_name="1")
-    db_pass = secret.get_version("db_pass", version_name="1")
-    db_name = secret.get_version("db_name", version_name="2")
-    db_host = secret.get_version("db_host", version_name="1")
-
+    db_user = secret.get_version("db_user", version_name="latest")
+    db_pass = secret.get_version("db_pass", version_name="latest")
+    db_name = secret.get_version("db_name", version_name="latest")
+    db_host = secret.get_version("db_host", version_name="latest")
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
