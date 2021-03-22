@@ -389,14 +389,14 @@ db_name = ""
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     global db_name
     global db_agent
-    db_name = "new_bill_data"
+    db_name = "bill_data"
 
     conn = None
     cursor = None
 
     db_agent = DBAgent(db_name)
 
-    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
+    #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
 
     #db_describe_table("MP")
     print_all_rows_of_table("MP")
@@ -406,6 +406,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     return
 
+    """
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
@@ -419,13 +420,13 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
         insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
-
-    #cursor.close()
-    #conn.close()
+    """
 
 
+"""
 if __name__ == "__main__":
     insert_and_update_data(run_on_app_engine=False, allow_party_and_mp_upsert=False)
+    """
 
 
 

@@ -14,6 +14,10 @@ class DBAgent:
         self.user = user
         self.host = host
         self.name = name
+        print(password)
+        print(user)
+        print(host)
+        print(name)
         self.config = {
             # Pool size is the maximum number of permanent connections to keep.
             "pool_size": 5,
