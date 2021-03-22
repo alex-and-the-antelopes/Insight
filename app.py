@@ -301,7 +301,7 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
 
 def verify_user(email: str, session_token: str) -> bool:
     """
-
+    Verify the user using their email and token. Checks if the email address is used, and verifies the token.
     :param email: The email address of the user.
     :param session_token: The session token of the user.
     :return: True if the user was verified, False otherwise.
