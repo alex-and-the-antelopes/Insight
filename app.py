@@ -276,7 +276,7 @@ def fetch_user(email_address: str) -> core.User or None:
     :param email_address: The email address of the user.
     :return: The constructed User object.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
     user = None
     if query:
         user_info = query[0]  # Get the user information
@@ -284,6 +284,15 @@ def fetch_user(email_address: str) -> core.User or None:
     return user
 
 
+def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
+
+    parliament_member = None
+    query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
+    if query:
+        mp_info = query[0]  # Extract the MP information
+        parliament_member = core.ParliamentMember(mp_info[0], mp_info[3], mp_info[4], mp_info[5], mp_info[6],
+                                                  mp_info[7], mp_info[8], mp_info[9])  # Construct MP object
+    return parliament_member
 
 
 if __name__ == '__main__':
