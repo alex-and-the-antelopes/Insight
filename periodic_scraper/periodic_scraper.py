@@ -377,8 +377,9 @@ def mock_datetime_pickle():
 
 
 def db_test_func(conn, cursor):
-    #cursor.execute(f"SHOW tables IN {db_name}")
-    cursor = db_agent.select(f"SHOW tables IN {db_name}")
+    table_name = "MP"
+    cursor.execute(f"DESCRIBE {table_name}")
+    print(f"{table_name} table structure")
     for x in cursor:
         print(x)
 
@@ -388,13 +389,6 @@ sql_config = {}
 db_name = ""
 
 
-def test_logging_func(message):
-    logging_client = google.cloud.logging.Client()
-
-    logging_client.get_default_handler()
-    logging_client.setup_logging(log_level=logging.INFO)
-
-    logging.warning(message)
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
@@ -406,12 +400,12 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None#mysql.connector.connect(**sql_config)
     cursor = None#conn.cursor(buffered=True)
 
-    db_agent = DBAgent("bill_data")
+    db_agent = DBAgent("bill_app_db")
 
     #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
-    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
+    #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
 
-    test_logging_func("execute_update_mp_data_in_db called")
+    db_test_func()
 
     #cursor.close()
     #conn.close()
