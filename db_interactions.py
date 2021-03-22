@@ -5,7 +5,7 @@ import secret_manager as secret
 class DBAgent:
     def __init__(
             self,
-            name: str,
+            name: str = secret.get_version("db_name"),
             host: str = secret.get_version("db_host"),
             user: str = secret.get_version("db_user"),
             password: str = secret.get_version("db_pass")
@@ -72,7 +72,7 @@ class DBAgent:
             # Using a with statement ensures that the connection is always released
             # back into the pool at the end of statement (even if an error occurs)
             with self.pool.connect() as conn:
-                return conn.execute(statement).fetchall()
+                return list(conn.execute(statement).fetchall())
         except Exception as e:
             # If something goes wrong, handle the error in this section. This might
             # involve retrying or adjusting parameters depending on the situation.
