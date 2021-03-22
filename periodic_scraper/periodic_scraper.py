@@ -149,9 +149,8 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
                             f"current = {current} " \
                             f"WHERE mpID = {member_id}"
 
-    #print(f"mp update command string")
-    #print(update_command_string)
-    test_logging_func(update_command_string)
+    print(f"mp update command string")
+    print(update_command_string)
 
     #cursor.execute(update_command_string)
     dbi.interact(update_command_string)
