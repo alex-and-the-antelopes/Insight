@@ -1,9 +1,8 @@
-from flask import Flask, jsonify, redirect, send_file, Response, request
+from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions
 import email_sender
-import secret_manager as secret
 import logging
 import random
 import string
@@ -13,16 +12,9 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-database = db_interactions.DBAgent("bill_app_db")
-
-# initialises database pool as a global variable
+database = db_interactions.DBAgent("bill_app_db")  # initialises database pool as a global variable
 
 # example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
-
-# Add more config constants
-# CONFIG.update({
-#     "key": "value"
-# })
 
 
 # region Bill actions.
@@ -38,15 +30,15 @@ def space(n):
 
 
 # Returns the bill with given id in JSON form
-def find_bill(id):
+def find_bill(bill_id):
     bill = core.Bill(
-        "1"
-        "Sample bill",
-        "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
-        "1/1/2021",
-        "2/1/2022",
-        "active",
-        short_desc="Sample Bill"
+        "3",
+        "Yet Another Sample bill",
+        "This is a 3rd, different sample bill: an example, for testing purposes.",
+        "1/2/2121",
+        "2/1/2122",
+        "inactive",
+        short_desc="Different Sample Bill"
     )
     return bill.to_dict()  # TODO REMOVE
 
@@ -75,14 +67,6 @@ def get_top_bills():
 
 # endregion
 
-# Mapping of "actions" (from URL) to their respective functions
-# !! Any function referenced in this dict can be run by anyone !!
-safe_actions = {
-    "capitalise": cap,
-    "space": space,
-    "get": find_bill,
-}
-
 
 # Sample private function
 # We don't want private functions to be accessible from the internet, so this function should NOT be put in the actions
@@ -92,7 +76,7 @@ def unsafe_function(n):
     print("oh dear!")
 
 
-# # Perform action on given bill
+# # Perform action on given bill TODO REMOVE
 # @app.route('/b/<bill_id>/<action>')
 # def handle_request(bill_id, action):
 #     # not case-sensitive
@@ -145,7 +129,7 @@ def top():
 
 @app.route('/')
 def landing_page():
-    return redirect(CONFIG["default_url"])
+    return redirect(CONFIG["default_url"])  # TODO remove
 
 
 @app.route('/testdb')
