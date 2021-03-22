@@ -285,7 +285,11 @@ def fetch_user(email_address: str) -> core.User or None:
 
 
 def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
-
+    """
+    Finds the member of parliament with the given ID, constructs and returns the ParliamentMember object.
+    :param mp_id: The id of the MP.
+    :return: The constructed ParliamentMember object.
+    """
     parliament_member = None
     query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
     if query:
