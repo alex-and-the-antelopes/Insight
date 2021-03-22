@@ -29,12 +29,12 @@ database = db_interactions.DBAgent("bill_app_db")
 # Todo: These could be placed in Bill class, or in core file?
 # Returns n in upper case
 def cap(n):
-    return n.upper()
+    return n.upper()  # TODO remove
 
 
 # Returns n with spaces between each character.
 def space(n):
-    return " ".join(n)
+    return " ".join(n)  # TODO remove
 
 
 # Returns the bill with given id in JSON form
@@ -48,10 +48,10 @@ def find_bill(id):
         "active",
         short_desc="Sample Bill"
     )
-    return bill.to_dict()
+    return bill.to_dict()  # TODO REMOVE
 
 
-def get_top_bills(range):
+def get_top_bills():
     bill1 = core.Bill(
         "1",
         "Sample Title",
@@ -70,7 +70,7 @@ def get_top_bills(range):
         short_desc="Different Sample Bill"
     )
 
-    return [bill1.to_dict(), bill2.to_dict()]
+    return [bill1.to_dict(), bill2.to_dict()]  # TODO Change to work with top 50 bills
 
 
 # endregion
@@ -133,7 +133,7 @@ def get_bills():
 
 @app.route('/top')
 def top():
-    result = get_top_bills(10)
+    result = get_top_bills()
     # Construct output
     output = {
         "result": result
@@ -268,6 +268,9 @@ def get_res(name):
     return send_file(CONFIG["img_dir"] + name)
 
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
+
+
+# Start of helper functions
 
 
 def create_session_token() -> str:
