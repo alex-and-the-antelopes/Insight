@@ -119,7 +119,7 @@ def unsafe_function(n):
 def get_bill(bill_id):
     # not case-sensitive
 
-    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
+    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + " FOR JSON AUTO;")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -129,7 +129,7 @@ def get_bill(bill_id):
 def get_bills():
     # not case-sensitive
 
-    response = database.select("SELECT * FROM Bills;")
+    response = database.select("SELECT * FROM Bills FOR JSON AUTO;")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -155,7 +155,7 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    response = database.select("SELECT * FROM Users;")
+    response = database.select("SELECT * FROM Users FOR JSON AUTO;")
     if response is None:
         return "None"
     else:
