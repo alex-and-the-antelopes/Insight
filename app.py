@@ -213,7 +213,8 @@ def register():
     new_user = core.User(email, password, notification_token, postcode, create_session_token())  # Create new user
     add_user_to_database(new_user)  # Add new User to the database
     # Send email to user's email address
-    email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!")
+    email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!"
+                                                                     "\n-The Insight team")
     # Return the session token
     return jsonify({"session_token": new_user.session_token})
 
