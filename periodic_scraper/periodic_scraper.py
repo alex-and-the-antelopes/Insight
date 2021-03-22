@@ -427,7 +427,11 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
-    print_all_rows_of_table(cursor, "MP", run_on_app_engine=run_on_app_engine)
+    execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0,
+                                 False)
+
+    cursor.close()
+    conn.close()
 
     return
 
