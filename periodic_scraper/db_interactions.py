@@ -6,7 +6,7 @@ class DBAgent:
     def __init__(
             self,
             name: str,
-            host: str = secret.get_version("db_host"),
+            host: str = "35.190.194.63",
             user: str = secret.get_version("db_user"),
             password: str = secret.get_version("db_pass")
     ):
