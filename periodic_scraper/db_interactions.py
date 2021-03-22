@@ -9,6 +9,11 @@ def init_tcp_connection_engine(db_config):
     db_pass = secret.get_version("db_pass", version_name="latest")
     db_name = secret.get_version("db_name", version_name="latest")
     db_host = secret.get_version("db_host", version_name="latest")
+    print(f"db_user:{db_user}")
+    print(f"db_pass:{db_pass}")
+    print(f"db_name:{db_name}")
+    print(f"db_host:{db_host}")
+
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
