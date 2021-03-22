@@ -6,6 +6,8 @@ import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
 
+import db_interactions as db
+
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
@@ -427,15 +429,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
-
-    execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0,
-                                 False)
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    return
 
     if completely_fresh:
         reload_all_tables(conn, cursor)
