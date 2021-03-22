@@ -37,17 +37,6 @@ def clear_all_4_tables(conn, cursor):
     clear_table(conn, cursor, "Party")
 
 
-def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
-    #cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
-    cursor = db_agent.select(f"SELECT * FROM {db_name}.{table_name}")
-    print(f"all items in table: {table_name}")
-    for x in cursor:
-        line = ""
-        for i in x:
-            line += str(i) + ", "
-
-        print(line)
-
 
 
 def get_names_from_full_name(name_display):
@@ -72,7 +61,7 @@ def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constitu
         current = 1
     else:
         current = 0
-    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
+    insert_command_string = f"INSERT INTO MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -229,7 +218,7 @@ def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
     #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
-    db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
     count = 0
     for row in cursor:
@@ -278,12 +267,12 @@ def execute_update_bill(conn, cursor, bill):
                             f"WHERE titleStripped = \"{bill.title_stripped}\""
     print(f"update command string {update_command_string}")
     #cursor.execute(update_command_string)
-    db_agent.interact(update_command_string)
+    cursor = db_agent.interact(update_command_string)
 
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
     #cursor.execute(count_command_string)
-    db_agent.select(count_command_string)
+    cursor = db_agent.select(count_command_string)
     for c in cursor:
         print(f"type count[0] {type(c[0])}")
         count = c[0]
@@ -376,10 +365,17 @@ def mock_datetime_pickle():
     pass
 
 
-def db_test_func(conn, cursor):
-    #cursor.execute(f"SHOW tables IN {db_name}")
-    db_agent.select(f"SHOW tables IN {db_name}")
-    for x in cursor:
+def db_describe_table(table_name):
+    description = db_agent.select(f"DESCRIBE {table_name}")
+    print(f"{table_name} table structure")
+    for x in description:
+        print(x)
+
+
+def print_all_rows_of_table(table_name):
+    rows = db_agent.select(f"SELECT * FROM {table_name}")
+    print(f"all items in table {table_name}:")
+    for x in rows:
         print(x)
 
 
@@ -388,30 +384,22 @@ sql_config = {}
 db_name = ""
 
 
-def test_logging_func(message):
-    logging_client = google.cloud.logging.Client()
-
-    logging_client.get_default_handler()
-    logging_client.setup_logging(log_level=logging.INFO)
-
-    logging.warning(message)
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     global db_name
     global db_agent
-    db_name = "bill_data"
-    #set_db_params(run_on_app_engine)
+    db_name = "new_bill_data"
 
-    conn = None#mysql.connector.connect(**sql_config)
-    cursor = None#conn.cursor(buffered=True)
+    conn = None
+    cursor = None
 
-    db_agent = DBAgent()
+    db_agent = DBAgent(db_name)
 
-    #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
-    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
+    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
 
-    test_logging_func("execute_update_mp_data_in_db called")
+    #db_describe_table("MP")
+    print_all_rows_of_table("MP")
 
     #cursor.close()
     #conn.close()
