@@ -4,12 +4,10 @@ import secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config):
-
     db_user = secret.get_version("db_user", version_name="1")
     db_pass = secret.get_version("db_pass", version_name="1")
     db_name = secret.get_version("db_name", version_name="2")
     db_host = secret.get_version("db_host", version_name="1")
-
 
     # Extract host and port from db_host
     host_args = db_host.split(":")
@@ -67,8 +65,6 @@ def interact(statement):
         return None
 
 
-
-
 def select(statement):
     """ Special function for select or similar statements which require something to be returned from the db
     as we want to return a value.
@@ -87,3 +83,13 @@ def select(statement):
         # [START_EXCLUDE]
         return None
 
+
+def get_bills(limit: int = None, params: dict = None) -> list:
+    if limit < 0:
+        raise ValueError("Limit can't be negative.")
+
+    table_name = "Bills"
+    statement = f"SELECT * FROM {table_name} WHERE {params}"
+
+    if limit is not None:
+        statement += " LIMIT" + str(limit)
