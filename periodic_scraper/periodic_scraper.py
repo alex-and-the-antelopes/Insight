@@ -229,7 +229,7 @@ def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
     #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
-    db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
     count = 0
     for row in cursor:
@@ -278,12 +278,12 @@ def execute_update_bill(conn, cursor, bill):
                             f"WHERE titleStripped = \"{bill.title_stripped}\""
     print(f"update command string {update_command_string}")
     #cursor.execute(update_command_string)
-    db_agent.interact(update_command_string)
+    cursor = db_agent.interact(update_command_string)
 
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
     #cursor.execute(count_command_string)
-    db_agent.select(count_command_string)
+    cursor = db_agent.select(count_command_string)
     for c in cursor:
         print(f"type count[0] {type(c[0])}")
         count = c[0]
@@ -378,7 +378,7 @@ def mock_datetime_pickle():
 
 def db_test_func(conn, cursor):
     #cursor.execute(f"SHOW tables IN {db_name}")
-    db_agent.select(f"SHOW tables IN {db_name}")
+    cursor = db_agent.select(f"SHOW tables IN {db_name}")
     for x in cursor:
         print(x)
 
@@ -406,7 +406,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None#mysql.connector.connect(**sql_config)
     cursor = None#conn.cursor(buffered=True)
 
-    db_agent = DBAgent()
+    db_agent = DBAgent("bill_data")
 
     #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
     execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
