@@ -40,20 +40,13 @@ def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
     #cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
     cursor = dbi.select(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
-    if run_on_app_engine:
-        for x in cursor:
-            line = ""
-            for i in x:
-                line += str(i) + ", "
+    for x in cursor:
+        line = ""
+        for i in x:
+            line += str(i) + ", "
 
-            test_logging_func(line)
-    else:
-        for x in cursor:
-            line = ""
-            for i in x:
-                line += str(i) + ", "
+        print(line)
 
-            print(line)
 
 
 def get_names_from_full_name(name_display):
