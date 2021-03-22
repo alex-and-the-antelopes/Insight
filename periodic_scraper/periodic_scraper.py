@@ -429,6 +429,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0,
                                  False)
+    conn.commit()
 
     cursor.close()
     conn.close()
