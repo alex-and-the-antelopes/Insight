@@ -42,6 +42,7 @@ def create_message(subject: str = "Insight message!", main_body: str = None) -> 
     if type(main_body) is not str:  # Check the email body
         raise TypeError("Expected type <class 'str'> got type ", type(main_body), " for main_body")
     message = f'Subject: {subject}\n{main_body}'  # Bundle the contents in the appropriate format
+    # todo add profanity check
     return message  # Return the constructed email
 
 
