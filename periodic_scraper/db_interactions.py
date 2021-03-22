@@ -40,11 +40,11 @@ class DBAgent:
             # mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
             sqlalchemy.engine.url.URL(
                 drivername="mysql+pymysql",
-                username="mastergk",  # e.g. "my-database-user"
-                password="9br*+9Fc9LX^2sy>iY,D",  # e.g. "my-database-password"
-                host="10.56.209.3",  # e.g. "127.0.0.1"
-                port=3306,  # e.g. 3306
-                database="new_bill_data",  # e.g. "my-database-name"
+                username=user,  # e.g. "my-database-user"
+                password=password,  # e.g. "my-database-password"
+                host=hostname,  # e.g. "127.0.0.1"
+                port=port,  # e.g. 3306
+                database="bill_data",  # e.g. "my-database-name"
             ),
             **self.config
         )
