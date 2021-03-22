@@ -175,14 +175,9 @@ def login_with_token():
     # Get form information:
     email = request.form['email']
     session_token = request.form['session_token']
-    if is_new_address(email):
-        return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
-    # Get user from database using username, check if user is valid.
-    user = fetch_user(email)  # Construct the user object
-    if user.verify_token(session_token):
+    if verify_user(email, session_token):  # Verify the user using email and session token
         return jsonify({"success": "login_successful"})  # Return success message
-
-    return jsonify({"error": "session_token_error"})  # Given the wrong token
+    return jsonify({"error": "login_unsuccessful"})  # Given the wrong token
 
 
 @app.route('/register', methods=['POST'])
