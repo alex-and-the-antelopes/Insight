@@ -123,7 +123,7 @@ def get_bill(bill_id):
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
-        return jsonify(str(response))
+        return jsonify(entry_to_json_dict(response[0]))
 
 @app.route('/bills')
 def get_bills():
@@ -133,7 +133,19 @@ def get_bills():
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
-        return jsonify(str(response))
+        list = []
+        for res in response:
+            list.append(entry_to_json_dict(res))
+        return jsonify(str(list))
+
+def entry_to_json_dict(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": entry[3],
+        "date_added": entry[4],
+    }
+    return bill
 
 
 @app.route('/top')
@@ -155,7 +167,7 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    response = database.select("SELECT * FROM Users;")
+    response = database.select("SELECT * FROM Users FOR JSON AUTO;")
     if response is None:
         return "None"
     else:
