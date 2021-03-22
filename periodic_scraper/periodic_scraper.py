@@ -399,7 +399,8 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
 
     #db_describe_table("MP")
-    print_all_rows_of_table("MP")
+    #print_all_rows_of_table("MP")
+    print(db_agent.select("SELECT * FROM Bills WHERE billID = 1;"))
 
     #cursor.close()
     #conn.close()
