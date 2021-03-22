@@ -51,11 +51,7 @@ def is_valid_email(email_address: str) -> bool:
     :param email_address: The email address to validate.
     :return: True if the given email is valid, False otherwise.
     """
-    # Values that the function should return for each outcome.
-    return_values = {
-        "valid": True,
-        "invalid": False,
-    }
+
     # Part of email we're processing, as there are different rules for each part of the email.
     state = "local"
 
@@ -70,26 +66,26 @@ def is_valid_email(email_address: str) -> bool:
                 state = "domain"
             elif c == '.':
                 if i == len(email_address) - 1 or email_address[i + 1] == '.':
-                    return return_values["invalid"]
+                    return False
             else:
-                return return_values["invalid"]
+                return False
         elif state == "domain" or state == "tld":
             if re.search(domain_legal_chars, c):
                 pass
             elif c == '.':
                 if i == len(email_address) - 1 or email_address[i + 1] == '.':
-                    return return_values["invalid"]
+                    return False
                 state = "tld"
             elif c == "_":
-                if email_address(i - 1) == '@' or i == len(email_address) - 1:
-                    return return_values["invalid"]
+                if email_address[i - 1] == '@' or i == len(email_address) - 1:
+                    return False
             else:
-                return return_values["invalid"]
+                return False
 
     if state != "tld":
-        return return_values["invalid"]
+        return False
 
-    return return_values["valid"]
+    return True
 
 
 def send_email(recipient_email: str, email_subject: str, email_body: str) -> None:

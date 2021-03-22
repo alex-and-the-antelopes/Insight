@@ -159,8 +159,8 @@ def login():
         # Send email to user address informing of new login
         email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We'"
                                                                   "re sending you this email to make sure it was you!"
-                                                                  " If it wasn't, please respond to this email letting "
-                                                                  "us know!\n-The Insight team")
+                                                                  " If it wasn't, please respond to this email to let "
+                                                                  "us know!\n\n-The Insight team")
         return jsonify({"session_token": user.session_token})  # Return the session token
     # Return the session token
     return jsonify({"error": "incorrect_password_error"})  # Given wrong password
@@ -175,14 +175,9 @@ def login_with_token():
     # Get form information:
     email = request.form['email']
     session_token = request.form['session_token']
-    if is_new_address(email):
-        return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
-    # Get user from database using username, check if user is valid.
-    user = fetch_user(email)  # Construct the user object
-    if user.verify_token(session_token):
+    if verify_user(email, session_token):  # Verify the user using email and session token
         return jsonify({"success": "login_successful"})  # Return success message
-
-    return jsonify({"error": "session_token_error"})  # Given the wrong token
+    return jsonify({"error": "login_unsuccessful"})  # Given the wrong token
 
 
 @app.route('/register', methods=['POST'])
@@ -214,9 +209,23 @@ def register():
     add_user_to_database(new_user)  # Add new User to the database
     # Send email to user's email address
     email_sender.send_email(new_user.email, "Insight: Registration", "Thanks for registering to use the Insight app!"
-                                                                     "\n-The Insight team")
+                                                                     "\n\n-The Insight team")
     # Return the session token
     return jsonify({"session_token": new_user.session_token})
+
+
+@app.route('/message', methods=['POST'])
+def send_message():
+    email = request.form['email']
+    session_token = request.form['session_token']
+
+    mp_id = request.form['mp_id']
+    message = request.form['message']
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verifications unsuccessful
+
+    return
 
 
 # Deliver requested resource.
@@ -276,12 +285,42 @@ def fetch_user(email_address: str) -> core.User or None:
     :param email_address: The email address of the user.
     :return: The constructed User object.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
     user = None
     if query:
         user_info = query[0]  # Get the user information
         user = core.User(user_info[1], user_info[2], user_info[3], user_info[5], user_info[4])  # Construct user
     return user
+
+
+def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
+    """
+    Finds the member of parliament with the given ID, constructs and returns the ParliamentMember object.
+    :param mp_id: The id of the MP.
+    :return: The constructed ParliamentMember object.
+    """
+    parliament_member = None
+    query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
+    if query:
+        mp_info = query[0]  # Extract the MP information
+        parliament_member = core.ParliamentMember(mp_info[0], mp_info[3], mp_info[4], mp_info[5], mp_info[6],
+                                                  mp_info[7], mp_info[8], mp_info[9])  # Construct MP object
+    return parliament_member
+
+
+def verify_user(email: str, session_token: str) -> bool:
+    """
+    Verify the user using their email and token. Checks if the email address is used, and verifies the token.
+    :param email: The email address of the user.
+    :param session_token: The session token of the user.
+    :return: True if the user was verified, False otherwise.
+    """
+    if is_new_address(email):  # Check if the email corresponds to a User
+        return False
+    user = fetch_user(email)  # Get the user form the database using their email
+    if user.verify_token(session_token):
+        return True  # Login successful
+    return False  # Tokens do not match
 
 
 if __name__ == '__main__':
