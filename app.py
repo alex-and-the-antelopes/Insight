@@ -249,7 +249,14 @@ def send_message():
 
     mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
 
-    return
+    if mp:  # If the MP was successfully constructed
+        try:
+            email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email
+            return jsonify({"success": "email_sent"})  # If sent without errors, return success message
+        except Exception as e:
+            return jsonify({"error": "email_failed_to_send"})  # Error with mail sending
+
+    return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
 # Deliver requested resource.
