@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, redirect, send_file, Response, request
 from flask_cors import CORS
 import bill_tracker_core as core
-import db_interactions
+import db_interactions as database
 import email_sender
 import secret_manager as secret
 import logging
@@ -13,8 +13,6 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-database = db_interactions.DBAgent("bill_data")
-
 # initialises database pool as a global variable
 
 # example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
