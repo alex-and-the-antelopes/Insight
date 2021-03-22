@@ -251,7 +251,7 @@ def send_message():
 
     if mp:  # If the MP was successfully constructed
         try:
-            email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email
+            email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email TODO add profanity filter
             return jsonify({"success": "email_sent"})  # If sent without errors, return success message
         except Exception as e:
             return jsonify({"error": "email_failed_to_send"})  # Error with mail sending
