@@ -31,6 +31,8 @@ class DBAgent:
             "pool_recycle": 1800,  # 30 minutes
         }
 
+        print(f"host: {host}")
+
         # Extract host and port from db_host
         host_args = host.split(":")
         hostname, port = host_args[0], int(host_args[1])
