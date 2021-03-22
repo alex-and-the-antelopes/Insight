@@ -1,5 +1,4 @@
 runtime: python37
-
 entrypoint: gunicorn -b :$PORT app:app
 
 vpc_access_connector:
