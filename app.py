@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, redirect, send_file, Response, request
 from flask_cors import CORS
 import bill_tracker_core as core
-import db_interactions as database
+import db_interactions
 import email_sender
 import secret_manager as secret
 import logging
@@ -13,7 +13,7 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-
+database = db_interactions.DBAgent("bill_app_db")
 
 # initialises database pool as a global variable
 
@@ -52,13 +52,12 @@ def find_bill(id):
 
 def get_top_bills(range):
     bill1 = core.Bill(
-        "id_1",
-        "Sample bill",
-        "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
+        "1",
+        "Sample Title",
+        "Sample Description of a sample bill",
         "1/1/2021",
-        "2/1/2022",
-        "active",
-        short_desc="Sample Bill"
+        "1/1/2030",
+        "active"
     )
     bill2 = core.Bill(
         "id_2",
