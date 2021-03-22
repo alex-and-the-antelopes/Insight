@@ -1,7 +1,9 @@
 import smtplib
 import re
 import sys
-import email_details
+
+email_address = "parlpy.test@gmail.com"
+email_password = "parlpy_pass123"
 
 
 def send_message(recipient_address, message):
@@ -18,8 +20,8 @@ def send_message(recipient_address, message):
         server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
         server.starttls()  # Connect to the server via tls
-        server.login(email_details.email_address, email_details.email_password)  # Login to the account
-        server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
+        server.login(email_address, email_password)  # Login to the account
+        server.sendmail(email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
         print("Email failed to send.", file=sys.stderr)  # Print using error stream
