@@ -44,7 +44,7 @@ class DBAgent:
                 password="9br*+9Fc9LX^2sy>iY,D",  # e.g. "my-database-password"
                 host="10.56.209.3",  # e.g. "127.0.0.1"
                 port="3306",  # e.g. 3306
-                database="demo",  # e.g. "my-database-name"
+                database="bill_data",  # e.g. "my-database-name"
             ),
             **self.config
         )
