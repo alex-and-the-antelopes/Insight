@@ -128,13 +128,8 @@ def get_bills():
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills WHERE billID = 1;")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        list = []
-        for res in response:
-            list.append(entry_to_json_dict(res))
-        return jsonify(str(list))
+    return response
+
 
 def entry_to_json_dict(entry):
     bill = {
