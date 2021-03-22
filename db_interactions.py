@@ -2,7 +2,6 @@ import os
 import sqlalchemy
 import secret_manager as secret
 
-
 class DBAgent:
     def __init__(
             self,

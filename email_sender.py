@@ -1,10 +1,10 @@
 import smtplib
 import sys
-import email_details
 import re
+import secret_manager as secret
 
 
-def send_message(recipient_address, message):
+def send_message(recipient_address: str, message: str) -> None:
     """
     Sends the given message (email) to the given email address. Uses smtplib to connect to the server, log in and send
     the email. The details for the account being used are in the email_details file.
@@ -18,15 +18,17 @@ def send_message(recipient_address, message):
         server = smtplib.SMTP('smtp.gmail.com', 587)  # Define the server (gmail server, with port number 587)
         server.ehlo()
         server.starttls()  # Connect to the server via tls
-        server.login(email_details.email_address, email_details.password)  # Login to the account
-        server.sendmail(email_details.email_address, recipient_address, message)  # Send the constructed email
+        email_address = secret.get_version("email_address", version_name="latest")
+        email_password = secret.get_version("email_pass", version_name="latest")
+        server.login(email_address, email_password)  # Login to the account
+        server.sendmail(email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
         print("Email failed to send.", file=sys.stderr)  # Print using error stream
     return
 
 
-def create_message(subject="Insight message!", main_body=None):
+def create_message(subject: str = "Insight message!", main_body: str = None) -> str:
     """
     Combines the given subject and main body to formulate an email message. Returns a str capable of being transmitted
     using smtplib and gmail.
@@ -47,7 +49,7 @@ def is_valid_email(email_address: str) -> bool:
     """
     Checks if the given email address is a valid address.
     :param email_address: The email address to validate.
-    :return: True if email is valid
+    :return: True if the given email is valid, False otherwise.
     """
     # Values that the function should return for each outcome.
     return_values = {
@@ -90,7 +92,7 @@ def is_valid_email(email_address: str) -> bool:
     return return_values["valid"]
 
 
-def send_email(recipient_email, email_subject, email_body):
+def send_email(recipient_email: str, email_subject: str, email_body: str) -> None:
     """
     Constructs and sends an email to the given email address. Includes error checking for type, value errors and
     invalid email addresses.
