@@ -5,7 +5,7 @@ import parlpy.bills.bill_list_fetcher as blf
 import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
-from db_interactions import DBAgent
+import db_interactions as db_agent
 
 import mysql.connector
 from mysql.connector.constants import ClientFlag
@@ -394,7 +394,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    db_agent = DBAgent(db_name)
+    #db_agent = DBAgent(db_name)
 
     #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
 
