@@ -37,7 +37,8 @@ def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
     print(f"all items in table: {table_name}")
     if run_on_app_engine:
         for x in cursor:
-            test_logging_func(x)
+            line = ", ".join(x)
+            test_logging_func(line)
     else:
         for x in cursor:
             print(x)
@@ -419,7 +420,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = mysql.connector.connect(**sql_config)
     cursor = conn.cursor(buffered=True)
 
-    print_all_rows_of_table(cursor, "MP", run_on_app_engine=True)
+    print_all_rows_of_table(cursor, "MP", run_on_app_engine=run_on_app_engine)
 
     return
 
