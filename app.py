@@ -160,7 +160,7 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,sessionToken,notificationToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC', 'BA23PZ');")
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
     return database.select("SELECT * FROM Users;")
 
 
