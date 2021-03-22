@@ -6,7 +6,7 @@ class DBAgent:
     def __init__(
             self,
             name: str,
-            host: str = "35.190.194.63",
+            host: str = secret.get_version("db_host"),
             user: str = secret.get_version("db_user"),
             password: str = secret.get_version("db_pass")
     ):
@@ -30,6 +30,8 @@ class DBAgent:
             # reestablished
             "pool_recycle": 1800,  # 30 minutes
         }
+
+        print(f"host: {host}")
 
         # Extract host and port from db_host
         host_args = host.split(":")
