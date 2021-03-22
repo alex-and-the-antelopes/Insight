@@ -7,7 +7,9 @@ def init_tcp_connection_engine(db_config):
 
     db_user = secret.get_version("db_user", version_name="latest")
     db_pass = secret.get_version("db_pass", version_name="latest")
-    db_name = secret.get_version("db_name", version_name="latest")
+    # todo: check how to get this automatically
+    # db_name = secret.get_version("db_name", version_name="latest")
+    db_name = "bill_data"
     db_host = secret.get_version("db_host", version_name="latest")
     print(f"db_user:{db_user}")
     print(f"db_pass:{db_pass}")
