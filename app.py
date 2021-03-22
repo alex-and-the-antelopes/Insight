@@ -115,7 +115,7 @@ def unsafe_function(n):
 #     return jsonify(output)
 
 
-@app.route('/b/<bill_id>/get')
+@app.route('/bill/<bill_id>')
 def handle_request(bill_id):
     # not case-sensitive
 
