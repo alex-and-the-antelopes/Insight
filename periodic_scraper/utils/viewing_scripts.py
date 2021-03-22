@@ -16,7 +16,7 @@ sql_config = {
     "ssl_key": "../secrets/client-key.pem"
 }
 
-db_name = "bill_data"
+db_name = "bill_app_db"
 
 
 def print_tables_in_db(cursor):
