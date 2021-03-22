@@ -117,23 +117,18 @@ def unsafe_function(n):
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    # not case-sensitive
-
-    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
+    response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
     if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        return jsonify(str(response))
+        return jsonify({"error": "query_error"})
+    return jsonify(str(response))
+
 
 @app.route('/bills')
 def get_bills():
-    # not case-sensitive
-
     response = database.select("SELECT * FROM Bills;")
     if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        return jsonify(str(response))
+        return jsonify({"error": "query_error"})
+    return jsonify(str(response))
 
 
 @app.route('/top')
@@ -155,6 +150,7 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
+    # TODO REMOVE
     response = database.select("SELECT * FROM Users;")
     if response is None:
         return "None"
@@ -162,7 +158,6 @@ def db_testing():
         return str(response)
 
 
-# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
     """
