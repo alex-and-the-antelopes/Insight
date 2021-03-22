@@ -61,7 +61,7 @@ def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constitu
         current = 1
     else:
         current = 0
-    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
+    insert_command_string = f"INSERT INTO MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -390,14 +390,11 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     global db_name
     global db_agent
     db_name = "bill_data"
-    #set_db_params(run_on_app_engine)
 
-    conn = None#mysql.connector.connect(**sql_config)
-    cursor = None#conn.cursor(buffered=True)
+    conn = None
+    cursor = None
 
-    db_agent = DBAgent("bill_data")
-
-
+    db_agent = DBAgent(db_name)
 
     #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
     execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6001, 0, False)
