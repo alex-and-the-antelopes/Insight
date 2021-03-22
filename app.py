@@ -40,6 +40,7 @@ def space(n):
 # Returns the bill with given id in JSON form
 def find_bill(id):
     bill = core.Bill(
+        "1"
         "Sample bill",
         "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
         "1/1/2021",
