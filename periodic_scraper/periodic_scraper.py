@@ -14,7 +14,7 @@ import os
 import datetime
 
 import secret_manager as sm
-from google.cloud import logging
+import google.cloud.logging
 import logging
 
 
@@ -396,7 +396,7 @@ def set_db_params(run_on_app_engine):
 
 
 def test_logging_func():
-    logging_client = logging.Client()
+    logging_client = google.cloud.logging.Client()
 
     logging_client.get_default_handler()
     logging_client.setup_logging()
