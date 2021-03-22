@@ -373,6 +373,10 @@ def set_db_params(run_on_app_engine):
         db_pass = sm.get_version("db_pass", version_name="1")
         db_name = sm.get_version("db_name", version_name="2")
         db_host = sm.get_version("db_host", version_name="1")
+        test_logging_func(db_user)
+        test_logging_func(db_pass)
+        test_logging_func(db_name)
+        test_logging_func(db_host)
     else:
         with open("secrets/user_pass", 'r') as reader:
             db_pass = reader.read()
@@ -395,20 +399,18 @@ def set_db_params(run_on_app_engine):
     db_name = "bill_data"
 
 
-def test_logging_func():
+def test_logging_func(message):
     logging_client = google.cloud.logging.Client()
 
     logging_client.get_default_handler()
     logging_client.setup_logging(log_level=logging.INFO)
 
-    test_msg = "TEST MESSAGE FROM PERIODIC SCRAPER"
-    logging.warning(test_msg)
+    logging.warning(message)
 
 import email_sender
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
-    test_logging_func()
-    #set_db_params(run_on_app_engine)
+    set_db_params(run_on_app_engine)
 
     #email_sender.send_email("1robertchambers@gmail.com", "test subject", "test message from app engine")
 
