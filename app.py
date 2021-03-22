@@ -116,7 +116,7 @@ def unsafe_function(n):
 
 
 @app.route('/bill/<bill_id>')
-def handle_request(bill_id):
+def get_bill(bill_id):
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
@@ -126,7 +126,7 @@ def handle_request(bill_id):
         return jsonify(response)
 
 @app.route('/bills')
-def handle_request(bill_id):
+def get_bills(bill_id):
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills;")
