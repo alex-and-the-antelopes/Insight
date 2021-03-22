@@ -5,7 +5,7 @@ import secret_manager as secret
 class DBAgent:
     def __init__(
             self,
-            name: str,
+            name: str ,
             host: str = secret.get_version("db_host"),
             user: str = secret.get_version("db_user"),
             password: str = secret.get_version("db_pass")
@@ -44,7 +44,7 @@ class DBAgent:
                 password=password,  # e.g. "my-database-password"
                 host=hostname,  # e.g. "127.0.0.1"
                 port=port,  # e.g. 3306
-                database="bill_data",  # e.g. "my-database-name"
+                database=name,  # e.g. "my-database-name"
             ),
             **self.config
         )

@@ -1,5 +1,5 @@
 runtime: python37
-
+env: flex
 entrypoint: gunicorn -b :$PORT app:app
 
 vpc_access_connector:

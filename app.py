@@ -127,16 +127,25 @@ def get_bill(bill_id):
 
 @app.route('/bills')
 def get_bills():
-    return get_all_env()
+    # not case-sensitive
 
+    response = database.select("SELECT * FROM Bills WHERE billID = 1;")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        list = []
+        for res in response:
+            list.append(entry_to_json_dict(res))
+        return jsonify(str(list))
 
-def get_all_env():
-    l= []
-    l.append(secret.get_version("db_host"))
-    l.append(secret.get_version("db_user"))
-    l.append(secret.get_version("db_pass"))
-    l.append(secret.get_version("db_name"))
-    return str(l)
+def entry_to_json_dict(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": entry[3],
+        "date_added": entry[4],
+    }
+    return bill
 
 
 @app.route('/top')
