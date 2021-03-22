@@ -401,16 +401,16 @@ def test_logging_func():
     logging_client.get_default_handler()
     logging_client.setup_logging(log_level=logging.INFO)
 
-    test_msg = "TEST MESSAGE"
+    test_msg = "TEST MESSAGE FROM PERIODIC SCRAPER"
     logging.warning(test_msg)
 
 import email_sender
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
-    #test_logging_func()
+    test_logging_func()
     #set_db_params(run_on_app_engine)
 
-    email_sender.send_email("1robertchambers@gmail.com", "test subject", "test message from app engine")
+    #email_sender.send_email("1robertchambers@gmail.com", "test subject", "test message from app engine")
 
 
     #conn = mysql.connector.connect(**sql_config)

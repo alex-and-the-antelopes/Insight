@@ -1,5 +1,5 @@
-#import periodic_scraper as ps
-#ps.insert_and_update_data()
+import periodic_scraper as ps
+ps.insert_and_update_data()
 import google.cloud.logging
 import logging
 
@@ -13,4 +13,4 @@ def test_logging_func():
     logging.warning(test_msg)
 
 def main(data, context):
-    test_logging_func()
+    ps.insert_and_update_data()
