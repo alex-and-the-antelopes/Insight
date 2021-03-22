@@ -12,5 +12,7 @@ def test_logging_func():
     test_msg = "TEST MESSAGE"
     logging.warning(test_msg)
 
+
 def main(data, context):
     ps.insert_and_update_data()
+
