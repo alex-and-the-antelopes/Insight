@@ -54,7 +54,7 @@ class User(object):
         self.postcode = postcode
         self.session_token = session_token
 
-    def verify_password(self, password):
+    def verify_password(self, password) -> bool:
         """
         Given a password, check if it is correct.
         :param password: The (hashed) password to check.
@@ -62,7 +62,7 @@ class User(object):
         """
         return password == self.password_hash
 
-    def verify_token(self, token):
+    def verify_token(self, token) -> bool:
         """
         Given a token, check if it is correct.
         :param token: The (hashed) password to check.
@@ -70,14 +70,14 @@ class User(object):
         """
         return token == self.session_token
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Creates and returns a dictionary representation of the current User object.
         :return: A dictionary containing the attributes of the current User.
         """
         return vars(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Creates and returns a string representation of the current User object. The string contains the email, password
         hash, postcode, notification and session token of the User.
@@ -99,14 +99,14 @@ class ParliamentMember:
         self.area = area
         self.current = current
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Creates and returns a dictionary representation of the current ParliamentMember (MP) object.
         :return: A dictionary containing the attributes of the current ParliamentMember.
         """
         return vars(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Creates and returns a string representation of the current ParliamentMember object. The string contains the
         email, id, address, party id, photo path, phone number and area of the MP.
@@ -151,5 +151,5 @@ class Bill:
             self.img_url = get_img_url(CONFIG["invalid_img"])
 
     # Return self as key-value pair dict
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return vars(self)
