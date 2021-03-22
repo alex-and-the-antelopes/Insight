@@ -5,8 +5,7 @@ import parlpy.bills.bill_list_fetcher as blf
 import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
-
-import db_interactions as dbi
+from db_interactions import DBAgent
 
 import mysql.connector
 from mysql.connector.constants import ClientFlag
@@ -19,14 +18,16 @@ import secret_manager as sm
 import google.cloud.logging
 import logging
 
+db_agent = None
+
 
 # clear all rows and reset increment
 def clear_table(conn, cursor, table_name):
     #cursor.execute(f"DELETE FROM {db_name}.{table_name}")
     #cursor.execute(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
     #conn.commit()
-    dbi.interact(f"DELETE FROM {db_name}.{table_name}")
-    dbi.interact(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
+    db_agent.interact(f"DELETE FROM {db_name}.{table_name}")
+    db_agent.interact(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
 
 
 def clear_all_4_tables(conn, cursor):
@@ -38,7 +39,7 @@ def clear_all_4_tables(conn, cursor):
 
 def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
     #cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
-    cursor = dbi.select(f"SELECT * FROM {db_name}.{table_name}")
+    cursor = db_agent.select(f"SELECT * FROM {db_name}.{table_name}")
     print(f"all items in table: {table_name}")
     for x in cursor:
         line = ""
@@ -77,7 +78,7 @@ def execute_insert_mp_data_in_db(conn, cursor, first_name, second_name, constitu
     print(insert_command_string)
 
     #cursor.execute(insert_command_string)
-    dbi.interact(insert_command_string)
+    db_agent.interact(insert_command_string)
 
 
 # there are missing entries as package does not get dead members, but dead members ids may be refd in votes data
@@ -110,10 +111,10 @@ def insert_mp_data(conn, cursor):
 def is_in_field(conn, cursor, table, field, val, type):
     if type == "string":
         #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
-        cursor = dbi.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+        cursor = db_agent.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
     elif type == "int":
         #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
-        cursor = dbi.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
+        cursor = db_agent.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
     else:
         raise ValueError("unrecog type")
 
@@ -146,7 +147,7 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
     print(update_command_string)
 
     #cursor.execute(update_command_string)
-    dbi.interact(update_command_string)
+    db_agent.interact(update_command_string)
 
 
 # does not assume table is empty
@@ -176,7 +177,7 @@ def execute_insert_party_data(cursor, party_id, party_name):
     print(insert_command_string)
 
     #cursor.execute(insert_command_string)
-    dbi.interact(insert_command_string)
+    db_agent.interact(insert_command_string)
 
 
 # insert all party data and execute
@@ -205,7 +206,7 @@ def execute_update_party_data(cursor, party_id, party_name):
     update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id}"
 
     #cursor.execute(update_command_string)
-    dbi.interact(update_command_string)
+    db_agent.interact(update_command_string)
 
 
 def upsert_party_data(conn, cursor):
@@ -228,7 +229,7 @@ def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
     #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
-    dbi.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
     count = 0
     for row in cursor:
@@ -259,7 +260,7 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
           f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
     #cursor.execute(insertion_command_string)
-    dbi.interact(insertion_command_string)
+    db_agent.interact(insertion_command_string)
 
     # todo: remove?
     #conn.commit()
@@ -277,12 +278,12 @@ def execute_update_bill(conn, cursor, bill):
                             f"WHERE titleStripped = \"{bill.title_stripped}\""
     print(f"update command string {update_command_string}")
     #cursor.execute(update_command_string)
-    dbi.interact(update_command_string)
+    db_agent.interact(update_command_string)
 
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
     #cursor.execute(count_command_string)
-    dbi.select(count_command_string)
+    db_agent.select(count_command_string)
     for c in cursor:
         print(f"type count[0] {type(c[0])}")
         count = c[0]
@@ -303,7 +304,7 @@ def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bi
                             f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
     #print(f"insert_command_string {insert_command_string}")
     #cursor.execute(insert_command_string)
-    dbi.interact(insert_command_string)
+    db_agent.interact(insert_command_string)
 
 
 def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
@@ -377,9 +378,10 @@ def mock_datetime_pickle():
 
 def db_test_func(conn, cursor):
     #cursor.execute(f"SHOW tables IN {db_name}")
-    dbi.select(f"SHOW tables IN {db_name}")
+    db_agent.select(f"SHOW tables IN {db_name}")
     for x in cursor:
         print(x)
+
 
 sql_config = {}
 
@@ -397,11 +399,14 @@ def test_logging_func(message):
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     global db_name
+    global db_agent
     db_name = "bill_data"
     #set_db_params(run_on_app_engine)
 
     conn = None#mysql.connector.connect(**sql_config)
     cursor = None#conn.cursor(buffered=True)
+
+    db_agent = DBAgent()
 
     #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
     execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
