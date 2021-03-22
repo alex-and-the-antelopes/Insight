@@ -123,7 +123,7 @@ def get_bill(bill_id):
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
-        return jsonify(response)
+        return jsonify(str(response))
 
 @app.route('/bills')
 def get_bills():
@@ -133,7 +133,7 @@ def get_bills():
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
-        return jsonify(response)
+        return jsonify(str(response))
 
 
 @app.route('/top')
