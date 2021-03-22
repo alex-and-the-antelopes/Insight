@@ -53,7 +53,12 @@ def init_connection_engine():
 db = init_connection_engine()
 
 
-def interact(statement):
+def interact(statement: str):
+    """
+    Special function for INSERT or REMOVE statements, which do not require the database to return something.
+    :param statement: The statement to be carried out.
+    :return: None
+    """
     try:
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
@@ -66,9 +71,7 @@ def interact(statement):
         return None
 
 
-
-
-def select(statement):
+def select(statement: str) -> list or None:
     """ Special function for select or similar statements which require something to be returned from the db
     as we want to return a value.
     :param statement: The statement to be carried out.
