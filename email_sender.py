@@ -2,6 +2,7 @@ import smtplib
 import sys
 import re
 import secret_manager as secret
+from profanityfilter import ProfanityFilter
 
 
 def send_message(recipient_address: str, message: str) -> None:
@@ -31,7 +32,7 @@ def send_message(recipient_address: str, message: str) -> None:
 def create_message(subject: str = "Insight message!", main_body: str = None) -> str:
     """
     Combines the given subject and main body to formulate an email message. Returns a str capable of being transmitted
-    using smtplib and gmail.
+    using smtplib and gmail. Uses a profanity filter to censor offensive content.
     :param subject: The subject (title/header) of the email.
     :param main_body: The main body of the email.
     :return: The constructed email to be sent.
@@ -42,7 +43,8 @@ def create_message(subject: str = "Insight message!", main_body: str = None) -> 
     if type(main_body) is not str:  # Check the email body
         raise TypeError("Expected type <class 'str'> got type ", type(main_body), " for main_body")
     message = f'Subject: {subject}\n{main_body}'  # Bundle the contents in the appropriate format
-    # todo add profanity check
+    profanity_filter = ProfanityFilter()  # Create ProfanityFilter object
+    message = profanity_filter.censor(message)  # Censor offensive content from the message
     return message  # Return the constructed email
 
 
