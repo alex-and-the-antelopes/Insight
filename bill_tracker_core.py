@@ -88,6 +88,28 @@ class User(object):
         return user_str
 
 
+class ParliamentMember:
+    def __init__(self, mp_id, email):
+        self.mp_id = mp_id
+        self.email = email
+
+    def to_dict(self):
+        """
+        Creates and returns a dictionary representation of the current ParliamentMember (MP) object.
+        :return: A dictionary containing the attributes of the current ParliamentMember.
+        """
+        return vars(self)
+
+    def __str__(self):
+        """
+        Creates and returns a string representation of the current ParliamentMember object. The string contains the
+        email and id of the MP.
+        :return: A string (str) containing the ParliamentMember's information.
+        """
+        mp_str = f"id: {self.mp_id}, email: {self.email}"
+        return mp_str
+
+
 class Bill:
     """
     Represents a bill entry.
