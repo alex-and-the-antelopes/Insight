@@ -37,17 +37,6 @@ def clear_all_4_tables(conn, cursor):
     clear_table(conn, cursor, "Party")
 
 
-def print_all_rows_of_table(cursor, table_name, run_on_app_engine=True):
-    #cursor.execute(f"SELECT * FROM {db_name}.{table_name}")
-    cursor = db_agent.select(f"SELECT * FROM {db_name}.{table_name}")
-    print(f"all items in table: {table_name}")
-    for x in cursor:
-        line = ""
-        for i in x:
-            line += str(i) + ", "
-
-        print(line)
-
 
 
 def get_names_from_full_name(name_display):
@@ -376,12 +365,17 @@ def mock_datetime_pickle():
     pass
 
 
-def db_test_func():
-    table_name = "MP"
-
+def db_describe_table(table_name):
     description = db_agent.select(f"DESCRIBE {table_name}")
     print(f"{table_name} table structure")
     for x in description:
+        print(x)
+
+
+def print_all_rows_of_table(table_name):
+    rows = db_agent.select(f"SELECT * FROM {table_name}")
+    print(f"all items in table {table_name}:")
+    for x in rows:
         print(x)
 
 
@@ -401,12 +395,15 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None#mysql.connector.connect(**sql_config)
     cursor = None#conn.cursor(buffered=True)
 
-    db_agent = DBAgent("bill_app_db")
+    db_agent = DBAgent("bill_data")
+
+
 
     #execute_update_mp_data_in_db(cursor, conn, "test_first", "test_second", "none", "none", 0, 0, False)
-    #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6000, 0, False)
+    execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second", "test", 6001, 0, False)
 
-    db_test_func()
+    #db_describe_table("MP")
+    print_all_rows_of_table("MP")
 
     #cursor.close()
     #conn.close()
