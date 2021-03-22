@@ -89,9 +89,15 @@ class User(object):
 
 
 class ParliamentMember:
-    def __init__(self, mp_id, email):
+    def __init__(self, mp_id, email, address, party_id, photo_path, phone_num, area, current):
         self.mp_id = mp_id
         self.email = email
+        self.address = address
+        self.party_id = party_id
+        self.photo_path = photo_path
+        self.phone_num = phone_num
+        self.area = area
+        self.current = current
 
     def to_dict(self):
         """
@@ -103,10 +109,12 @@ class ParliamentMember:
     def __str__(self):
         """
         Creates and returns a string representation of the current ParliamentMember object. The string contains the
-        email and id of the MP.
+        email, id, address, party id, photo path, phone number and area of the MP.
         :return: A string (str) containing the ParliamentMember's information.
         """
-        mp_str = f"id: {self.mp_id}, email: {self.email}"
+        mp_str = f"id: {self.mp_id}, email: {self.email}, address: {self.address}, party id: {self.party_id}, photo " \
+                 f"path: {self.photo_path}, phone number: {self.phone_num}, area: {self.area} and current:" \
+                 f" {self.current}"
         return mp_str
 
 
