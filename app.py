@@ -304,7 +304,7 @@ def get_mp_votes():
         return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
     mp_votes = []
-    for bill in bill_votes:  # Iterate through the list of bills voted on and keep the relevant votes
+    for bill in bill_votes:  # Iterate through the list of bills voted
         bill_details = {"id": bill[0], "positive": bill[1]}
         mp_votes.append(bill_details)
     return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
@@ -317,7 +317,6 @@ def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
     return send_file(CONFIG["img_dir"] + name)
-
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
