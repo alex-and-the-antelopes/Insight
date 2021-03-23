@@ -4,7 +4,6 @@ import bill_tracker_core as core
 import db_interactions as database
 import email_sender
 import logging
-import random
 import string
 import random
 
@@ -123,7 +122,7 @@ def rand_bills():
         if response is None:
             return jsonify({"error": "Query failed"})
         else:
-            list.append(entry_to_json_dict(response))
+            list.append(entry_to_json_dict(response[0]))
     return jsonify(str(list))
 
 
