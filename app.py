@@ -35,15 +35,8 @@ def mp_voted_bills(mp_id):
 
     bill_list = database.select(f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes "
                                 f"RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID={mp_id};")
+    return str(bill_list)
 
-    if not bill_list:
-        return jsonify({"error": "query_failed"})  # Query failed
-
-    bill_result = []  # Holds the bills in the appropriate format
-    for bill in bill_list:  # Iterate thru each bill and add it to the final list
-        bill_result.append(entry_to_json_dict_mp_vote_bill(bill))
-
-    return jsonify(str(bill_result))  # Return a string representation of the list of bills
 
 
 @app.route('/bills')
