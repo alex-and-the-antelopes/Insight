@@ -130,10 +130,10 @@ def get_bills():
 @app.route('/randbills')
 def rand_bills():
     # not case-sensitive
-    bill_list = []
     list = []
     for i in range(10):
-        response = database.select("SELECT * FROM Bills WHERE billID = {random.randint(1,2028)};")
+        bill_id = random.randint(1,2028);
+        response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
         if response is None:
             return jsonify({"error": "Query failed"})
         else:
