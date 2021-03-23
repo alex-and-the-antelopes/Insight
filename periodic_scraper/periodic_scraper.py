@@ -386,6 +386,11 @@ sql_config = {}
 db_name = ""
 
 
+def write_to_log_file(message):
+    fs = gcsfs.GCSFileSystem(project="bills-app-305000")
+    log_filename = "log_file.txt"
+    with fs.open("bills-app-305000.appspot.com" + "/" + log_filename, "wb") as handle:
+        handle.write("message")
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
@@ -399,8 +404,9 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     #bills_overview = blf.BillsOverview()
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
-    print(f"datatime to pickle: {mock_datetime}")
+    print(f"datetime to pickle: {mock_datetime}")
     #bills_overview.mock_datetime_last_scraped(mock_datetime)
+    """
     fs = gcsfs.GCSFileSystem(project="bills-app-305000")
 
     test_filename =  "test_file.txt"
@@ -411,6 +417,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
         read_datetime = pickle.load(handle)
 
     print(f"read datetime: {read_datetime}")
+    """
 
     """
     if completely_fresh:
