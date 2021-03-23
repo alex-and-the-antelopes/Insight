@@ -311,36 +311,6 @@ def get_mp_votes():
     return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
 
 
-def clean_mp_votes(bill_votes: list) -> list:
-    """
-    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
-    readings.
-    :param bill_votes: The list of bill votes to clean/filter.
-    :return: The filtered list of bill votes.
-    """
-    clean_votes = []
-    prev_id = '-1'  # Used to filter out deprecated bills from the final list
-    for bill in bill_votes:
-        if "amendments" in bill[2]:  # Ignore amendments
-            continue
-        if prev_id == bill[0]:
-            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
-        clean_votes.append(bill)  # Add the bill to the cleaned list
-        prev_id = bill[0]  # Update the previous id for next iteration
-    return clean_votes
-
-
-def fetch_mp_votes(mp_id: str) -> list:
-    """
-    Constructs and returns a list of all of the MP's votes on bills from the database.
-    :param mp_id: The id of the ParliamentMember.
-    :return: A list of all the MP's votes on bills.
-    """
-    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
-    bill_votes = database.select(db_statement)
-    return bill_votes
-
-
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
@@ -438,6 +408,36 @@ def verify_user(email: str, session_token: str) -> bool:
     if user and user.verify_token(session_token):
         return True  # Login successful
     return False  # Tokens do not match
+
+
+def clean_mp_votes(bill_votes: list) -> list:
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes
+
+
+def fetch_mp_votes(mp_id: str) -> list:
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
+    bill_votes = database.select(db_statement)
+    return bill_votes
 
 
 if __name__ == '__main__':
