@@ -297,8 +297,12 @@ def get_mp_votes():
     if not bill_votes:
         return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
 
-    # Return {list of billIds and positive/negative}
-    return jsonify({"success": "list of bills here"})
+    # Put it in the final format:
+    mp_votes = []
+    for bill in bill_votes:
+        bill_details = {"id": bill[0], "positive": bill[1]}
+        mp_votes.append(bill_details)
+    return jsonify({"success": str(mp_votes)})  # Return list of {billID and positive}
 
 
 def fetch_mp_votes(mp_id: str) -> list:
