@@ -18,7 +18,7 @@ import secret_manager as sm
 import google.cloud.logging
 import logging
 
-db_agent = None
+#db_agent = None
 
 
 # clear all rows and reset increment
@@ -388,7 +388,7 @@ db_name = ""
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
     global db_name
-    global db_agent
+    #global db_agent
     db_name = "bill_data"
 
     conn = None
