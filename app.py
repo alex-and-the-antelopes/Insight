@@ -141,7 +141,7 @@ def register():
         return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
         return jsonify({"error": "notification_token_error"})
-    if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
+    if type(postcode) is not str or len(postcode) < 5 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     if not email_sender.is_valid_email(email):  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
@@ -269,11 +269,10 @@ def update_postcode():
     if not verify_user(email, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    if type(postcode) is not str or len(postcode) < 6 or len(postcode) > 8:  # Check that the postcode is valid
+    if type(postcode) is not str or len(postcode) < 5 or len(postcode) > 8:  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
-
     try:
-        database.interact(f"UPDATE User SET postcode='{postcode}'")  # Query to update the user's postcode
+        database.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{email}';")  # Update user's postcode
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
