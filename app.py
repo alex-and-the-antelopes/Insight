@@ -188,6 +188,8 @@ def send_message():
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
+    return jsonify({"success": "email_sent"})  # todo REMOVE BEFORE FINAL VERSION. ONLY USED FOR PROTOTYPE
+
     mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
 
     if mp:  # If the MP was successfully constructed
