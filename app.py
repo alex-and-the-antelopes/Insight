@@ -62,7 +62,7 @@ def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": entry[6],
+        "description": parse_double_quote(str(entry[6])),
         "date_added": entry[4],
     }
     return bill  # Todo rework (use todict) and comment
