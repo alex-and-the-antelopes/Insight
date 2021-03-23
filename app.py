@@ -6,6 +6,7 @@ import email_sender
 import logging
 import random
 import string
+import random
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -105,6 +106,7 @@ def get_bill(bill_id):
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
+
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -115,6 +117,7 @@ def get_bill(bill_id):
 def get_bills():
     # not case-sensitive
 
+
     response = database.select("SELECT * FROM Bills;")
     if response is None:
         return jsonify({"error": "Query failed"})
@@ -123,6 +126,20 @@ def get_bills():
         for i in range(10):
             list.append(entry_to_json_dict(response[i]))
         return jsonify(str(list))
+
+@app.route('/randbills')
+def rand_bills():
+    # not case-sensitive
+    bill_list = []
+    list = []
+    for i in range(10):
+        response = database.select("SELECT * FROM Bills WHERE billID = {random.randint(1,2028)};")
+        if response is None:
+            return jsonify({"error": "Query failed"})
+        else:
+            list.append(response)
+    return jsonify(str(list))
+
 
 
 def entry_to_json_dict(entry):
