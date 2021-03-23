@@ -396,7 +396,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    bills_overview = blf.BillsOverview()
+    #bills_overview = blf.BillsOverview()
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
     print(f"datatime to pickle: {mock_datetime}")
