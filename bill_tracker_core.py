@@ -54,7 +54,16 @@ class User(object):
         self.postcode = postcode
         self.session_token = session_token
 
-    def verify_password(self, password) -> bool:
+    def update_postcode(self, postcode: str) -> None:
+        """
+        Updates the user's postcode.
+        :param postcode: The postcode to be changed.
+        :return: None.
+        """
+        self.postcode = postcode
+        return
+
+    def verify_password(self, password: str) -> bool:
         """
         Given a password, check if it is correct.
         :param password: The (hashed) password to check.
@@ -62,7 +71,7 @@ class User(object):
         """
         return password == self.password_hash
 
-    def verify_token(self, token) -> bool:
+    def verify_token(self, token: str) -> bool:
         """
         Given a token, check if it is correct.
         :param token: The (hashed) password to check.
@@ -154,4 +163,8 @@ class Bill:
 
     # Return self as key-value pair dict
     def to_dict(self) -> dict:
+        """
+        Creates and returns a dictionary representation of the current Bill object.
+        :return: A dictionary containing the attributes of the current Bill.
+        """
         return vars(self)
