@@ -14,6 +14,7 @@ CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
+
 # ////// End region //////
 
 
@@ -43,6 +44,7 @@ def mp_voted_bills(mp_id):
             list.append(entry_to_json_dict_mp_vote_bill(response[i]))
     return jsonify(str(list))
 
+
 @app.route('/bills')
 def bills():
     bill_list = []
@@ -62,7 +64,7 @@ def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": parse_double_quote(str(entry[6])),
+        "description": parse_double_quote((entry[6])),
         "date_added": entry[4],
     }
     return bill  # Todo rework (use todict) and comment
@@ -77,10 +79,12 @@ def entry_to_json_dict_mp_vote_bill(entry):
     }
     return bill  # Todo rework (use todict) and comment
 
+
 def parse_double_quote(message):
     if "\"" in message:
         message = message.replace("\"", "'")
     return message
+
 
 @app.route('/')
 def landing_page():
