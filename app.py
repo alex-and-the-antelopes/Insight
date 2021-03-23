@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
-import db_interactions
+import db_interactions as database
 import email_sender
 import logging
 import random
@@ -12,7 +12,8 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-database = db_interactions.DBAgent("bill_app_db")  # initialises database pool as a global variable
+
+# initialises database pool as a global variable
 
 # example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
 
@@ -101,18 +102,28 @@ def unsafe_function(n):
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
-    if not response:
-        return jsonify({"error": "query_error"})
-    return jsonify(str(response))
-
+    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        return jsonify(entry_to_json_dict(response[0]))
 
 @app.route('/bills')
 def get_bills():
-    response = database.select("SELECT * FROM Bills;")
-    if not response:
-        return jsonify({"error": "query_error"})
-    return jsonify(str(response))
+    # not case-sensitive
+
+    response = database.select("SELECT * FROM Bills WHERE billID = 1;")
+    return response
+
+
+def entry_to_json_dict(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": entry[3],
+        "date_added": entry[4],
+    }
+    return bill
 
 
 @app.route('/top')
@@ -134,12 +145,8 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    # TODO REMOVE
-    response = database.select("SELECT * FROM Users;")
-    if response is None:
-        return "None"
-    else:
-        return str(response)
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
+    return database.select("SELECT * FROM Users;")
 
 
 @app.route('/login', methods=['POST'])
