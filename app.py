@@ -44,7 +44,7 @@ def get_bill(bill_id):
     response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict(response[0]))
-    return jsonify({"error": "Query failed"})
+    return jsonify({"error": "Query failed"})  # todo add docstring
 
 
 @app.route('/bills/<mp_id>')
@@ -79,7 +79,8 @@ def entry_to_json_dict(entry):
         "description": entry[6],
         "date_added": entry[4],
     }
-    return bill
+    return bill  # Todo rework (use todict) and comment
+
 
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
@@ -88,19 +89,7 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "description": entry[2],
         "date_added": entry[3],
     }
-    return bill
-
-
-@app.route('/top')
-def top():
-    result = get_top_bills()
-    # Construct output
-    output = {
-        "result": result
-    }
-
-    # Convert to json and return
-    return jsonify(output)
+    return bill  # Todo rework (use todict) and comment
 
 
 @app.route('/')
@@ -113,7 +102,7 @@ def db_testing():
     database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
                       "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
                       "'Ga70JuPC');")
-    return database.select("SELECT * FROM Users;")
+    return database.select("SELECT * FROM Users;")  # todo remove
 
 
 @app.route('/login', methods=['POST'])
@@ -283,12 +272,11 @@ def get_local_mp():
     return jsonify({"error": "construct_mp_error"})  # Return error message
 
 
-# Deliver requested resource.
-# todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
 def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
+    #  generalise so works with filetypes other than image
     return send_file(CONFIG["img_dir"] + name)
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
