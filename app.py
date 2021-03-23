@@ -104,7 +104,6 @@ def unsafe_function(n):
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     # not case-sensitive
-
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
 
     if response is None:
@@ -116,8 +115,6 @@ def get_bill(bill_id):
 @app.route('/bills')
 def get_bills():
     # not case-sensitive
-
-
     response = database.select("SELECT * FROM Bills;")
     if response is None:
         return jsonify({"error": "Query failed"})
@@ -126,6 +123,7 @@ def get_bills():
         for i in range(10):
             list.append(entry_to_json_dict(response[i]))
         return jsonify(str(list))
+
 
 @app.route('/randbills')
 def rand_bills():
@@ -139,7 +137,6 @@ def rand_bills():
         else:
             list.append(response)
     return jsonify(str(list))
-
 
 
 def entry_to_json_dict(entry):
@@ -171,7 +168,9 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
+                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
+                      "'Ga70JuPC');")
     return database.select("SELECT * FROM Users;")
 
 
@@ -344,7 +343,7 @@ def is_new_address(email_address: str) -> bool:
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the given email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
