@@ -114,7 +114,6 @@ def get_bill(bill_id):
 
 @app.route('/bills')
 def bills():
-    # not case-sensitive
     list = []
     for i in range(10):
         bill_id = random.randint(1, 2028);
