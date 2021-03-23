@@ -18,7 +18,8 @@ import pickle
 import secret_manager as sm
 import google.cloud.logging
 import logging
-import gcsfs
+#import gcsfs
+
 
 #db_agent = None
 
@@ -386,11 +387,14 @@ sql_config = {}
 db_name = ""
 
 
+"""
+
 def write_to_log_file(message):
     fs = gcsfs.GCSFileSystem(project="bills-app-305000")
     log_filename = "log_file.txt"
     with fs.open("bills-app-305000.appspot.com" + "/" + log_filename, "wb") as handle:
         handle.write("message")
+"""
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
