@@ -102,25 +102,34 @@ def unsafe_function(n):
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
+    # not case-sensitive
+
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
         return jsonify(entry_to_json_dict(response[0]))
 
+
 @app.route('/bills')
 def get_bills():
     # not case-sensitive
 
-    response = database.select("SELECT * FROM Bills WHERE billID = 1;")
-    return str(response)
+    response = database.select("SELECT * FROM Bills;")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        list = []
+        for i in range(10):
+            list.append(entry_to_json_dict(response[i]))
+        return jsonify(str(list))
 
 
 def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": entry[3],
+        "description": entry[6],
         "date_added": entry[4],
     }
     return bill
