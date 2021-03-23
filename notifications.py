@@ -92,9 +92,10 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print("No tokens.txt file found. Notifications tokens need to be in the tokens.txt file", file=sys.stderr)
     token = "ExponentPushToken[" + token + "]"  # Convert to valid format for push tokens
-    user1 = User("Rob", "pass1", token, "AB2 AB2", "SESSION TOKEN")
-    user2 = User("Joe", "pass2", token, "AB2 AB2", "SESSION TOKEN")
-    user3 = User("Alex", "pass3", token, "AB2 AB2", "SESSION TOKEN")
-    users = [user1, user2, user3]
-    send_notification(user1, "Test 4", "Example message body for user test")  # Send to single user
-    send_notification_to_clients(users, "Testing for many clients", "Example message body")  # Send to list of users
+    user1 = User("joehd@emai.com", "pass1", token, "AB24EZ", "asaQSA2")
+    # user2 = User("Joe", "pass2", token, "AB2 AB2", "SESSION TOKEN")
+    # user3 = User("Alex", "pass3", token, "AB2 AB2", "SESSION TOKEN")
+    # users = [user1, user2, user3]
+    # send_notification(user1, "Test 4", "Example message body for user test")  # Send to single user
+    # send_notification_to_clients(users, "Testing for many clients", "Example message body")  # Send to list of users
+    send_notification(user1, "Insight Update!", "New bills have been updated. Take 5 minutes to go through them.")
