@@ -72,10 +72,10 @@ def entry_to_json_dict(entry):
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
-        "title": entry[1],
+        "title": parse_double_quote(str(entry[1])),
         "description": parse_double_quote(str(entry[2])),
         "date_added": entry[3],
-        "link": entry[4]
+        "link": parse_double_quote(str(entry[4]))
     }
     return bill  # Todo rework (use todict) and comment
 
