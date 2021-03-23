@@ -419,8 +419,9 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
     query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
     if query:
         mp_info = query[0]  # Extract the MP information
-        parliament_member = core.ParliamentMember(mp_info[0], mp_info[3], mp_info[4], mp_info[5], mp_info[6],
-                                                  mp_info[7], mp_info[8], mp_info[9])  # Construct MP object
+        # Construct MP object:
+        parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
+                                                  mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
     return parliament_member
 
 
