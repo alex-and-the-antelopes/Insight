@@ -58,7 +58,7 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            return str(conn.execute(statement))
+            return str(conn.execute(statement).fetchall())
     except Exception as e:
     # If something goes wrong, handle the error in this section. This might
     # involve retrying or adjusting parameters depending on the situation.
