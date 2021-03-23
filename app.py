@@ -359,14 +359,12 @@ def fetch_mp_votes(mp_id: str) -> list:
     return bill_votes
 
   
-def get_MP_id_for_pc(pc: str):
-    const = pp_constituency.get_constituencies_from_post_code(pc)
+def fetch_mp_by_postcode(postcode: str) -> int:
 
-    if len(const) == 0:
-        raise KeyError(f"Found no constituencies for postcode '{pc}'.")
-    if len(const) > 1:
-        raise KeyError(f"Postcode '{pc}' too vague: too many constituencies.")
-    return const[0]["currentRepresentation"]["member"]["value"]["id"]
+    constituency = pp_constituency.get_constituencies_from_post_code(postcode)  # Get the constituency from ParlPy
+    if not constituency:
+        raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
+    return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
 
 
 if __name__ == '__main__':
