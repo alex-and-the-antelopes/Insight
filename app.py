@@ -120,8 +120,10 @@ def bills():
     if num_of_bills is None:
         return jsonify({"error": "Query failed"})
     else:
+        num_of_bills = str(num_of_bills)
+        num_of_bills = num_of_bills.split(":")[0]
         for i in range(10):
-            bill_id = random.randint(1, int(str(num_of_bills[0])));
+            bill_id = random.randint(1, int(num_of_bills[0]));
             response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
             if response is None:
                 return jsonify({"error": "Query failed"})
