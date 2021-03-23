@@ -128,7 +128,7 @@ def get_bills():
     # not case-sensitive
 
     response = database.select("SELECT * FROM Bills WHERE billID = 1;")
-    return response
+    return str(response)
 
 
 def entry_to_json_dict(entry):
