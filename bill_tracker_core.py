@@ -71,7 +71,7 @@ class User(object):
         """
         return password == self.password_hash
 
-    def verify_token(self, token) -> bool:
+    def verify_token(self, token: str) -> bool:
         """
         Given a token, check if it is correct.
         :param token: The (hashed) password to check.
@@ -163,4 +163,8 @@ class Bill:
 
     # Return self as key-value pair dict
     def to_dict(self) -> dict:
+        """
+        Creates and returns a dictionary representation of the current Bill object.
+        :return: A dictionary containing the attributes of the current Bill.
+        """
         return vars(self)
