@@ -105,7 +105,6 @@ def unsafe_function(n):
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     # not case-sensitive
-
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
 
     if response is None:
@@ -156,8 +155,9 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    database.interact(
-        "INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
+                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
+                      "'Ga70JuPC');")
     return database.select("SELECT * FROM Users;")
 
 
@@ -291,40 +291,10 @@ def get_mp_votes():
         return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
     mp_votes = []
-    for bill in bill_votes:  # Iterate through the list of bills voted on and keep the relevant votes
+    for bill in bill_votes:  # Iterate through the list of bills voted
         bill_details = {"id": bill[0], "positive": bill[1]}
         mp_votes.append(bill_details)
     return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
-
-
-def clean_mp_votes(bill_votes: list) -> list:
-    """
-    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
-    readings.
-    :param bill_votes: The list of bill votes to clean/filter.
-    :return: The filtered list of bill votes.
-    """
-    clean_votes = []
-    prev_id = '-1'  # Used to filter out deprecated bills from the final list
-    for bill in bill_votes:
-        if "amendments" in bill[2]:  # Ignore amendments
-            continue
-        if prev_id == bill[0]:
-            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
-        clean_votes.append(bill)  # Add the bill to the cleaned list
-        prev_id = bill[0]  # Update the previous id for next iteration
-    return clean_votes
-
-
-def fetch_mp_votes(mp_id: str) -> list:
-    """
-    Constructs and returns a list of all of the MP's votes on bills from the database.
-    :param mp_id: The id of the ParliamentMember.
-    :return: A list of all the MP's votes on bills.
-    """
-    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
-    bill_votes = database.select(db_statement)
-    return bill_votes
 
 
 # Deliver requested resource.
@@ -334,7 +304,6 @@ def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
     return send_file(CONFIG["img_dir"] + name)
-
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
@@ -360,8 +329,7 @@ def is_new_address(email_address: str) -> bool:
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database.select(
-        f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the given email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
@@ -406,8 +374,9 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
     query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
     if query:
         mp_info = query[0]  # Extract the MP information
-        parliament_member = core.ParliamentMember(mp_info[0], mp_info[3], mp_info[4], mp_info[5], mp_info[6],
-                                                  mp_info[7], mp_info[8], mp_info[9])  # Construct MP object
+        # Construct MP object:
+        parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
+                                                  mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
     return parliament_member
 
 
@@ -426,6 +395,37 @@ def verify_user(email: str, session_token: str) -> bool:
     return False  # Tokens do not match
 
 
+def clean_mp_votes(bill_votes: list) -> list:
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes
+
+
+def fetch_mp_votes(mp_id: str) -> list:
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
+    bill_votes = database.select(db_statement)
+    return bill_votes
+
+  
+  
 def get_MP_id_for_pc(pc: str):
     const = pp_constituency.get_constituencies_from_post_code(pc)
 
