@@ -360,7 +360,11 @@ def fetch_mp_votes(mp_id: str) -> list:
 
   
 def fetch_mp_by_postcode(postcode: str) -> int:
-
+    """
+    Find and return the MP of the constituency, based on the given postcode.
+    :param postcode: The postcode being searched.
+    :return: The id of the MP for the constituency.
+    """
     constituency = pp_constituency.get_constituencies_from_post_code(postcode)  # Get the constituency from ParlPy
     if not constituency:
         raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
