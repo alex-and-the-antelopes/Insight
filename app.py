@@ -49,15 +49,15 @@ def get_bill(bill_id):
 
 @app.route('/bills')
 def bills():
-    list = []
+    bill_list = []
     for i in range(10):
-        bill_id = random.randint(1, 2028);
-        response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
-        if response is None:
-            return jsonify({"error": "Query failed"})
+        bill_id = random.randint(1, 2028)
+        response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
+        if response:
+            bill_list.append(entry_to_json_dict(response[0]))  # Add the bill to the bill list
         else:
-            list.append(entry_to_json_dict(response[0]))
-    return jsonify(str(list))
+            return jsonify({"error": "Query failed"})
+    return jsonify(str(bill_list))
 
 
 def entry_to_json_dict(entry):
