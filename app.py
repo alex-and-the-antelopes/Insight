@@ -32,12 +32,16 @@ def mp_voted_bills(mp_id):
     :param mp_id:
     :return: A list of bills voted by the given MP, in a suitable format.
     """
-
-    bill_list = database.select(f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes "
-                                f"RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID={mp_id};")
-    return str(bill_list)
-
-
+    list = []
+    # returns 10 bills for a given mp_id
+    response = database.select(
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        for i in range(10):
+            list.append(entry_to_json_dict_mp_vote_bill(response[i]))
+    return jsonify(str(list))
 
 @app.route('/bills')
 def bills():
@@ -68,11 +72,14 @@ def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": entry[2],
+        "description": parse_double_quote(entry[2]),
         "date_added": entry[3],
     }
     return bill  # Todo rework (use todict) and comment
 
+def parse_double_quote(message):
+    message.replace("\"", "'")
+    return message
 
 @app.route('/')
 def landing_page():
