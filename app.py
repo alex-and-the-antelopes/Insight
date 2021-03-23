@@ -299,13 +299,30 @@ def get_mp_votes():
     bill_votes = fetch_mp_votes(mp_id)  # Get the MP's votes on the bills
     if not bill_votes:
         return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
-
+    # Clean list of bills
+    bill_votes = clean_mp_votes(bill_votes)
+    if not bill_votes:
+        return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
     mp_votes = []
-    for bill in bill_votes:
+    for bill in bill_votes:  # Iterate through the list of bills voted on and keep the relevant votes
         bill_details = {"id": bill[0], "positive": bill[1]}
         mp_votes.append(bill_details)
-    return jsonify({"success": str(mp_votes)})  # Return list of {billID and positive}
+    return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
+
+
+def clean_mp_votes(bill_votes: list) -> list:
+
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes
 
 
 def fetch_mp_votes(mp_id: str) -> list:
