@@ -36,7 +36,7 @@ def mp_voted_bills(mp_id):
     list = []
     # returns 10 bills for a given mp_id
     response = database.select(
-        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, link FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
