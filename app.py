@@ -47,6 +47,15 @@ def get_bill(bill_id):
     return jsonify({"error": "Query failed"})
 
 
+@app.route('/bills/<mp_id>')
+def mp_voted_bills(mp_id):
+    mp_id = 1423
+    list = []
+    #returns 10 bills for a given mp_id
+    response = database.select(f"SELECT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+    return str(response)
+
+
 @app.route('/bills')
 def bills():
     bill_list = []
