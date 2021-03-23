@@ -2,9 +2,9 @@ from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
+import parlpy.utils.constituency as pp_constituency
 import email_sender
 import logging
-import random
 import string
 import random
 
@@ -13,6 +13,7 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
+
 
 # initialises database pool as a global variable
 
@@ -113,29 +114,15 @@ def get_bill(bill_id):
 
 
 @app.route('/bills')
-def get_bills():
-    # not case-sensitive
-    response = database.select("SELECT * FROM Bills;")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        list = []
-        for i in range(10):
-            list.append(entry_to_json_dict(response[i]))
-        return jsonify(str(list))
-
-
-@app.route('/randbills')
-def rand_bills():
-    # not case-sensitive
+def bills():
     list = []
     for i in range(10):
-        bill_id = random.randint(1,2028);
+        bill_id = random.randint(1, 2028);
         response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
         if response is None:
             return jsonify({"error": "Query failed"})
         else:
-            list.append(response)
+            list.append(entry_to_json_dict(response[0]))
     return jsonify(str(list))
 
 
@@ -436,6 +423,17 @@ def fetch_mp_votes(mp_id: str) -> list:
     db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
     bill_votes = database.select(db_statement)
     return bill_votes
+
+  
+  
+def get_MP_id_for_pc(pc: str):
+    const = pp_constituency.get_constituencies_from_post_code(pc)
+
+    if len(const) == 0:
+        raise KeyError(f"Found no constituencies for postcode '{pc}'.")
+    if len(const) > 1:
+        raise KeyError(f"Postcode '{pc}' too vague: too many constituencies.")
+    return const[0]["currentRepresentation"]["member"]["value"]["id"]
 
 
 if __name__ == '__main__':
