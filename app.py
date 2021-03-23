@@ -118,12 +118,8 @@ def mp_voted_bills(mp_id):
     list = []
     #returns 10 bills for a given mp_id
     response = database.select(f"SELECT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        for i in range(10):
-            list.append(entry_to_json_dict(response[i]))
-    return jsonify(str(list))
+    return str(response)
+
 
 @app.route('/bills')
 def bills():
