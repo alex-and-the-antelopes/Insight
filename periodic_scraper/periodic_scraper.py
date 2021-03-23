@@ -401,14 +401,11 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     #db_describe_table("MP")
     #print_all_rows_of_table("MP")
 
-    result = db_agent.select(f"SELECT * FROM {db_name}.Bills;")
+    for i in range(10):
+        result = db_agent.select(f"SELECT titleStripped FROM {db_name}.Bills WHERE billID={i};")
 
-    print("got result")
-    print(result)
-
-    for i in result:
-        print("result:")
-        print(i)
+        print(f"got result {i}")
+        print(result)
 
     print(db_agent.select(f"SELECT * FROM {db_name}.MP;"))
     print(db_agent.select(f"SELECT * FROM {db_name}.Party;"))
