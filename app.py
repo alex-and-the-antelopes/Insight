@@ -50,12 +50,10 @@ def bills():
     bill_list = []
     for i in range(10):
         bill_id = random.randint(1, 2028)
-        response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
-
+        response = database.select(f"SELECT billID, titleStripped,shortDesc, dateAdded FROM Bills WHERE billID='{bill_id}';")
         if not response:
             return jsonify({"error": "query_failed"})  # Query failed
-
-        bill_list.append(entry_to_json_dict(response[0]))  # Add the bill to the bill list
+        bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
     return jsonify(str(bill_list))  # todo add docstring
 
@@ -64,7 +62,7 @@ def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": parse_double_quote((entry[6])),
+        "description": parse_double_quote(str(entry[6])),
         "date_added": entry[4],
     }
     return bill  # Todo rework (use todict) and comment
