@@ -276,8 +276,12 @@ def send_message():
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
-@app.route('/mp_bills/', methods=['POST'])
+@app.route('/mp_bills', methods=['POST'])
 def get_mp_votes():
+    """
+    Fetches all of the MP's votes on bills from the database and returns it in a suitable format.
+    :return: A list of the MP's votes.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
@@ -288,7 +292,6 @@ def get_mp_votes():
     if not verify_user(email, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    # todo Add verification
     if not fetch_mp(mp_id):  # Check if mp_id exists
         return jsonify({"error": "mp_id_error"})  # Return an error if the mp does not exist
 
@@ -306,7 +309,12 @@ def get_mp_votes():
 
 
 def fetch_mp_votes(mp_id: str) -> list:
-    db_statement = f"SELECT billID, positive FROM MPVotes WHERE mpID='{mp_id}'"
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
     bill_votes = database.select(db_statement)
     return bill_votes
 
