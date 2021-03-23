@@ -2,6 +2,7 @@ from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
+import parlpy.utils.constituency as pp_constituency
 import email_sender
 import logging
 import string
@@ -12,6 +13,7 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
+
 
 # initialises database pool as a global variable
 
@@ -159,7 +161,8 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
+    database.interact(
+        "INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
     return database.select("SELECT * FROM Users;")
 
 
@@ -332,7 +335,8 @@ def is_new_address(email_address: str) -> bool:
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
+    query = database.select(
+        f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
@@ -395,6 +399,16 @@ def verify_user(email: str, session_token: str) -> bool:
     if user and user.verify_token(session_token):
         return True  # Login successful
     return False  # Tokens do not match
+
+
+def get_MP_id_for_pc(pc: str):
+    const = pp_constituency.get_constituencies_from_post_code(pc)
+
+    if len(const) == 0:
+        raise KeyError(f"Found no constituencies for postcode '{pc}'.")
+    if len(const) > 1:
+        raise KeyError(f"Postcode '{pc}' too vague: too many constituencies.")
+    return const[0]["currentRepresentation"]["member"]["value"]["id"]
 
 
 if __name__ == '__main__':
