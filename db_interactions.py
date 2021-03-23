@@ -5,7 +5,7 @@ import secret_manager as secret
 def init_tcp_connection_engine(db_config):
     db_user = secret.get_version("db_user")
     db_pass = secret.get_version("db_pass")
-    db_name = os.environ["DB_NAME"]
+    db_name = secret.get_version("db_name")
     db_host = secret.get_version("db_host")
 
 
@@ -22,7 +22,7 @@ def init_tcp_connection_engine(db_config):
             password=db_pass,  # e.g. "my-database-password"
             host=db_hostname,  # e.g. "127.0.0.1"
             port=db_port,  # e.g. 3306
-            database="bill_data",  # e.g. "my-database-name"
+            database=db_name,  # e.g. "my-database-name"
         ),
         **db_config
     )
@@ -57,7 +57,7 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            return str(conn.execute(statement))
+            return str(conn.execute(statement).fetchall())
     except Exception as e:
     # If something goes wrong, handle the error in this section. This might
     # involve retrying or adjusting parameters depending on the situation.
