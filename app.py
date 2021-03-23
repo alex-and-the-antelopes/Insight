@@ -162,7 +162,7 @@ def login():
         return jsonify({"error": "new_email_error"})  # Email does not correspond to a User
     # Get user from database using username, check if user is valid.
     user = fetch_user(email)  # Construct the user object
-    if user.verify_password(password):
+    if user and user.verify_password(password):
         # Send email to user address informing of new login
         email_sender.send_email(user.email, "Insight: new login", "A new device signed in to your Insight account. We'"
                                                                   "re sending you this email to make sure it was you!"
@@ -343,7 +343,7 @@ def verify_user(email: str, session_token: str) -> bool:
     if is_new_address(email):  # Check if the email corresponds to a User
         return False
     user = fetch_user(email)  # Get the user form the database using their email
-    if user.verify_token(session_token):
+    if user and user.verify_token(session_token):
         return True  # Login successful
     return False  # Tokens do not match
 
