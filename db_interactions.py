@@ -1,4 +1,3 @@
-import os
 import sqlalchemy
 import secret_manager as secret
 
@@ -23,7 +22,7 @@ def init_tcp_connection_engine(db_config):
             password=db_pass,  # e.g. "my-database-password"
             host=db_hostname,  # e.g. "127.0.0.1"
             port=db_port,  # e.g. 3306
-            database="bill_data",  # e.g. "my-database-name"
+            database=db_name,  # e.g. "my-database-name"
         ),
         **db_config
     )
