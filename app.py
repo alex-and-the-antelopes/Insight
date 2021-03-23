@@ -262,8 +262,12 @@ def send_message():
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
-@app.route('/mp_bills/', methods=['POST'])
+@app.route('/mp_bills', methods=['POST'])
 def get_mp_votes():
+    """
+    Fetches all of the MP's votes on bills from the database and returns it in a suitable format.
+    :return: A list of the MP's votes.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
@@ -274,7 +278,6 @@ def get_mp_votes():
     if not verify_user(email, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    # todo Add verification
     if not fetch_mp(mp_id):  # Check if mp_id exists
         return jsonify({"error": "mp_id_error"})  # Return an error if the mp does not exist
 
@@ -282,17 +285,44 @@ def get_mp_votes():
     bill_votes = fetch_mp_votes(mp_id)  # Get the MP's votes on the bills
     if not bill_votes:
         return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
-
+    # Clean list of bills
+    bill_votes = clean_mp_votes(bill_votes)
+    if not bill_votes:
+        return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
     mp_votes = []
-    for bill in bill_votes:
+    for bill in bill_votes:  # Iterate through the list of bills voted on and keep the relevant votes
         bill_details = {"id": bill[0], "positive": bill[1]}
         mp_votes.append(bill_details)
-    return jsonify({"success": str(mp_votes)})  # Return list of {billID and positive}
+    return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
+
+
+def clean_mp_votes(bill_votes: list) -> list:
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes
 
 
 def fetch_mp_votes(mp_id: str) -> list:
-    db_statement = f"SELECT billID, positive FROM MPVotes WHERE mpID='{mp_id}'"
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
     bill_votes = database.select(db_statement)
     return bill_votes
 
