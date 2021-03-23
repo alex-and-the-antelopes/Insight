@@ -443,10 +443,10 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     """
 
 
-"""
+
 if __name__ == "__main__":
     insert_and_update_data(run_on_app_engine=False, allow_party_and_mp_upsert=False)
-    """
+
 
 
 
