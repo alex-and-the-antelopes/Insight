@@ -42,7 +42,7 @@ def mp_voted_bills(mp_id):
     else:
         for i in range(10):
             list.append(entry_to_json_dict_mp_vote_bill(response[i]))
-    return jsonify(str(list))
+    return jsonify(list)
 
 
 @app.route('/bills')
@@ -55,7 +55,7 @@ def bills():
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
-    return jsonify(str(bill_list))  # todo add docstring
+    return jsonify(bill_list) # todo add docstring
 
 
 def entry_to_json_dict(entry):
