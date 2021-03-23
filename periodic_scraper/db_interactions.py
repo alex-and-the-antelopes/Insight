@@ -4,17 +4,10 @@ import secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config):
-
-    db_user = secret.get_version("db_user", version_name="latest")
-    db_pass = secret.get_version("db_pass", version_name="latest")
-    # todo: check how to get this automatically
-    # db_name = secret.get_version("db_name", version_name="latest")
-    db_name = "bill_data"
-    db_host = secret.get_version("db_host", version_name="latest")
-    print(f"db_user:{db_user}")
-    print(f"db_pass:{db_pass}")
-    print(f"db_name:{db_name}")
-    print(f"db_host:{db_host}")
+    db_user = secret.get_version("db_user")
+    db_pass = secret.get_version("db_pass")
+    db_name = secret.get_version("db_name")
+    db_host = secret.get_version("db_host")
 
 
     # Extract host and port from db_host
@@ -65,31 +58,13 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            return conn.execute(statement)
+            return str(conn.execute(statement))
     except Exception as e:
-        # If something goes wrong, handle the error in this section. This might
-        # involve retrying or adjusting parameters depending on the situation.
-        # [START_EXCLUDE]
-        return None
-
-
-
+    # If something goes wrong, handle the error in this section. This might
+    # involve retrying or adjusting parameters depending on the situation.
+    # [START_EXCLUDE]
+        raise RuntimeWarning("Interaction database failed with message:" + str(e))
 
 def select(statement):
-    """ Special function for select or similar statements which require something to be returned from the db
-    as we want to return a value.
-    :param statement: The statement to be carried out.
-    :return: The resulting query from the database.
-    """
-
-    try:
-        # Using a with statement ensures that the connection is always released
-        # back into the pool at the end of statement (even if an error occurs)
-        with db.connect() as conn:
-            return list(conn.execute(statement).fetchall())
-    except Exception as e:
-        # If something goes wrong, handle the error in this section. This might
-        # involve retrying or adjusting parameters depending on the situation.
-        # [START_EXCLUDE]
-        return None
-
+    with db.connect() as conn:
+        return str(conn.execute(statement).fetchall())
