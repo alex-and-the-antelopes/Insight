@@ -2,6 +2,7 @@ from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
+import parlpy.utils.constituency as pp_constituency
 import email_sender
 import logging
 import string
@@ -12,36 +13,6 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
-
-# initialises database pool as a global variable
-
-# example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
-
-
-# region Bill actions.
-# Todo: These could be placed in Bill class, or in core file?
-# Returns n in upper case
-def cap(n):
-    return n.upper()  # TODO remove
-
-
-# Returns n with spaces between each character.
-def space(n):
-    return " ".join(n)  # TODO remove
-
-
-# Returns the bill with given id in JSON form
-def find_bill(bill_id):
-    bill = core.Bill(
-        "3",
-        "Yet Another Sample bill",
-        "This is a 3rd, different sample bill: an example, for testing purposes.",
-        "1/2/2121",
-        "2/1/2122",
-        "inactive",
-        short_desc="Different Sample Bill"
-    )
-    return bill.to_dict()  # TODO REMOVE
 
 
 def get_top_bills():
@@ -63,51 +34,17 @@ def get_top_bills():
         short_desc="Different Sample Bill"
     )
 
-    return [bill1.to_dict(), bill2.to_dict()]  # TODO Change to work with top 50 bills
-
+    return [bill1.to_dict(), bill2.to_dict()]  # TODO Remove
 
 # endregion
 
 
-# Sample private function
-# We don't want private functions to be accessible from the internet, so this function should NOT be put in the actions
-#   array.
-def unsafe_function(n):
-    # Do something that shouldn't be accessible publicly
-    print("oh dear!")
-
-
-# # Perform action on given bill TODO REMOVE
-# @app.route('/b/<bill_id>/<action>')
-# def handle_request(bill_id, action):
-#     # not case-sensitive
-#     action = action.lower()
-#
-#     # Run requested action if valid
-#     if action in safe_actions:
-#         result = safe_actions[action](bill_id)
-#     else:
-#         result = f"unknown or forbidden action: {action}"
-#
-#     # Construct output
-#     output = {
-#         "bill_id": bill_id,
-#         "action": action,
-#         "result": result
-#     }
-#
-#     # Convert to json and return
-#     return jsonify(output)
-
-
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    # not case-sensitive
-    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
+    response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
+    if response:
         return jsonify(entry_to_json_dict(response[0]))
+    return jsonify({"error": "Query failed"})
 
 
 @app.route('/bills/<mp_id>')
@@ -124,15 +61,15 @@ def mp_voted_bills(mp_id):
 
 @app.route('/bills')
 def bills():
-    list = []
+    bill_list = []
     for i in range(10):
-        bill_id = random.randint(1, 2028);
-        response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
-        if response is None:
-            return jsonify({"error": "Query failed"})
+        bill_id = random.randint(1, 2028)
+        response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
+        if response:
+            bill_list.append(entry_to_json_dict(response[0]))  # Add the bill to the bill list
         else:
-            list.append(entry_to_json_dict(response[0]))
-    return jsonify(str(list))
+            return jsonify({"error": "Query failed"})
+    return jsonify(str(bill_list))
 
 
 def entry_to_json_dict(entry):
@@ -173,7 +110,9 @@ def landing_page():
 
 @app.route('/testdb')
 def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  VALUES ('smellypete@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[dTC1ViHeJ36_SqB7MPj6B7]', 'Ga70JuPC');")
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
+                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
+                      "'Ga70JuPC');")
     return database.select("SELECT * FROM Users;")
 
 
@@ -278,6 +217,72 @@ def send_message():
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
+@app.route('/mp_bills', methods=['POST'])
+def get_mp_votes():
+    """
+    Fetches all of the MP's votes on bills from the database and returns it in a suitable format.
+    :return: A list of the MP's votes.
+    """
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    # Get information to send email
+    mp_id = request.form['mp_id']
+
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    if not fetch_mp(mp_id):  # Check if mp_id exists
+        return jsonify({"error": "mp_id_error"})  # Return an error if the mp does not exist
+
+    # Get all the bills
+    bill_votes = fetch_mp_votes(mp_id)  # Get the MP's votes on the bills
+    if not bill_votes:
+        return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
+    # Clean list of bills
+    bill_votes = clean_mp_votes(bill_votes)
+    if not bill_votes:
+        return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
+    # Put it in the final format:
+    mp_votes = []
+    for bill in bill_votes:  # Iterate through the list of bills voted
+        bill_details = {"id": bill[0], "positive": bill[1]}
+        mp_votes.append(bill_details)
+    return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
+
+
+@app.route('/local_mp', methods=['POST'])
+def get_local_mp():
+    """
+    Get the user's local MP. Verifies the user's identity, uses the user's postcode to construct and return the user's
+    local MP.
+    :return: The user's local MP if successful, an error message otherwise.
+    """
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    user = fetch_user(email)  # Get the user's details
+    if not user:
+        return jsonify({"error": "user_error"})  # Verification unsuccessful
+
+    # Get the id of the MP for the user's constituency
+    try:
+        mp_id = fetch_mp_by_postcode(user.postcode)  # Construct the MP for the user's constituency
+    except KeyError:
+        return jsonify({"error": "mp_error"})  # Key error caused by invalid postcode
+
+    parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
+    if parliament_member:
+        return jsonify(parliament_member.to_dict())  # Return the user's local MP
+
+    return jsonify({"error": "construct_mp_error"})  # Return error message
+
+
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
@@ -285,7 +290,6 @@ def get_res(name):
     # print(request.mimetype)
     # todo: sort out mimetype. This might affect retrieving images in the future.
     return send_file(CONFIG["img_dir"] + name)
-
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
@@ -311,7 +315,7 @@ def is_new_address(email_address: str) -> bool:
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user(s) with the given email
+    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the given email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
@@ -356,8 +360,9 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
     query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
     if query:
         mp_info = query[0]  # Extract the MP information
-        parliament_member = core.ParliamentMember(mp_info[0], mp_info[3], mp_info[4], mp_info[5], mp_info[6],
-                                                  mp_info[7], mp_info[8], mp_info[9])  # Construct MP object
+        # Construct MP object:
+        parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
+                                                  mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
     return parliament_member
 
 
@@ -374,6 +379,48 @@ def verify_user(email: str, session_token: str) -> bool:
     if user and user.verify_token(session_token):
         return True  # Login successful
     return False  # Tokens do not match
+
+
+def clean_mp_votes(bill_votes: list) -> list:
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes
+
+
+def fetch_mp_votes(mp_id: str) -> list:
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
+    bill_votes = database.select(db_statement)
+    return bill_votes
+
+
+def fetch_mp_by_postcode(postcode: str) -> int:
+    """
+    Find and return the MP of the constituency, based on the given postcode.
+    :param postcode: The postcode being searched.
+    :return: The id of the MP for the constituency.
+    """
+    constituency = pp_constituency.get_constituencies_from_post_code(postcode)  # Get the constituency from ParlPy
+    if not constituency:
+        raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
+    return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
 
 
 if __name__ == '__main__':
