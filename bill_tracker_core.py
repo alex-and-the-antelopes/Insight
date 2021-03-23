@@ -89,8 +89,10 @@ class User(object):
 
 
 class ParliamentMember:
-    def __init__(self, mp_id, email, address, party_id, photo_path, phone_num, area, current):
+    def __init__(self, mp_id, first_name, last_name, email, address, party_id, photo_path, phone_num, area, current):
         self.mp_id = mp_id
+        self.first_name = first_name
+        self.last_name = last_name
         self.email = email
         self.address = address
         self.party_id = party_id
@@ -112,9 +114,9 @@ class ParliamentMember:
         email, id, address, party id, photo path, phone number and area of the MP.
         :return: A string (str) containing the ParliamentMember's information.
         """
-        mp_str = f"id: {self.mp_id}, email: {self.email}, address: {self.address}, party id: {self.party_id}, photo " \
-                 f"path: {self.photo_path}, phone number: {self.phone_num}, area: {self.area} and current:" \
-                 f" {self.current}"
+        mp_str = f"id: {self.mp_id}, last name: {self.last_name}, first name: {self.first_name}, email: {self.email}," \
+                 f" address: {self.address}, party id: {self.party_id}, photo path: {self.photo_path}, phone number:" \
+                 f" {self.phone_num}, area: {self.area} and current: {self.current}"
         return mp_str
 
 
