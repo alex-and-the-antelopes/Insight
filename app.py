@@ -14,29 +14,7 @@ CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
 
-
-def get_top_bills():
-    bill1 = core.Bill(
-        "1",
-        "Sample Title",
-        "Sample Description of a sample bill",
-        "1/1/2021",
-        "1/1/2030",
-        "active"
-    )
-    bill2 = core.Bill(
-        "id_2",
-        "Another Sample bill",
-        "This is a different sample bill: an example. Probably for testing purposes.",
-        "1/2/2121",
-        "2/1/2122",
-        "inactive",
-        short_desc="Different Sample Bill"
-    )
-
-    return [bill1.to_dict(), bill2.to_dict()]  # TODO Remove
-
-# endregion
+# ////// End region //////
 
 
 @app.route('/bill/<bill_id>')
@@ -281,7 +259,7 @@ def get_res(name):
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
 
 
-# Start of helper functions
+# ////// End region //////
 
 
 def create_session_token() -> str:
