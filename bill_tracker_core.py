@@ -54,7 +54,16 @@ class User(object):
         self.postcode = postcode
         self.session_token = session_token
 
-    def verify_password(self, password) -> bool:
+    def update_postcode(self, postcode: str) -> None:
+        """
+        Updates the user's postcode.
+        :param postcode: The postcode to be changed.
+        :return: None.
+        """
+        self.postcode = postcode
+        return
+
+    def verify_password(self, password: str) -> bool:
         """
         Given a password, check if it is correct.
         :param password: The (hashed) password to check.
