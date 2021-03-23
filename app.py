@@ -276,6 +276,15 @@ def send_message():
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
+
+
+
+def fetch_mp_votes(mp_id: str) -> list:
+    db_statement = f"SELECT billID, positive FROM MPVotes WHERE mpID='{mp_id}'"
+    bill_votes = database.select(db_statement)
+    return bill_votes
+
+
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
