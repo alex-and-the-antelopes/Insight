@@ -114,31 +114,19 @@ def get_bill(bill_id):
 
 
 @app.route('/bills')
-def get_bills():
-    # not case-sensitive
-
-
-    response = database.select("SELECT * FROM Bills;")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        list = []
-        for i in range(10):
-            list.append(entry_to_json_dict(response[i]))
-        return jsonify(str(list))
-
-@app.route('/randbills')
 def rand_bills():
     # not case-sensitive
     list = []
     for i in range(10):
-        bill_id = random.randint(1,2028);
+        bill_id = random.randint(1, 2028);
         response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
         if response is None:
             return jsonify({"error": "Query failed"})
         else:
-            list.append(response)
+            list.append(entry_to_json_dict(response))
     return jsonify(str(list))
+
+
 
 
 
