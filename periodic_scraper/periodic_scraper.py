@@ -13,10 +13,12 @@ from mysql.connector.constants import ClientFlag
 import pandas as pd
 import os
 import datetime
+import pickle
 
 import secret_manager as sm
 import google.cloud.logging
 import logging
+#import gcsfs
 
 #db_agent = None
 
@@ -383,7 +385,12 @@ sql_config = {}
 
 db_name = ""
 
-
+"""
+def write_to_log_file(message):
+    fs = gcsfs.GCSFileSystem(project="bills-app-305000")
+    log_filename = "log_file.txt"
+    with fs.open("bills-app-305000.appspot.com" + "/" + log_filename, "wb") as handle:
+        handle.write("message")
 
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
@@ -394,26 +401,23 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    #db_agent = DBAgent(db_name)
+    #bills_overview = blf.BillsOverview()
 
-    #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
+    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
+    print(f"datetime to pickle: {mock_datetime}")
+    #bills_overview.mock_datetime_last_scraped(mock_datetime)
+    """
+    fs = gcsfs.GCSFileSystem(project="bills-app-305000")
 
-    #db_describe_table("MP")
-    #print_all_rows_of_table("MP")
+    test_filename =  "test_file.txt"
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "wb") as handle:
+        pickle.dump(mock_datetime, handle)
 
-    for i in range(10):
-        result = db_agent.select(f"SELECT titleStripped FROM {db_name}.Bills WHERE billID={i};")
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "rb") as handle:
+        read_datetime = pickle.load(handle)
 
-        print(f"got result {i}")
-        print(result)
-
-    print(db_agent.select(f"SELECT * FROM {db_name}.MP;"))
-    print(db_agent.select(f"SELECT * FROM {db_name}.Party;"))
-
-    #cursor.close()
-    #conn.close()
-
-    return
+    print(f"read datetime: {read_datetime}")
+    """
 
     """
     if completely_fresh:
