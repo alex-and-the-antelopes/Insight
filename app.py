@@ -312,7 +312,12 @@ def get_mp_votes():
 
 
 def clean_mp_votes(bill_votes: list) -> list:
-
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
     clean_votes = []
     prev_id = '-1'  # Used to filter out deprecated bills from the final list
     for bill in bill_votes:
