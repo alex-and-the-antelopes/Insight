@@ -1,4 +1,3 @@
-import os
 import sqlalchemy
 import secret_manager as secret
 

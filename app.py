@@ -1,9 +1,8 @@
-from flask import Flask, jsonify, redirect, send_file, Response, request
+from flask import Flask, jsonify, redirect, send_file, request
 from flask_cors import CORS
 import bill_tracker_core as core
 import db_interactions as database
 import email_sender
-import secret_manager as secret
 import logging
 import random
 import string
@@ -13,43 +12,39 @@ logger = logging.getLogger()
 CORS(app)
 # Get config from core
 CONFIG = core.CONFIG
+
 # initialises database pool as a global variable
 
 # example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
-
-# Add more config constants
-# CONFIG.update({
-#     "key": "value"
-# })
 
 
 # region Bill actions.
 # Todo: These could be placed in Bill class, or in core file?
 # Returns n in upper case
 def cap(n):
-    return n.upper()
+    return n.upper()  # TODO remove
 
 
 # Returns n with spaces between each character.
 def space(n):
-    return " ".join(n)
+    return " ".join(n)  # TODO remove
 
 
 # Returns the bill with given id in JSON form
-def find_bill(id):
+def find_bill(bill_id):
     bill = core.Bill(
-        "1"
-        "Sample bill",
-        "This is a sample bill: a placeholder. Probably for debugging and testing purposes.",
-        "1/1/2021",
-        "2/1/2022",
-        "active",
-        short_desc="Sample Bill"
+        "3",
+        "Yet Another Sample bill",
+        "This is a 3rd, different sample bill: an example, for testing purposes.",
+        "1/2/2121",
+        "2/1/2122",
+        "inactive",
+        short_desc="Different Sample Bill"
     )
-    return bill.to_dict()
+    return bill.to_dict()  # TODO REMOVE
 
 
-def get_top_bills(range):
+def get_top_bills():
     bill1 = core.Bill(
         "1",
         "Sample Title",
@@ -68,18 +63,10 @@ def get_top_bills(range):
         short_desc="Different Sample Bill"
     )
 
-    return [bill1.to_dict(), bill2.to_dict()]
+    return [bill1.to_dict(), bill2.to_dict()]  # TODO Change to work with top 50 bills
 
 
 # endregion
-
-# Mapping of "actions" (from URL) to their respective functions
-# !! Any function referenced in this dict can be run by anyone !!
-safe_actions = {
-    "capitalise": cap,
-    "space": space,
-    "get": find_bill,
-}
 
 
 # Sample private function
@@ -90,7 +77,7 @@ def unsafe_function(n):
     print("oh dear!")
 
 
-# # Perform action on given bill
+# # Perform action on given bill TODO REMOVE
 # @app.route('/b/<bill_id>/<action>')
 # def handle_request(bill_id, action):
 #     # not case-sensitive
@@ -115,8 +102,6 @@ def unsafe_function(n):
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    # not case-sensitive
-
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
     if response is None:
         return jsonify({"error": "Query failed"})
@@ -143,7 +128,7 @@ def entry_to_json_dict(entry):
 
 @app.route('/top')
 def top():
-    result = get_top_bills(10)
+    result = get_top_bills()
     # Construct output
     output = {
         "result": result
@@ -155,7 +140,7 @@ def top():
 
 @app.route('/')
 def landing_page():
-    return redirect(CONFIG["default_url"])
+    return redirect(CONFIG["default_url"])  # TODO remove
 
 
 @app.route('/testdb')
@@ -164,7 +149,6 @@ def db_testing():
     return database.select("SELECT * FROM Users;")
 
 
-# It will then redirect you to the logged_in or garbage page, depending on if you gave it the right password or not
 @app.route('/login', methods=['POST'])
 def login():
     """
@@ -239,16 +223,31 @@ def register():
 
 @app.route('/message', methods=['POST'])
 def send_message():
+    """
+    Sends an email to a member of parliament specified by the user.
+    Requires user verification, MP id and the message itself.
+    :return: A success message, if the email was sent successfully, otherwise an error message
+    """
+    # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
-
+    # Get information to send email
     mp_id = request.form['mp_id']
     message = request.form['message']
     # Verify the user:
-    if not verify_user(email, session_token):
-        return jsonify({"error": "invalid_credentials"})  # Verifications unsuccessful
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    return
+    mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
+
+    if mp:  # If the MP was successfully constructed
+        try:
+            email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email
+            return jsonify({"success": "email_sent"})  # If sent without errors, return success message
+        except Exception as e:
+            return jsonify({"error": "email_failed_to_send"})  # Error with mail sending
+
+    return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
 # Deliver requested resource.
@@ -260,6 +259,9 @@ def get_res(name):
     return send_file(CONFIG["img_dir"] + name)
 
     # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
+
+
+# Start of helper functions
 
 
 def create_session_token() -> str:
