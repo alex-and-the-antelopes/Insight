@@ -231,6 +231,32 @@ def get_mp_votes():
     return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
 
 
+@app.route('/local_mp', methods=['POST'])
+def get_local_mp():
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    user = fetch_user(email)  # Get the user's details
+    if not user:
+        return jsonify({"error": "user_error"})  # Verification unsuccessful
+
+    # Get the id of the MP for the user's constituency
+    try:
+        mp_id = fetch_mp_by_postcode(user.postcode)  # Construct the MP for the user's constituency
+    except KeyError:
+        return jsonify({"error": "mp_error"})  # Key error caused by invalid postcode
+
+    parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
+    if parliament_member:
+        return jsonify({"success": str(parliament_member)})  # Return the user's local MP
+
+    return jsonify({"error": "construct_mp_error"})  # Return error message
+
+
 # Deliver requested resource.
 # todo: generalise so works with filetypes other than image
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
@@ -358,7 +384,7 @@ def fetch_mp_votes(mp_id: str) -> list:
     bill_votes = database.select(db_statement)
     return bill_votes
 
-  
+
 def fetch_mp_by_postcode(postcode: str) -> int:
     """
     Find and return the MP of the constituency, based on the given postcode.
