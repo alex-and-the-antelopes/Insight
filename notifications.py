@@ -8,9 +8,7 @@ from exponent_server_sdk import (
 from requests.exceptions import ConnectionError, HTTPError
 import sys
 from bill_tracker_core import User
-import db_interactions
-database = db_interactions.DBAgent("bill_app_db")
-
+import db_interactions as database
 
 
 def send_notification_to_clients(clients, title, body):
