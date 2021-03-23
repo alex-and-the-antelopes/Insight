@@ -6,7 +6,7 @@ import secret_manager as secret
 def init_tcp_connection_engine(db_config):
     db_user = secret.get_version("db_user")
     db_pass = secret.get_version("db_pass")
-    db_name = os.environ["DB_NAME"]
+    db_name = secret.get_version("db_name")
     db_host = secret.get_version("db_host")
 
 
