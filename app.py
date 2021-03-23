@@ -15,37 +15,6 @@ CORS(app)
 CONFIG = core.CONFIG
 
 
-# initialises database pool as a global variable
-
-# example call: database.interact("INSERT INTO bills_db VALUES (1,3,'large bill text')")
-
-
-# region Bill actions.
-# Todo: These could be placed in Bill class, or in core file?
-# Returns n in upper case
-def cap(n):
-    return n.upper()  # TODO remove
-
-
-# Returns n with spaces between each character.
-def space(n):
-    return " ".join(n)  # TODO remove
-
-
-# Returns the bill with given id in JSON form
-def find_bill(bill_id):
-    bill = core.Bill(
-        "3",
-        "Yet Another Sample bill",
-        "This is a 3rd, different sample bill: an example, for testing purposes.",
-        "1/2/2121",
-        "2/1/2122",
-        "inactive",
-        short_desc="Different Sample Bill"
-    )
-    return bill.to_dict()  # TODO REMOVE
-
-
 def get_top_bills():
     bill1 = core.Bill(
         "1",
@@ -65,52 +34,17 @@ def get_top_bills():
         short_desc="Different Sample Bill"
     )
 
-    return [bill1.to_dict(), bill2.to_dict()]  # TODO Change to work with top 50 bills
-
+    return [bill1.to_dict(), bill2.to_dict()]  # TODO Remove
 
 # endregion
 
 
-# Sample private function
-# We don't want private functions to be accessible from the internet, so this function should NOT be put in the actions
-#   array.
-def unsafe_function(n):
-    # Do something that shouldn't be accessible publicly
-    print("oh dear!")
-
-
-# # Perform action on given bill TODO REMOVE
-# @app.route('/b/<bill_id>/<action>')
-# def handle_request(bill_id, action):
-#     # not case-sensitive
-#     action = action.lower()
-#
-#     # Run requested action if valid
-#     if action in safe_actions:
-#         result = safe_actions[action](bill_id)
-#     else:
-#         result = f"unknown or forbidden action: {action}"
-#
-#     # Construct output
-#     output = {
-#         "bill_id": bill_id,
-#         "action": action,
-#         "result": result
-#     }
-#
-#     # Convert to json and return
-#     return jsonify(output)
-
-
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    # not case-sensitive
-    response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
-
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
+    response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
+    if response:
         return jsonify(entry_to_json_dict(response[0]))
+    return jsonify({"error": "Query failed"})
 
 
 @app.route('/bills')
@@ -424,7 +358,6 @@ def fetch_mp_votes(mp_id: str) -> list:
     bill_votes = database.select(db_statement)
     return bill_votes
 
-  
   
 def get_MP_id_for_pc(pc: str):
     const = pp_constituency.get_constituencies_from_post_code(pc)
