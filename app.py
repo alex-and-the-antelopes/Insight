@@ -20,7 +20,8 @@ CONFIG = core.CONFIG
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    response = database.select(f"SELECT billID, titleStripped,shortDesc, dateAdded, link FROM Bills WHERE billID='{bill_id}';")
+    response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
+                               f"'{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
     return jsonify({"error": "Query failed"})  # todo add docstring
@@ -36,7 +37,8 @@ def mp_voted_bills(mp_id):
     list = []
     # returns 10 bills for a given mp_id
     response = database.select(
-        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
+        f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -50,7 +52,8 @@ def bills():
     bill_list = []
     for i in range(10):
         bill_id = random.randint(1, 2028)
-        response = database.select(f"SELECT billID, titleStripped,shortDesc, dateAdded, link FROM Bills WHERE billID='{bill_id}';")
+        response = database.select(f"SELECT billID, titleStripped,shortDesc, dateAdded, link FROM Bills WHERE billID="
+                                   f"'{bill_id}';")
         if not response:
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
@@ -80,7 +83,7 @@ def entry_to_json_dict_mp_vote_bill(entry):
     return bill  # Todo rework (use todict) and comment
 
 
-def parse_double_quote(message):
+def parse_double_quote(message: str) -> str:
     if "\"" in message:
         message = message.replace("\"", "'")
     return message
