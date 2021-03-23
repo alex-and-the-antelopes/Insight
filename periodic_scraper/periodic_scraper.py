@@ -404,10 +404,10 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     fs = gcsfs.GCSFileSystem(project="bills-app-305000")
 
     test_filename =  "test_file.txt"
-    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename) as handle:
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "wb") as handle:
         pickle.dump(mock_datetime, handle)
 
-    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename) as handle:
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "rb") as handle:
         read_datetime = pickle.load(handle)
 
     print(f"read datetime: {read_datetime}")
