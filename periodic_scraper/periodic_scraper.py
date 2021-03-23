@@ -18,6 +18,7 @@ import pickle
 import secret_manager as sm
 import google.cloud.logging
 import logging
+import gcsfs
 
 #db_agent = None
 
@@ -399,9 +400,16 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
     print(f"datatime to pickle: {mock_datetime}")
-    bills_overview.mock_datetime_last_scraped(mock_datetime)
+    #bills_overview.mock_datetime_last_scraped(mock_datetime)
+    fs = gcsfs.GCSFileSystem(project="bills-app-305000")
 
-    read_datetime = pickle.load( open( "datetime_last_scraped.p", "rb" ) )
+    test_filename =  "test_file.txt"
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename) as handle:
+        pickle.dump(mock_datetime, handle)
+
+    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename) as handle:
+        read_datetime = pickle.load(handle)
+
     print(f"read datetime: {read_datetime}")
 
     """
