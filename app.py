@@ -103,9 +103,7 @@ def unsafe_function(n):
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     # not case-sensitive
-
     response = database.select("SELECT * FROM Bills WHERE billID = " + bill_id + ";")
-
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -117,9 +115,13 @@ def mp_voted_bills(mp_id):
     mp_id = 1423
     list = []
     #returns 10 bills for a given mp_id
-    response = database.select(f"SELECT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
-    return str(response)
-
+    response = database.select(f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+    if response is None:
+        return jsonify({"error": "Query failed"})
+    else:
+        for i in range(10):
+            list.append(entry_to_json_dict_mp_vote_bill(response[i]))
+    return jsonify(str(list))
 
 @app.route('/bills')
 def bills():
@@ -140,6 +142,15 @@ def entry_to_json_dict(entry):
         "title": entry[1],
         "description": entry[6],
         "date_added": entry[4],
+    }
+    return bill
+
+def entry_to_json_dict_mp_vote_bill(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": entry[2],
+        "date_added": entry[3],
     }
     return bill
 
