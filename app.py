@@ -72,13 +72,14 @@ def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": parse_double_quote(entry[2]),
+        "description": parse_double_quote(str(entry[2])),
         "date_added": entry[3],
     }
     return bill  # Todo rework (use todict) and comment
 
 def parse_double_quote(message):
-    message.replace("\"", "'")
+    if "\"" in message:
+        message = message.replace("\"", "'")
     return message
 
 @app.route('/')
