@@ -121,7 +121,6 @@ def bills():
         return jsonify({"error": "Query failed"})
     else:
         num_of_bills = str(num_of_bills)
-        num_of_bills = num_of_bills.split(":")[0]
         for i in range(10):
             bill_id = random.randint(1, int(num_of_bills[0]));
             response = database.select(f"SELECT * FROM Bills WHERE billID = {bill_id};")
@@ -129,7 +128,7 @@ def bills():
                 return jsonify({"error": "Query failed"})
             else:
                 list.append(entry_to_json_dict(response[0]))
-    return jsonify(str(list))
+    return str(num_of_bills)
 
 
 def entry_to_json_dict(entry):
