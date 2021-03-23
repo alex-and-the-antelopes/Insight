@@ -34,7 +34,7 @@ def mp_voted_bills(mp_id):
     :param mp_id:
     :return: A list of bills voted by the given MP, in a suitable format.
     """
-    list = []
+    bill_list = []
     # returns 10 bills for a given mp_id
     response = database.select(
         f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
@@ -43,8 +43,8 @@ def mp_voted_bills(mp_id):
         return jsonify({"error": "Query failed"})
     else:
         for i in range(10):
-            list.append(entry_to_json_dict_mp_vote_bill(response[i]))
-    return jsonify(list)
+            bill_list.append(entry_to_json_dict_mp_vote_bill(response[i]))
+    return jsonify(bill_list)
 
 
 @app.route('/bills')
@@ -237,7 +237,7 @@ def get_mp_votes():
     for bill in bill_votes:  # Iterate through the list of bills voted
         bill_details = {"id": bill[0], "positive": bill[1]}
         mp_votes.append(bill_details)
-    return jsonify({"success": str(mp_votes)})  # Return a list of {billID and positive}
+    return jsonify(mp_votes)  # Return the list of {billID and positive}
 
 
 @app.route('/local_mp', methods=['POST'])
