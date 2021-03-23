@@ -57,14 +57,29 @@ def interact(statement):
         # Using a with statement ensures that the connection is always released
         # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
-            return str(conn.execute(statement).fetchall())
+            return conn.execute(statement)
     except Exception as e:
-    # If something goes wrong, handle the error in this section. This might
-    # involve retrying or adjusting parameters depending on the situation.
-    # [START_EXCLUDE]
+        # If something goes wrong, handle the error in this section. This might
+        # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
         raise RuntimeWarning("Interaction database failed with message:" + str(e))
 
+
 def select(statement):
-    with db.connect() as conn:
-        return str(conn.execute(statement).fetchall())
+    """ Special function for select or similar statements which require something to be returned from the db
+    as we want to return a value.
+    :param statement: The statement to be carried out.
+    :return: The resulting query from the database.
+    """
+
+    try:
+        # Using a with statement ensures that the connection is always released
+        # back into the pool at the end of statement (even if an error occurs)
+        with db.connect() as conn:
+            return list(conn.execute(statement).fetchall())
+    except Exception as e:
+        # If something goes wrong, handle the error in this section. This might
+        # involve retrying or adjusting parameters depending on the situation.
+        # [START_EXCLUDE]
+        raise RuntimeWarning("Selection database failed with message:" + str(e))
 
