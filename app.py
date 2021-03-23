@@ -256,6 +256,10 @@ def get_local_mp():
 
 @app.route('/update_postcode', methods=['POST'])
 def update_postcode():
+    """
+    Updates the user's postcode with the given postcode. Verifies the user before updating the postcode.
+    :return: Success statement if the postcode was changed, an error statement otherwise.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
@@ -269,11 +273,11 @@ def update_postcode():
         return jsonify({"error": "postcode_error"})
 
     try:
-        database.interact(f"UPDATE User SET postcode='{postcode}'")
+        database.interact(f"UPDATE User SET postcode='{postcode}'")  # Query to update the user's postcode
     except RuntimeWarning:
-        return jsonify({"error": "query_error"})
+        return jsonify({"error": "query_error"})  # Error when executing sql statement
 
-    return jsonify({"success": "postcode_updated"})
+    return jsonify({"success": "postcode_updated"})  # Return success message
 
 
 @app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
