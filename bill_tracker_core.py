@@ -1,4 +1,3 @@
-# from passlib.hash import sha256_crypt  # Uses SHA256 for storing the password. We could implement our own later
 
 # Configuration constants
 CONFIG = {
@@ -31,15 +30,6 @@ CONFIG = {
 # Returns the URL for the given filename
 def get_img_url(filename):
     return CONFIG["external_res_path"] + filename
-
-
-# Generate a hash for the given password.
-def hash_password(password):
-    # Module not imported, so just return password for now
-    # todo: Change this when user accounts are implemented
-    return password
-
-    # return sha256_crypt.hash(password)
 
 
 class User(object):
