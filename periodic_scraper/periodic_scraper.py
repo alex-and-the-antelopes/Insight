@@ -13,6 +13,7 @@ from mysql.connector.constants import ClientFlag
 import pandas as pd
 import os
 import datetime
+import pickle
 
 import secret_manager as sm
 import google.cloud.logging
@@ -394,22 +395,14 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    #db_agent = DBAgent(db_name)
+    bills_overview = blf.BillsOverview()
 
-    execute_insert_mp_data_in_db(conn, cursor, "test_first_from_app_engine", "test_second_from_app_engine", "test", 6001, 0, False)
+    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
+    print(f"datatime to pickle: {mock_datetime}")
+    bills_overview.mock_datetime_last_scraped(mock_datetime)
 
-    """
-    for i in range(10):
-        result = db_agent.select(f"SELECT titleStripped FROM {db_name}.Bills WHERE billID={i};")
-
-        print(f"got result {i}")
-        print(result)
-
-    print(db_agent.select(f"SELECT * FROM {db_name}.MP;"))
-    print(db_agent.select(f"SELECT * FROM {db_name}.Party;"))
-    """
-
-    return
+    read_datetime = pickle.load( open( "datetime_last_scraped.p", "rb" ) )
+    print(f"read datetime: {read_datetime}")
 
     """
     if completely_fresh:

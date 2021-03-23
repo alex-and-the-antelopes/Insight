@@ -20,9 +20,9 @@ CONFIG = core.CONFIG
 
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
-    response = database.select(f"SELECT * FROM Bills WHERE billID='{bill_id}';")
+    response = database.select(f"SELECT billID, titleStripped,shortDesc, dateAdded, link FROM Bills WHERE billID='{bill_id}';")
     if response:
-        return jsonify(entry_to_json_dict(response[0]))
+        return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
     return jsonify({"error": "Query failed"})  # todo add docstring
 
 
@@ -36,7 +36,7 @@ def mp_voted_bills(mp_id):
     list = []
     # returns 10 bills for a given mp_id
     response = database.select(
-        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, link FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
     if response is None:
         return jsonify({"error": "Query failed"})
     else:
@@ -72,10 +72,10 @@ def entry_to_json_dict(entry):
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
-        "title": entry[1],
+        "title": parse_double_quote(str(entry[1])),
         "description": parse_double_quote(str(entry[2])),
         "date_added": entry[3],
-        "link": entry[4]
+        "link": parse_double_quote(str(entry[4]))
     }
     return bill  # Todo rework (use todict) and comment
 
