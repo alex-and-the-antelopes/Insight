@@ -257,7 +257,7 @@ def get_local_mp():
 
     parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
     if parliament_member:
-        return jsonify({"success": str(parliament_member)})  # Return the user's local MP
+        return jsonify(parliament_member.to_dict())  # Return the user's local MP
 
     return jsonify({"error": "construct_mp_error"})  # Return error message
 
