@@ -396,11 +396,9 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     #db_agent = DBAgent(db_name)
 
-    #execute_insert_mp_data_in_db(conn, cursor, "test_first", "test_second_new", "test", 6001, 0, False)
+    execute_insert_mp_data_in_db(conn, cursor, "test_first_from_app_engine", "test_second_from_app_engine", "test", 6001, 0, False)
 
-    #db_describe_table("MP")
-    #print_all_rows_of_table("MP")
-
+    """
     for i in range(10):
         result = db_agent.select(f"SELECT titleStripped FROM {db_name}.Bills WHERE billID={i};")
 
@@ -409,9 +407,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
     print(db_agent.select(f"SELECT * FROM {db_name}.MP;"))
     print(db_agent.select(f"SELECT * FROM {db_name}.Party;"))
-
-    #cursor.close()
-    #conn.close()
+    """
 
     return
 
