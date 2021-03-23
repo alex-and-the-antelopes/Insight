@@ -233,6 +233,11 @@ def get_mp_votes():
 
 @app.route('/local_mp', methods=['POST'])
 def get_local_mp():
+    """
+    Get the user's local MP. Verifies the user's identity, uses the user's postcode to construct and return the user's
+    local MP.
+    :return: The user's local MP if successful, an error message otherwise.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
