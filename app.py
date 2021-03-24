@@ -305,15 +305,6 @@ def update_postcode():
     return jsonify({"success": "postcode_updated"})  # Return success message
 
 
-@app.route('/res/' + CONFIG["external_res_path"] + '/<name>')
-def get_res(name):
-    # print(request.mimetype)
-    # todo: sort out mimetype. This might affect retrieving images in the future.
-    #  generalise so works with filetypes other than image
-    return send_file(CONFIG["img_dir"] + name)
-    # return send_file("CONFIG["img_dir"] + core.CONFIG["invalid_img"], mimetype='image/gif')
-
-
 # ////// End region //////
 
 
