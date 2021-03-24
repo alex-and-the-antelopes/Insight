@@ -215,7 +215,7 @@ class BillsOverview():
         if self.run_on_app_engine:
             fs = gcsfs.GCSFileSystem(project=self.project_name)
             try:
-                with fs.open(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p", "wb") as handle:
+                with fs.open(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p", "rb") as handle:
                     loaded_datetime_last_scraped = pickle.load(handle)
             except (FileNotFoundError) as e:
                 # this is the case if the pickle file has been manually deleted, or if this is the first time
