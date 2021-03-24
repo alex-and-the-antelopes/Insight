@@ -340,13 +340,8 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
 
     bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
     bills_overview.get_changed_bills_in_session(session_name=session)
-    print("new bills_overview.bills_overview_data")
-    print(bills_overview.bills_overview_data)
-    print("bills overview object obtained, scraping complete")
-    print(f"item counts: {bills_overview.bills_overview_data.count()}")
 
-    pd.set_option('display.max_columns', 20)
-    print(bills_overview.bills_overview_data)
+    write_to_log_file(bills_overview.bills_overview_data.to_string())
 
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
