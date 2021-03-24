@@ -7,7 +7,6 @@ import db_interactions as db_agent
 import pandas as pd
 import os
 import datetime
-import pickle
 
 import secret_manager as sm
 import google.cloud.logging
@@ -366,10 +365,6 @@ def reload_all_tables():
     insert_mp_data()
     insert_dead_mp_placeholder()
     upsert_bills_and_divisions_data(fresh=True, session="All")
-
-
-def mock_datetime_pickle():
-    pass
 
 
 def db_describe_table(table_name):
