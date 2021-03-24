@@ -130,7 +130,7 @@ def upsert_mp_data():
     print("created MPOverview obj")
 
     # todo: uncomment and delete below
-    mp_fetcher.get_all_members(params={"House": "Commons"})
+    mp_fetcher.get_all_members(params={"House": "Commons", "IsCurrentMember": "true"})
     all_mp_data = mp_fetcher.mp_overview_data
     print("fetched all mp data")
 
