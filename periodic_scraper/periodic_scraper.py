@@ -225,8 +225,8 @@ def bill_id_in_bills_table(conn, cursor, bill):
     count_from_interaction = db_agent.select(count_command_string)
     #cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
-    print(f"type count from interaction: {type(count)}")
-    print(f"count from interaction: {count}")
+    print(f"type count from interaction: {type(count_from_interaction)}")
+    print(f"count from interaction: {count_from_interaction}")
 
     for c in count_from_interaction:
         count = c
