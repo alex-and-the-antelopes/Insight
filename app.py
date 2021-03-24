@@ -58,14 +58,14 @@ def bills():
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
-    return jsonify(bill_list) # todo add docstring
+    return jsonify(bill_list)  # todo add docstring
 
 
 def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": parse_double_quote(str(entry[6])),
+        "description": entry[6],
         "date_added": entry[4],
         "link": entry[11]
     }
@@ -75,18 +75,12 @@ def entry_to_json_dict(entry):
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
-        "title": parse_double_quote(str(entry[1])),
-        "description": parse_double_quote(str(entry[2])),
+        "title": entry[1],
+        "description": entry[2],
         "date_added": entry[3],
-        "link": parse_double_quote(str(entry[4]))
+        "link": entry[4]
     }
     return bill  # Todo rework (use todict) and comment
-
-
-def parse_double_quote(message: str) -> str:
-    if "\"" in message:
-        message = message.replace("\"", "'")
-    return message
 
 
 @app.route('/')
