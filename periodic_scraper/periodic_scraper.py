@@ -338,7 +338,7 @@ def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
         clear_table(conn, cursor, "Bills")
 
 
-    bills_overview = blf.BillsOverview()
+    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
     bills_overview.get_changed_bills_in_session(session_name=session)
     print("new bills_overview.bills_overview_data")
     print(bills_overview.bills_overview_data)
@@ -396,7 +396,7 @@ def write_to_log_file(message):
 
 
 # by default assumes running on app engine
-def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
+def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
     #global db_agent
     db_name = "bill_data"
@@ -404,27 +404,15 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
+
+    bills_overview = blf.BillsOverview(run_on_app_engine=run_on_app_engine, project_name=project_name)
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     print("executed pickle function")
 
-    bills_overview.get_changed_bills_in_session(session_name="All")
 
-    print("executed bills list method")
-
-    df_string = bills_overview.bills_overview_data.to_string()
-    write_to_log_file(df_string)
-
-
-
-    #mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
-    #print(f"datetime to pickle: {mock_datetime}")
-    #bills_overview.mock_datetime_last_scraped(mock_datetime)
-
-    """
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
@@ -438,7 +426,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
         insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
-    """
 
 
 
