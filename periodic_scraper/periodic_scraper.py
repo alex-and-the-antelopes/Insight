@@ -300,7 +300,7 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
 
     insertion_command_string \
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, dateAdded, shortDesc, sessions, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated.isoformat()}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
     #cursor.execute(insertion_command_string)
     db_agent.interact(insertion_command_string)
 
@@ -314,7 +314,7 @@ def execute_update_bill(conn, cursor, bill):
     update_command_string = f"UPDATE {db_name}.Bills " \
                             f"SET " \
                             f"billOrAct = \"{bill.title_postfix}\", " \
-                            f"dateAdded = \"{bill.last_updated}\", " \
+                            f"dateAdded = \"{bill.last_updated.isoformat()}\", " \
                             f"shortDesc = \"{bill.summary}\", " \
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
