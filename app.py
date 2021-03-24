@@ -37,7 +37,8 @@ def get_bill(bill_id):
                                f"'{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
-    return jsonify({"error": "Query failed"})  # todo add docstring
+
+    return jsonify({"error": "query_failed"})  # todo add docstring
 
 
 @app.route('/bills/<mp_id>')
@@ -48,15 +49,18 @@ def mp_voted_bills(mp_id):
     :return: A list of bills voted by the given MP, in a suitable format.
     """
     bill_list = []
+
     # returns 10 bills for a given mp_id
     response = database.select(
         f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
         f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        for i in range(10):
-            bill_list.append(entry_to_json_dict_mp_vote_bill(response[i]))
+
+    if not response:
+        return jsonify({"error": "query_failed"})
+
+    for bill in response:
+        bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
+
     return jsonify(bill_list)
 
 
