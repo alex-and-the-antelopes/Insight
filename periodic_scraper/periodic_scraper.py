@@ -89,12 +89,8 @@ def is_in_field(table, field, val, type):
     else:
         raise ValueError("unrecog type")
 
-    print(f"count from interact {count_from_interaction}")
-
     count = extract_first_string_from_db_interaction(count_from_interaction)
     count = int(count)
-
-    print(f"count {count}")
 
     if count > 0:
         return True
@@ -136,12 +132,9 @@ def upsert_mp_data():
 
     for mp in all_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(mp.name_display)
-        print(f"checking if mp {mp.name_display}")
         if is_in_field("MP", "mpID", mp.member_id, "int"):
-            print(f"mp {mp.name_display} already in MP")
             execute_update_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, mp.current_member)
         else:
-            print(f"mp {mp.name_display} not yet in MP")
             execute_insert_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, mp.current_member)
 
     print("finished inserting mp data")
