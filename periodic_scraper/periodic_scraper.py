@@ -402,14 +402,14 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     else:
         # update MPs and parties ~every 5 days by default
         # this is not possible from google app engine as app engine times out
-        """
+
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data()
             upsert_mp_data()
             print("finished updating MP and Party table")
         else:
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
-        """
+
 
         upsert_bills_and_divisions_data(fresh=False, session="All")
 
