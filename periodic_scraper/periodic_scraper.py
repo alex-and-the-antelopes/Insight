@@ -404,15 +404,21 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000")
+    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
+    print("executed pickle function")
+
     bills_overview.get_changed_bills_in_session(session_name="All")
+
+    print("executed bills list method")
 
     df_string = bills_overview.bills_overview_data.to_string()
     write_to_log_file(df_string)
+
+
 
     #mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
     #print(f"datetime to pickle: {mock_datetime}")
