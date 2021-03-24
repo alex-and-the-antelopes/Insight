@@ -103,10 +103,10 @@ def insert_mp_data(conn, cursor):
 def is_in_field(conn, cursor, table, field, val, type):
     if type == "string":
         #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
-        count_from_interaction = db_agent.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = \"{val}\"")
     elif type == "int":
         #cursor.execute(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
-        count_from_interaction = db_agent.select(f"SELECT * FROM {db_name}.{table} WHERE {field} = {val}")
+        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = {val}")
     else:
         raise ValueError("unrecog type")
 
