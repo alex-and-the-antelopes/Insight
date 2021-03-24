@@ -221,7 +221,22 @@ def bill_id_in_bills_table(conn, cursor, bill):
     bill_id = None
 
     #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
-    cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    count_command_string = f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
+    count = db_agent.select(count_command_string)
+    #cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+
+    print(f"type count: {type(count)}")
+    print(f"count: {count}")
+
+    #if cursor != 0:
+    select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
+    bill_id = db_agent.select(select_bill_id_string)
+    print(f"type bill id: {type(bill_id)}")
+    print(f"bill id: {bill_id}")
+    raise Exception("deliberately quitting")
+
+    #else:
+    #    return None
 
     count = 0
     for row in cursor:
@@ -233,6 +248,19 @@ def bill_id_in_bills_table(conn, cursor, bill):
 
     return bill_id
 
+
+def division_in_mpvotes_table(conn, cursor, division_name):
+    count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
+    #cursor.execute(count_command_string)
+    cursor = db_agent.select(count_command_string)
+    for c in cursor:
+        print(f"type count[0] {type(c[0])}")
+        count = c[0]
+
+    if count > 0:
+        return True
+    else:
+        return False
 
 def get_sessions_string(sessions):
     sessions_string = ""
