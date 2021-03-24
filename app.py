@@ -77,12 +77,14 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "id": entry[0],
         "title": entry[1],
         "description": parse_text(entry[2]),
-        "date_added": entry[3],
+        "date_added": entry[3][5:16:1],
         "link": entry[4],
         "likes": random.randint(0, 4),
         "dislikes": random.randint(0, 4)
     }
     return bill  # Todo rework (use todict) and comment
+
+
 
 
 def parse_text(text: str) -> str:
@@ -96,6 +98,7 @@ def parse_text(text: str) -> str:
     if "\n" in text:
         text = text.replace("\n", "")  # Remove mac & windows next line char
     return text
+
 
 
 @app.route('/')
