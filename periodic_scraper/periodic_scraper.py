@@ -244,6 +244,9 @@ def bill_id_in_bills_table(conn, cursor, bill):
     print(f"count: {count}")
 
     if count != 0:
+        if count > 1:
+            raise Exception("billID must be unique, duplicates found")
+
         select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
         bill_id_from_interaction = db_agent.select(select_bill_id_string)
         print(f"type bill id interaction: {type(bill_id_from_interaction)}")
@@ -254,18 +257,8 @@ def bill_id_in_bills_table(conn, cursor, bill):
 
         print(f"bill_id: {bill_id}")
         print(f"bill_id type: {type(bill_id)}")
-    raise Exception("deliberately quitting")
-
-    #else:
-    #    return None
-
-    count = 0
-    for row in cursor:
-        bill_id = row[0]
-
-        count+=1
-        if count > 2:
-            raise Exception("billID must be unique, duplicates found")
+    else:
+        return None
 
     return bill_id
 
