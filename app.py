@@ -18,6 +18,19 @@ CONFIG = core.CONFIG
 # ////// End region //////
 
 
+@app.route('/')
+def landing_page():
+    return redirect(CONFIG["default_url"])  # TODO remove
+
+
+@app.route('/testdb')
+def db_testing():
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
+                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
+                      "'Ga70JuPC');")
+    return database.select("SELECT * FROM Users;")  # todo remove
+
+
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
@@ -96,19 +109,6 @@ def parse_text(text: str) -> str:
     if "\n" in text:
         text = text.replace("\n", "")  # Remove mac & windows next line char
     return text
-
-
-@app.route('/')
-def landing_page():
-    return redirect(CONFIG["default_url"])  # TODO remove
-
-
-@app.route('/testdb')
-def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
-                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
-                      "'Ga70JuPC');")
-    return database.select("SELECT * FROM Users;")  # todo remove
 
 
 @app.route('/login', methods=['POST'])
