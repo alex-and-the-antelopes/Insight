@@ -430,25 +430,29 @@ def write_to_log_file(message, log_filename):
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
     #global db_agent
-    db_name = "bill_app_db"
+    db_name = "bill_data"
 
     conn = None
     cursor = None
 
     bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
     mock_datetime = datetime.datetime(2021,3,17,12,0,0,0)
+    bills_overview.reset_datetime_last_scraped()
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
         # update MPs and parties ~every 5 days by default
+        # this is not possible from google app engine as app engine times out
+        """
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data(conn, cursor)
             upsert_mp_data(conn, cursor)
             print("finished updating MP and Party table")
         else:
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
+        """
 
         upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
 
