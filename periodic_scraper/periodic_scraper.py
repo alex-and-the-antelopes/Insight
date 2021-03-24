@@ -290,8 +290,8 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
     summary_sanitised = bill.summary.replace("\"", "")
 
     insertion_command_string \
-        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
+        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, dateAdded, shortDesc, sessions, link) " \
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
     #cursor.execute(insertion_command_string)
     db_agent.interact(insertion_command_string)
 
