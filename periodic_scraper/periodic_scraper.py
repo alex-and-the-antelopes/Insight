@@ -45,7 +45,9 @@ def execute_insert_mp_data_in_db(first_name, second_name, email, constituency, m
         current = 1
     else:
         current = 0
-    insert_command_string = f"INSERT INTO MP (mpID, firstName, lastName, email, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",\"{email}\",{party_id},\"{constituency}\",\"{current}\")"
+    print("current state of MP")
+    print(db_agent.select("SELECT * FROM {db_name}.MP"))
+    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, email, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",\"{email}\",{party_id},\"{constituency}\",\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
