@@ -331,22 +331,17 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             #conn.commit()
 
 
-def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"):
+def upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"):
     if fresh == True:
         os.remove("datetime_last_scraped.p")
         clear_table(conn, cursor, "MPVotes")
         clear_table(conn, cursor, "Bills")
 
 
-    bills_overview = blf.BillsOverview()
+    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
     bills_overview.get_changed_bills_in_session(session_name=session)
-    print("new bills_overview.bills_overview_data")
-    print(bills_overview.bills_overview_data)
-    print("bills overview object obtained, scraping complete")
-    print(f"item counts: {bills_overview.bills_overview_data.count()}")
 
-    pd.set_option('display.max_columns', 20)
-    print(bills_overview.bills_overview_data)
+    write_to_log_file(bills_overview.bills_overview_data.to_string())
 
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
@@ -361,7 +356,7 @@ def reload_all_tables(conn, cursor):
     insert_party_data(conn, cursor)
     insert_mp_data(conn, cursor)
     insert_dead_mp_placeholder(conn, cursor)
-    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="All")
+    upsert_bills_and_divisions_data(conn, cursor, fresh=True, session="All")
 
 
 def mock_datetime_pickle():
@@ -396,7 +391,7 @@ def write_to_log_file(message):
 
 
 # by default assumes running on app engine
-def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True):
+def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
     #global db_agent
     db_name = "bill_data"
@@ -404,40 +399,15 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
+
+    bills_overview = blf.BillsOverview(run_on_app_engine=run_on_app_engine, project_name=project_name)
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     print("executed pickle function")
 
-    bills_overview.get_changed_bills_in_session(session_name="All")
 
-    print("executed bills list method")
-
-    df_string = bills_overview.bills_overview_data.to_string()
-    write_to_log_file(df_string)
-
-
-
-    #mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
-    #print(f"datetime to pickle: {mock_datetime}")
-    #bills_overview.mock_datetime_last_scraped(mock_datetime)
-
-    """
-    fs = gcsfs.GCSFileSystem(project="bills-app-305000")
-
-    test_filename =  "test_file.txt"
-    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "wb") as handle:
-        pickle.dump(mock_datetime, handle)
-
-    with fs.open("bills-app-305000.appspot.com" + "/" + test_filename, "rb") as handle:
-        read_datetime = pickle.load(handle)
-
-    print(f"read datetime: {read_datetime}")
-    """
-
-    """
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
@@ -450,8 +420,8 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
-    """
+        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
+        print("finished inserting bills and divisions data")
 
 
 
