@@ -214,6 +214,15 @@ def upsert_party_data(conn, cursor):
 
     #conn.commit()
 
+# gets xyz from string of form "[(xyz,...)]"
+def extract_first_string_from_db_interaction(interaction_string):
+    # remove opening 2 brackets
+    extracted_result = interaction_string[2:]
+    # remove closing 2 brackets
+    extracted_result = extracted_result[:-2]
+    extracted_result = extracted_result.split(",", maxsplit=1)[0]
+
+    return extracted_result
 
 # return the billID for the passed bill
 # todo: this needs to be more sophisticated, does not account for cases where the title is the same
@@ -229,23 +238,20 @@ def bill_id_in_bills_table(conn, cursor, bill):
     print(f"count from interaction: {count_from_interaction}")
 
     # remove opening 2 brackets
-    count = count_from_interaction[2:]
-    # remove closing 2 brackets
-    count = count[:-2]
-    count = count.split(",", maxsplit=1)
+    count = extract_first_string_from_db_interaction(count_from_interaction)
     count = int(count)
 
-    print(f"type count: {type(c)}")
-    print(f"count: {c}")
+    print(f"type count: {type(count)}")
+    print(f"count: {count}")
 
     if count != 0:
         select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
-        bill_id_interaction = db_agent.select(select_bill_id_string)
-        print(f"type bill id interaction: {type(bill_id_interaction)}")
-        print(f"bill id interaction: {bill_id_interaction}")
+        bill_id_from_interaction = db_agent.select(select_bill_id_string)
+        print(f"type bill id interaction: {type(bill_id_from_interaction)}")
+        print(f"bill id interaction: {bill_id_from_interaction}")
 
-        for i in bill_id_interaction:
-            bill_id = i
+        bill_id = extract_first_string_from_db_interaction(bill_id_from_interaction)
+        bill_id = int(bill_id)
 
         print(f"bill_id: {bill_id}")
         print(f"bill_id type: {type(bill_id)}")
