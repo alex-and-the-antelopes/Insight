@@ -172,7 +172,7 @@ def insert_party_data():
             execute_insert_party_data(i, "unknown")
 
 
-def execute_update_party_data(cursor, party_id, party_name):
+def execute_update_party_data(party_id, party_name):
     update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id}"
 
     db_agent.interact(update_command_string)
