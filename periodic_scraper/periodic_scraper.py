@@ -442,7 +442,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
-        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
         # update MPs and parties ~every 5 days by default
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data(conn, cursor)
@@ -450,6 +449,8 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
             print("finished updating MP and Party table")
         else:
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
+
+        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
 
