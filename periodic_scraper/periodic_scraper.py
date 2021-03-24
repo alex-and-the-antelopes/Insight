@@ -404,13 +404,17 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-    #bills_overview = blf.BillsOverview()
+    bills_overview = blf.BillsOverview()
 
-    print("before write to log")
+    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
+    bills_overview.mock_datetime_last_scraped()
 
-    write_to_log_file("test message")
+    bills_overview.mock_datetime_last_scraped(mock_datetime)
 
-    print("after write to log")
+    bills_overview.get_changed_bills_in_session(session_name="All")
+
+    df_string = bills_overview.bills_overview_data.to_string()
+    write_to_log_file(df_string)
 
     #mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0)
     #print(f"datetime to pickle: {mock_datetime}")
