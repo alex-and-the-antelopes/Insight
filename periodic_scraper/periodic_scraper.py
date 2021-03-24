@@ -40,12 +40,12 @@ def get_names_from_full_name(name_display):
     return first_name, second_name
 
 
-def execute_insert_mp_data_in_db(first_name, second_name, constituency, member_id, party_id, active):
+def execute_insert_mp_data_in_db(first_name, second_name, email, constituency, member_id, party_id, active):
     if active == True:
         current = 1
     else:
         current = 0
-    insert_command_string = f"INSERT INTO MP (mpID, firstName, lastName, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",{party_id},\"{constituency}\",\"{current}\")"
+    insert_command_string = f"INSERT INTO MP (mpID, firstName, lastName, email, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",\"{email}\",{party_id},\"{constituency}\",\"{current}\")"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -60,7 +60,7 @@ def insert_dead_mp_placeholder():
         print(f"checking mpID {i} in table")
         if not is_in_field("MP", "mpID", i, "int"):
             print(f"mpID {i} not in table")
-            execute_insert_mp_data_in_db("missing_first_name", "missing_second_name", "unknown", i, 0, False)
+            execute_insert_mp_data_in_db("missing_first_name", "missing_second_name", "unknown", "unknown", i, 0, False)
 
 
 # assumes table is empty
@@ -74,7 +74,7 @@ def insert_mp_data():
         first_name, second_name = get_names_from_full_name(mp.name_display)
 
         print(f"{mp.name_display} is {mp.current_member} active")
-        execute_insert_mp_data_in_db(first_name, second_name, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
+        execute_insert_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, mp.current_member)
 
 
 def is_in_field(table, field, val, type):
@@ -135,15 +135,15 @@ def upsert_mp_data():
         print(f"checking if mp {mp.name_display}")
         if is_in_field("MP", "mpID", mp.member_id, "int"):
             print(f"mp {mp.name_display} already in MP")
-            execute_update_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
+            execute_update_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, mp.current_member)
         else:
             print(f"mp {mp.name_display} not yet in MP")
-            execute_insert_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
+            execute_insert_mp_data_in_db(first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, mp.current_member)
 
     print("finished inserting mp data")
 
 
-def execute_insert_party_data(cursor, party_id, party_name):
+def execute_insert_party_data(party_id, party_name):
     insert_command_string = f"INSERT INTO {db_name}.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
 
     print(f"party insert command string")
@@ -292,7 +292,7 @@ def execute_update_bill(bill):
     db_agent.interact(update_command_string)
 
 
-def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bill_id, mp_id, aye=True):
+def execute_insert_new_vote_into_mpvotes_table(division_title, stage, bill_id, mp_id, aye=True):
     if aye == True:
         positive = 1
     else:
