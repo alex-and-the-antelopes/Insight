@@ -12,8 +12,8 @@ import gcsfs
 
 # clear all rows and reset increment
 def clear_table(table_name):
-    db_agent.interact(f"DELETE FROM {db_name}.{table_name}")
-    db_agent.interact(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
+    db_agent.interact(f"DELETE FROM {db_name}.{table_name};")
+    db_agent.interact(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1;")
 
 
 def clear_all_4_tables():
@@ -49,7 +49,7 @@ def execute_insert_mp_data_in_db(first_name, second_name, email, constituency, m
     select_string = f"SELECT * FROM {db_name}.MP;"
     rows = db_agent.select(select_string)
     print(rows)
-    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, email, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",\"{email}\",{party_id},\"{constituency}\",\"{current}\")"
+    insert_command_string = f"INSERT INTO {db_name}.MP (mpID, firstName, lastName, email, partyID, area, current) VALUES (\"{member_id}\",\"{first_name}\",\"{second_name}\",\"{email}\",{party_id},\"{constituency}\",\"{current}\");"
 
     print(f"mp insert command string")
     print(insert_command_string)
@@ -83,9 +83,9 @@ def insert_mp_data():
 
 def is_in_field(table, field, val, type):
     if type == "string":
-        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = \"{val}\"")
+        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = \"{val}\";")
     elif type == "int":
-        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = {val}")
+        count_from_interaction = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.{table} WHERE {field} = {val};")
     else:
         raise ValueError("unrecog type")
 
@@ -148,7 +148,7 @@ def upsert_mp_data():
 
 
 def execute_insert_party_data(party_id, party_name):
-    insert_command_string = f"INSERT INTO {db_name}.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\")"
+    insert_command_string = f"INSERT INTO {db_name}.Party (partyID, partyName) VALUES (\"{party_id}\",\"{party_name}\");"
 
     print(f"party insert command string")
     print(insert_command_string)
@@ -177,7 +177,7 @@ def insert_party_data():
 
 
 def execute_update_party_data(party_id, party_name):
-    update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id}"
+    update_command_string = f"UPDATE {db_name}.Party SET partyName = \"{party_name}\" WHERE partyID = {party_id};"
 
     db_agent.interact(update_command_string)
 
@@ -209,7 +209,7 @@ def extract_first_string_from_db_interaction(interaction_string):
 def bill_id_in_bills_table(bill):
     bill_id = None
 
-    count_command_string = f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
+    count_command_string = f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";"
     count_from_interaction = db_agent.select(count_command_string)
 
     print(f"type count from interaction: {type(count_from_interaction)}")
@@ -226,7 +226,7 @@ def bill_id_in_bills_table(bill):
         if count > 1:
             raise Exception("billID must be unique, duplicates found")
 
-        select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
+        select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";"
         bill_id_from_interaction = db_agent.select(select_bill_id_string)
         print(f"type bill id interaction: {type(bill_id_from_interaction)}")
         print(f"bill id interaction: {bill_id_from_interaction}")
@@ -243,7 +243,7 @@ def bill_id_in_bills_table(bill):
 
 
 def division_in_mpvotes_table(division_name):
-    count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
+    count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\";"
 
     count_from_interaction = db_agent.select(count_command_string)
     count = extract_first_string_from_db_interaction(count_from_interaction)
@@ -270,7 +270,7 @@ def execute_insert_new_bill_into_bills_table(bill):
 
     insertion_command_string \
         = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, dateAdded, shortDesc, sessions, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated.isoformat()}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated.isoformat()}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\");"
 
     db_agent.interact(insertion_command_string)
 
@@ -290,7 +290,7 @@ def execute_update_bill(bill):
                             f"link = \"{bill.url}\" " \
                             f"WHERE titleStripped = \'{bill.title_stripped}\'"
     print(f"update command string {update_command_string}")
-    row_used = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    row_used = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";")
     print(f"row used: {row_used}")
 
     db_agent.interact(update_command_string)
@@ -303,7 +303,7 @@ def execute_insert_new_vote_into_mpvotes_table(division_title, stage, bill_id, m
         positive = 0
 
     insert_command_string = f"INSERT INTO {db_name}.MPVotes (positive, billID, mpID, stage, title)" \
-                            f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\")"
+                            f"VALUES (\"{positive}\",\"{bill_id}\",\"{mp_id}\",\"{stage}\",\"{division_title}\");"
 
     db_agent.interact(insert_command_string)
 
@@ -319,11 +319,11 @@ def put_bill_and_division_data_in_db(bills_overview):
             bill_id = bill_id_in_bills_table(bill)
         else:
             print(f"bill {bill.title_stripped} already in Bills table")
-            row_before_op = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+            row_before_op = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";")
             print(f"row before: {row_before_op}")
             execute_update_bill(bill)
             row_after_op = db_agent.select(
-                f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+                f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";")
             print(f"row after: {row_after_op}")
 
         for division in bill.divisions_list:
@@ -364,17 +364,17 @@ def reload_all_tables():
     insert_party_data()
     insert_mp_data()
     insert_dead_mp_placeholder()
-    upsert_bills_and_divisions_data(fresh=True, session="All")
+    #upsert_bills_and_divisions_data(fresh=True, session="All")
 
 
 def db_describe_table(table_name):
-    description = db_agent.select(f"DESCRIBE {table_name}")
+    description = db_agent.select(f"DESCRIBE {table_name};")
     print(f"{table_name} table structure")
     print(description)
 
 
 def print_all_rows_of_table(table_name):
-    rows = db_agent.select(f"SELECT * FROM {table_name}")
+    rows = db_agent.select(f"SELECT * FROM {table_name};")
     print(f"all items in table {table_name}:")
     print(rows)
 
@@ -394,13 +394,14 @@ def write_to_log_file(message, log_filename):
 # by default assumes running on app engine
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
-    db_name = "bill_app_db"
+    db_name = "bill_data"
 
     bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.reset_datetime_last_scraped()
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
+    # if this is the first time the script is run on app engine, you will want to run with completely_fresh
     if completely_fresh:
         reload_all_tables()
     else:
@@ -414,10 +415,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
         else:
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
 
-
         upsert_bills_and_divisions_data(fresh=False, session="All")
-
-        # todo in final version the session_name must be "All" - but check the script works on Google cloud first
 
         print("finished inserting bills and divisions data")
 
