@@ -82,6 +82,30 @@ def bills():
 # ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
+def entry_to_json_dict(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": parse_text(entry[6]),
+        "date_added": entry[4],
+        "link": entry[11]
+    }
+    return bill  # Todo rework (use todict) and comment
+
+
+def entry_to_json_dict_mp_vote_bill(entry):
+    bill = {
+        "id": entry[0],
+        "title": entry[1],
+        "description": parse_text(entry[2]),
+        "date_added": str(entry[3])[:10].replace(" ", ""),
+        "link": entry[4],
+        "likes": random.randint(0, 4),
+        "dislikes": random.randint(0, 4)
+    }
+    return bill  # Todo rework (use todict) and comment
+
+
 @app.route('/get_mp_bills', methods=['POST'])
 def get_mp_bills():
     """
@@ -106,34 +130,17 @@ def get_mp_bills():
         return jsonify({"error": "query_failed"})  # Query failed
 
     bill_list = []
-    for bill in response:  # Iterate through each bill and add them to the bill list
-        bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
+    # for bill in response:  # Iterate through each bill and add them to the bill list
+    #     bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
+
+    for bill_data in response:
+        bill = core.Bill(bill_data[0], bill_data[1], None, bill_data[3], None, None, bill_data[2], link=bill_data[4])
+        bill_dict = bill.to_dict()
+        bill_dict['likes'] = random.randint(0, 4)
+        bill_dict['dislikes'] = random.randint(0, 4)
+        bill_list.append(bill_dict)
 
     return jsonify(bill_list)  # Return the list of bills
-
-
-def entry_to_json_dict(entry):
-    bill = {
-        "id": entry[0],
-        "title": entry[1],
-        "description": parse_text(entry[6]),
-        "date_added": entry[4],
-        "link": entry[11]
-    }
-    return bill  # Todo rework (use todict) and comment
-
-
-def entry_to_json_dict_mp_vote_bill(entry):
-    bill = {
-        "id": entry[0],
-        "title": entry[1],
-        "description": parse_text(entry[2]),
-        "date_added": str(entry[3])[:10].replace(" ", ""),
-        "link": entry[4],
-        "likes": random.randint(0, 4),
-        "dislikes": random.randint(0, 4)
-    }
-    return bill  # Todo rework (use todict) and comment
 
 
 @app.route('/login', methods=['POST'])
