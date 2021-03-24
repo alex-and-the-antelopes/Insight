@@ -110,8 +110,12 @@ def is_in_field(conn, cursor, table, field, val, type):
     else:
         raise ValueError("unrecog type")
 
+    print(f"count from interact {count_from_interaction}")
+
     count = extract_first_string_from_db_interaction(count_from_interaction)
     count = int(count)
+
+    print(f"count {count}")
 
     if count > 0:
         return True
@@ -145,20 +149,24 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
 def upsert_mp_data(conn, cursor):
     print("in upsert_mp_data")
     mp_fetcher = mf.MPOverview()
+    print("created MPOverview obj")
 
     # todo: uncomment and delete below
     mp_fetcher.get_all_members(params={"House": "Commons"})
     all_mp_data = mp_fetcher.mp_overview_data
+    print("fetched all mp data")
 
     for mp in all_mp_data.itertuples():
         first_name, second_name = get_names_from_full_name(mp.name_display)
-        print(mp)
+        print(f"checking if mp {mp.name_display}")
         if is_in_field(conn, cursor, "MP", "mpID", mp.member_id, "int"):
+            print(f"mp {mp.name_display} already in MP")
             execute_update_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
         else:
-            #execute_insert_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
-            print("should not be the case")
+            print(f"mp {mp.name_display} not yet in MP")
+            execute_insert_mp_data_in_db(cursor, conn, first_name, second_name, mp.email, mp.constituency, mp.member_id, mp.party_id, active=mp.current_member)
 
+    print("finished inserting mp data")
     #conn.commit()
 
 
@@ -434,6 +442,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
+        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
         # update MPs and parties ~every 5 days by default
         if datetime.datetime.now().day % day_frequency_for_party_and_mp_data == 0 and allow_party_and_mp_upsert:
             upsert_party_data(conn, cursor)
@@ -443,7 +452,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
+
         print("finished inserting bills and divisions data")
 
 
