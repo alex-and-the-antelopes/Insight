@@ -81,6 +81,36 @@ def bills():
 # ////// End region ////// todo: remove region above
 
 
+@app.route('/get_mp_bills', methods=['POST'])
+def get_mp_bills():
+    """
+    Find and return the bills voted on by the given MP.
+    Requires user verification and the MP's id.
+    :return: A list of bills voted by the given MP, if successful, or an error message if it failed.
+    """
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    # Get information to send email
+    mp_id = request.form['mp_id']
+    # Verify the user:
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    response = database.select(
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
+        f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
+
+    if not response:
+        return jsonify({"error": "query_failed"})  # Query failed
+
+    bill_list = []
+    for bill in response:  # Iterate through each bill and add them to the bill list
+        bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
+
+    return jsonify(bill_list)  # Return the list of bills
+
+
 def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
