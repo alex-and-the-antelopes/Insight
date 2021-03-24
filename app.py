@@ -77,7 +77,7 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "id": entry[0],
         "title": entry[1],
         "description": entry[2],
-        "date_added": str(entry[3])[5:16:1],
+        "date_added": entry[3][5:16:1],
         "link": entry[4],
         "likes": random.randint(0,4),
         "dislikes": random.randint(0,4)
@@ -85,7 +85,8 @@ def entry_to_json_dict_mp_vote_bill(entry):
     return bill  # Todo rework (use todict) and comment
 
 
-
+def date_parser(datetime):
+    datetime.
 
 
 @app.route('/')
