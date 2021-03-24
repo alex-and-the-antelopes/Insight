@@ -4,13 +4,9 @@ import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
 import db_interactions as db_agent
 
-import pandas as pd
 import os
 import datetime
 
-import secret_manager as sm
-import google.cloud.logging
-import logging
 import gcsfs
 
 
