@@ -18,33 +18,51 @@ CONFIG = core.CONFIG
 # ////// End region //////
 
 
+@app.route('/')
+def landing_page():
+    return redirect(CONFIG["default_url"])  # todo remove
+
+
+@app.route('/testdb')
+def db_testing():
+    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
+                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
+                      "'Ga70JuPC');")
+    return database.select("SELECT * FROM Users;")  # todo remove
+
+
 @app.route('/bill/<bill_id>')
 def get_bill(bill_id):
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
                                f"'{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
-    return jsonify({"error": "Query failed"})  # todo add docstring
+
+    return jsonify({"error": "query_failed"})  # todo add docstring and migrate to secure endpoint with POST
 
 
 @app.route('/bills/<mp_id>')
 def mp_voted_bills(mp_id):
     """
+    DEPRECATED, new endpoint & function --> get_mp_bills() [use POST request for verification)
     Find and return the bills voted on by the given MP.
     :param mp_id:
     :return: A list of bills voted by the given MP, in a suitable format.
     """
     bill_list = []
+
     # returns 10 bills for a given mp_id
     response = database.select(
         f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
         f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
-    if response is None:
-        return jsonify({"error": "Query failed"})
-    else:
-        for i in range(10):
-            bill_list.append(entry_to_json_dict_mp_vote_bill(response[i]))
-    return jsonify(bill_list)
+
+    if not response:
+        return jsonify({"error": "query_failed"})
+
+    for bill in response:
+        bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
+
+    return jsonify(bill_list)  # todo remove (secure version added) --> get_mp_bills
 
 
 @app.route('/bills')
@@ -58,7 +76,10 @@ def bills():
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
-    return jsonify(bill_list)  # todo add docstring
+    return jsonify(bill_list)  # todo add docstring and migrate to secure endpoint with POST
+
+
+# ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
 def entry_to_json_dict(entry):
@@ -85,30 +106,41 @@ def entry_to_json_dict_mp_vote_bill(entry):
     return bill  # Todo rework (use todict) and comment
 
 
-def parse_text(text: str) -> str:
+@app.route('/get_mp_bills', methods=['POST'])
+def get_mp_bills():
     """
-    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
-    :param text: The string to be parsed.
-    :return: The parsed string.
+    Find and return the bills voted on by the given MP.
+    Requires user verification and the MP's id.
+    :return: A list of bills voted by the given MP, if successful, or an error message if it failed.
     """
-    if "\r" in text:
-        text = text.replace("\r", "")  # Remove linux next line char
-    if "\n" in text:
-        text = text.replace("\n", "")  # Remove mac & windows next line char
-    return text
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    # Get information to send email
+    mp_id = request.form['mp_id']
+    # Verify the user:
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
+    response = database.select(
+        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
+        f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
 
-@app.route('/')
-def landing_page():
-    return redirect(CONFIG["default_url"])  # TODO remove
+    if not response:
+        return jsonify({"error": "query_failed"})  # Query failed
 
+    bill_list = []
+    # for bill in response:  # Iterate through each bill and add them to the bill list
+    #     bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
 
-@app.route('/testdb')
-def db_testing():
-    database.interact("INSERT INTO Users (email,password,postcode,norificationToken,sessionToken)  "
-                      "VALUES ('dummyemail@gmail.com', 'johncenalover2', 'BA23PZ', 'ExponentPushToken[randomtoken]', "
-                      "'Ga70JuPC');")
-    return database.select("SELECT * FROM Users;")  # todo remove
+    for bill_data in response:
+        bill = core.Bill(bill_data[0], bill_data[1], None, bill_data[3], None, None, bill_data[2], link=bill_data[4])
+        bill_dict = bill.to_dict()
+        bill_dict['likes'] = random.randint(0, 4)
+        bill_dict['dislikes'] = random.randint(0, 4)
+        bill_list.append(bill_dict)
+
+    return jsonify(bill_list)  # Return the list of bills
 
 
 @app.route('/login', methods=['POST'])
@@ -433,6 +465,19 @@ def fetch_mp_by_postcode(postcode: str) -> int:
     if not constituency:
         raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
     return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
+
+
+def parse_text(text: str) -> str:
+    """
+    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
+    :param text: The string to be parsed.
+    :return: The parsed string.
+    """
+    if "\r" in text:
+        text = text.replace("\r", "")  # Remove linux next line char
+    if "\n" in text:
+        text = text.replace("\n", "")  # Remove mac & windows next line char
+    return text
 
 
 if __name__ == '__main__':
