@@ -4,10 +4,4 @@ entrypoint: gunicorn -b :$PORT app:app
 vpc_access_connector:
   name: projects/bills-app-305000/locations/europe-west1/connectors/db-connector
 
-env_variables:
-  DB_USER: mastergk
-  DB_PASS: 9br*+9Fc9LX^2sy>iY,D
-  DB_NAME: bill_data
-  DB_HOST: "10.56.209.3:3306"
-
 
