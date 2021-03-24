@@ -235,17 +235,21 @@ def bill_id_in_bills_table(conn, cursor, bill):
     count = count.split(",", maxsplit=1)
     count = int(count)
 
-    print(f"type count: {type(c)}")
-    print(f"count: {c}")
+    print(f"type count: {type(count)}")
+    print(f"count: {count}")
 
     if count != 0:
         select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
-        bill_id_interaction = db_agent.select(select_bill_id_string)
+        bill_id_from_interaction = db_agent.select(select_bill_id_string)
         print(f"type bill id interaction: {type(bill_id_interaction)}")
         print(f"bill id interaction: {bill_id_interaction}")
 
-        for i in bill_id_interaction:
-            bill_id = i
+        # remove opening 2 brackets
+        bill_id = bill_id_from_interaction[2:]
+        # remove closing 2 brackets
+        bill_id = bill_id[:-2]
+        bill_id = bill_id.split(",", maxsplit=1)
+        bill_id = int(bill_id)
 
         print(f"bill_id: {bill_id}")
         print(f"bill_id type: {type(bill_id)}")
