@@ -86,6 +86,11 @@ def entry_to_json_dict_mp_vote_bill(entry):
 
 
 def parse_text(text: str) -> str:
+    """
+    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
+    :param text: The string to be parsed.
+    :return: The parsed string.
+    """
     if "\r" in text:
         text = text.replace("\r", "")  # Remove linux next line char
     if "\n" in text:
