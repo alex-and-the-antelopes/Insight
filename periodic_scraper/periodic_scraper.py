@@ -394,8 +394,7 @@ def mock_datetime_pickle():
 def db_describe_table(table_name):
     description = db_agent.select(f"DESCRIBE {table_name}")
     print(f"{table_name} table structure")
-    for x in description:
-        print(x)
+    print(description)
 
 
 def print_all_rows_of_table(table_name):
