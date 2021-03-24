@@ -311,15 +311,21 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
 def execute_update_bill(conn, cursor, bill):
     sessions_string = get_sessions_string(bill.sessions)
 
+    datetime_iso_string = bill.last_updated.isoformat()
+    print(f"dattime iso: {datetime_iso_string}")
+
     update_command_string = f"UPDATE {db_name}.Bills " \
                             f"SET " \
                             f"billOrAct = \"{bill.title_postfix}\", " \
-                            f"dateAdded = \"{bill.last_updated.isoformat()}\", " \
+                            f"dateAdded = \"{datetime_iso_string}\", " \
                             f"shortDesc = \"{bill.summary}\", " \
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
-                            f"WHERE titleStripped = \'{bill.title_stripped + 'test'}\'"
+                            f"WHERE titleStripped = \'{bill.title_stripped}\'"
     print(f"update command string {update_command_string}")
+    row_used = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+    print(f"row used: {row_used}")
+
     #cursor.execute(update_command_string)
     db_agent.interact(update_command_string)
 
@@ -348,11 +354,11 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             bill_id = bill_id_in_bills_table(conn, cursor, bill)
         else:
             print(f"bill {bill.title_stripped} already in Bills table")
-            row_before_op = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+            row_before_op = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
             print(f"row before: {row_before_op}")
             execute_update_bill(conn, cursor, bill)
             row_after_op = db_agent.select(
-                f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+                f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
             print(f"row after: {row_after_op}")
         # todo: otherwise, modify the row to put in the data which may have changed (we dont know what has changed, so
         #  insert all of it
