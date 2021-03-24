@@ -407,8 +407,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     bills_overview = blf.BillsOverview()
 
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
-    bills_overview.mock_datetime_last_scraped()
-
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     bills_overview.get_changed_bills_in_session(session_name="All")
