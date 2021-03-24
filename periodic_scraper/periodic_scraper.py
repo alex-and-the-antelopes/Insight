@@ -425,15 +425,6 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     conn = None
     cursor = None
 
-
-    bills_overview = blf.BillsOverview(run_on_app_engine=run_on_app_engine, project_name=project_name)
-
-    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
-    bills_overview.mock_datetime_last_scraped(mock_datetime)
-
-    print("executed pickle function")
-
-
     if completely_fresh:
         reload_all_tables(conn, cursor)
     else:
