@@ -65,7 +65,7 @@ def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": entry[6],
+        "description": parse_text(entry[6]),
         "date_added": entry[4],
         "link": entry[11]
     }
@@ -76,13 +76,26 @@ def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
         "title": entry[1],
-        "description": entry[2],
+        "description": parse_text(entry[2]),
         "date_added": str(entry[3])[5:16],
         "link": entry[4],
-        "likes": random.randint(0,4),
-        "dislikes": random.randint(0,4)
+        "likes": random.randint(0, 4),
+        "dislikes": random.randint(0, 4)
     }
     return bill  # Todo rework (use todict) and comment
+
+
+def parse_text(text: str) -> str:
+    """
+    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
+    :param text: The string to be parsed.
+    :return: The parsed string.
+    """
+    if "\r" in text:
+        text = text.replace("\r", "")  # Remove linux next line char
+    if "\n" in text:
+        text = text.replace("\n", "")  # Remove mac & windows next line char
+    return text
 
 
 @app.route('/')
