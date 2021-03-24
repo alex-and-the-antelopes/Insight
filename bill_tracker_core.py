@@ -133,7 +133,7 @@ class Bill:
         self.date_added = date_added
         self.desc = desc
         self.title = title
-        self.bill_id = bill_id
+        self.id = bill_id
 
         # Generate short desc from long desc if one isn't given
         if short_desc is None:

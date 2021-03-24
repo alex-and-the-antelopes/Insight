@@ -122,23 +122,21 @@ def get_mp_bills():
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    response = database.select(
+    bill_query = database.select(
         f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
         f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
 
-    if not response:
+    if not bill_query:
         return jsonify({"error": "query_failed"})  # Query failed
 
-    bill_list = []
-    # for bill in response:  # Iterate through each bill and add them to the bill list
-    #     bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
-
-    for bill_data in response:
-        bill = core.Bill(bill_data[0], bill_data[1], None, bill_data[3], None, None, bill_data[2], link=bill_data[4])
-        bill_dict = bill.to_dict()
+    bill_list = []  # Holds the list of bills to be transmitted
+    for bill_data in bill_query:  # Put all bills in the query in the correct format
+        bill = core.Bill(bill_data[0], bill_data[1], None, bill_data[3][:10].replace(" ", ""), None, None, bill_data[2],
+                         link=bill_data[4])
+        bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = random.randint(0, 4)
         bill_dict['dislikes'] = random.randint(0, 4)
-        bill_list.append(bill_dict)
+        bill_list.append(bill_dict)  # Append the bill to the list
 
     return jsonify(bill_list)  # Return the list of bills
 
