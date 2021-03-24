@@ -143,6 +143,7 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
 
 # does not assume table is empty
 def upsert_mp_data(conn, cursor):
+    print("in upsert_mp_data")
     mp_fetcher = mf.MPOverview()
 
     # todo: uncomment and delete below
@@ -290,8 +291,8 @@ def execute_insert_new_bill_into_bills_table(conn, cursor, bill):
     summary_sanitised = bill.summary.replace("\"", "")
 
     insertion_command_string \
-        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, shortDesc, sessions, link) " \
-          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
+        = f"INSERT INTO {db_name}.Bills (titleStripped, billOrAct, dateAdded, shortDesc, sessions, link) " \
+          f"VALUES (\"{bill.title_stripped}\",\"{bill.title_postfix}\",\"{bill.last_updated}\",\"{summary_sanitised}\",\"{sessions_string}\",\"{bill.url}\")"
     #cursor.execute(insertion_command_string)
     db_agent.interact(insertion_command_string)
 
@@ -305,6 +306,7 @@ def execute_update_bill(conn, cursor, bill):
     update_command_string = f"UPDATE {db_name}.Bills " \
                             f"SET " \
                             f"billOrAct = \"{bill.title_postfix}\", " \
+                            f"dateAdded = \"{bill.last_updated}\", " \
                             f"shortDesc = \"{bill.summary}\", " \
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
@@ -369,7 +371,8 @@ def upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
     bills_overview.get_changed_bills_in_session(session_name=session)
 
-    write_to_log_file(bills_overview.bills_overview_data.to_string())
+    filename = datetime.datetime.now().isoformat() + "_bills_overview"
+    write_to_log_file(bills_overview.bills_overview_data.to_string(), filename)
 
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
@@ -408,9 +411,8 @@ sql_config = {}
 db_name = ""
 
 
-def write_to_log_file(message):
+def write_to_log_file(message, log_filename):
     fs = gcsfs.GCSFileSystem(project="bills-app-305000")
-    log_filename = "log_file.txt"
     encoded_message = str.encode(message)
     with fs.open("bills-app-305000.appspot.com" + "/" + log_filename, "wb") as handle:
         handle.write(encoded_message)
@@ -420,10 +422,14 @@ def write_to_log_file(message):
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
     #global db_agent
-    db_name = "bill_data"
+    db_name = "bill_app_db"
 
     conn = None
     cursor = None
+
+    bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
+    mock_datetime = datetime.datetime(2021,3,17,12,0,0,0)
+    bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     if completely_fresh:
         reload_all_tables(conn, cursor)
