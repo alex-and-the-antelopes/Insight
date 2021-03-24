@@ -400,8 +400,7 @@ def db_describe_table(table_name):
 def print_all_rows_of_table(table_name):
     rows = db_agent.select(f"SELECT * FROM {table_name}")
     print(f"all items in table {table_name}:")
-    for x in rows:
-        print(x)
+    print(rows)
 
 
 sql_config = {}
