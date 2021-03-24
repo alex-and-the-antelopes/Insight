@@ -266,10 +266,9 @@ def bill_id_in_bills_table(conn, cursor, bill):
 def division_in_mpvotes_table(conn, cursor, division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
     #cursor.execute(count_command_string)
-    cursor = db_agent.select(count_command_string)
-    for c in cursor:
-        print(f"type count[0] {type(c[0])}")
-        count = c[0]
+    count_from_interaction = db_agent.select(count_command_string)
+    count = extract_first_string_from_db_interaction(count_from_interaction)
+    count = int(count)
 
     if count > 0:
         return True
@@ -313,19 +312,6 @@ def execute_update_bill(conn, cursor, bill):
     print(f"update command string {update_command_string}")
     #cursor.execute(update_command_string)
     cursor = db_agent.interact(update_command_string)
-
-def division_in_mpvotes_table(conn, cursor, division_name):
-    count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\""
-    #cursor.execute(count_command_string)
-    cursor = db_agent.select(count_command_string)
-    for c in cursor:
-        print(f"type count[0] {type(c[0])}")
-        count = c[0]
-
-    if count > 0:
-        return True
-    else:
-        return False
 
 
 def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bill_id, mp_id, aye=True):
