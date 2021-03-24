@@ -436,7 +436,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     cursor = None
 
     bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
-    mock_datetime = datetime.datetime(2021, 1, 1, 12, 0, 0, 0)
+    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.reset_datetime_last_scraped()
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
