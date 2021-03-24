@@ -9,4 +9,4 @@ pandas~=1.2.3
 google-cloud-secret-manager==2.2.0
 google-cloud-logging==2.3.0
 gcsfs~=0.7.2
-bs4~=4.9.0
+beautifulsoup4~=4.9.3
