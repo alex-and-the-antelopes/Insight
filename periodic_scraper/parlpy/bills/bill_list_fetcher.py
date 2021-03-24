@@ -12,6 +12,8 @@ import numpy
 
 from bs4 import BeautifulSoup
 
+import gcsfs
+
 
 # class that will have a method to fetch all bill titles, with its associated data:
 # * associated link to further details
@@ -19,7 +21,13 @@ from bs4 import BeautifulSoup
 # and will update the list by fetching each https://bills.parliament.uk page in series until the oldest updated date
 # is older than the bills_df_last_updated, amending the bills_df as it does so (planned)
 class BillsOverview():
-    def __init__(self, debug=False):
+    def __init__(self, run_on_app_engine=False, project_name=None, debug=False):
+        # whether to use gcsfs
+        self.run_on_app_engine = run_on_app_engine
+
+        # what project to use
+        self.project_name = project_name
+
         # whether to print output as it is collected
         self.debug = debug
 
@@ -204,13 +212,23 @@ class BillsOverview():
             check_last_updated=True):
         bill_tuple_list = []
 
-        try:
-            with open("datetime_last_scraped.p", "rb") as f:
-                loaded_datetime_last_scraped = pickle.load(f)
-        except (FileNotFoundError) as e:
-            # this is the case if the pickle file has been manually deleted, or if this is the first time
-            # get_changed_bills_in_session is running
-            loaded_datetime_last_scraped = None
+        if self.run_on_app_engine:
+            fs = gcsfs.GCSFileSystem(project=self.project_name)
+            try:
+                with fs.open(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p", "wb") as handle:
+                    loaded_datetime_last_scraped = pickle.load(handle)
+            except (FileNotFoundError) as e:
+                # this is the case if the pickle file has been manually deleted, or if this is the first time
+                # get_changed_bills_in_session is running
+                loaded_datetime_last_scraped = None
+        else:
+            try:
+                with open("datetime_last_scraped.p", "rb") as f:
+                    loaded_datetime_last_scraped = pickle.load(f)
+            except (FileNotFoundError) as e:
+                # this is the case if the pickle file has been manually deleted, or if this is the first time
+                # get_changed_bills_in_session is running
+                loaded_datetime_last_scraped = None
 
         for i in range(len(titles_stripped)):
             if loaded_datetime_last_scraped != None and check_last_updated:
@@ -333,8 +351,13 @@ class BillsOverview():
         to_store_datetime_last_scraped = datetime.datetime.now()
         if self.debug:
             print("saving to_store_datetime_last_scraped {}".format(to_store_datetime_last_scraped))
-        with open("datetime_last_scraped.p", "wb") as f:
-            pickle.dump(to_store_datetime_last_scraped, f)
+        if self.run_on_app_engine:
+            fs = gcsfs.GCSFileSystem(project=self.project_name)
+            with fs.open(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p", "wb") as handle:
+                pickle.dump(to_store_datetime_last_scraped, handle)
+        else:
+            with open("datetime_last_scraped.p", "wb") as f:
+                pickle.dump(to_store_datetime_last_scraped, f)
         print(self.last_updated)
 
     # this method uses a pickled variable (so that ths package can be run periodically)
@@ -352,12 +375,22 @@ class BillsOverview():
 
 
     def reset_datetime_last_scraped(self):
-        if os.path.exists("datetime_last_scraped.p"):
-            os.remove("datetime_last_scraped.p")
+        if self.run_on_app_engine:
+            fs = gcsfs.GCSFileSystem(project=self.project_name)
+            if fs.exists(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p"):
+                fs.rm(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p")
         else:
-            print("datetime last scraped not recorded")
+            if os.path.exists("datetime_last_scraped.p"):
+                os.remove("datetime_last_scraped.p")
+            else:
+                print("datetime last scraped not recorded")
 
 
     def mock_datetime_last_scraped(self, mock_datetime: datetime.datetime):
-        with open("datetime_last_scraped.p", "wb") as f:
-            pickle.dump(mock_datetime, f)
+        if self.run_on_app_engine:
+            fs = gcsfs.GCSFileSystem(project=self.project_name)
+            with fs.open(f"{self.project_name}.appspot.com" + "/" + "datetime_last_scraped.p", "wb") as handle:
+                pickle.dump(mock_datetime, handle)
+        else:
+            with open("datetime_last_scraped.p", "wb") as f:
+                pickle.dump(mock_datetime, f)
