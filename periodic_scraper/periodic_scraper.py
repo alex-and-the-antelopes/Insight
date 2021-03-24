@@ -369,7 +369,8 @@ def upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"
     bills_overview = blf.BillsOverview(run_on_app_engine=True, project_name="bills-app-305000", debug=True)
     bills_overview.get_changed_bills_in_session(session_name=session)
 
-    write_to_log_file(bills_overview.bills_overview_data.to_string())
+    filename = datetime.datetime.now().isoformat() + "_bills_overview"
+    write_to_log_file(bills_overview.bills_overview_data.to_string(), filename)
 
     # insert everything back in
     put_bill_and_division_data_in_db(conn, cursor, bills_overview)
@@ -408,9 +409,8 @@ sql_config = {}
 db_name = ""
 
 
-def write_to_log_file(message):
+def write_to_log_file(message, log_filename):
     fs = gcsfs.GCSFileSystem(project="bills-app-305000")
-    log_filename = "log_file.txt"
     encoded_message = str.encode(message)
     with fs.open("bills-app-305000.appspot.com" + "/" + log_filename, "wb") as handle:
         handle.write(encoded_message)
