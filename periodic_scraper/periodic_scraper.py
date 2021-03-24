@@ -305,6 +305,7 @@ def execute_update_bill(conn, cursor, bill):
     update_command_string = f"UPDATE {db_name}.Bills " \
                             f"SET " \
                             f"billOrAct = \"{bill.title_postfix}\", " \
+                            f"dateAdded = \"{bill.last_updated}\", " \
                             f"shortDesc = \"{bill.summary}\", " \
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
@@ -420,10 +421,14 @@ def write_to_log_file(message, log_filename):
 def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_mp_data=7, allow_party_and_mp_upsert=True, run_on_app_engine=True, project_name="bills-app-305000"):
     global db_name
     #global db_agent
-    db_name = "bill_data"
+    db_name = "bill_app_db"
 
     conn = None
     cursor = None
+
+    bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
+    mock_datetime = datetime.datetime(2021,3,17,12,0,0,0)
+    bills_overview.mock_datetime_last_scraped(mock_datetime)
 
     if completely_fresh:
         reload_all_tables(conn, cursor)
