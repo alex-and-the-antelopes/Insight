@@ -318,10 +318,10 @@ def execute_update_bill(conn, cursor, bill):
                             f"shortDesc = \"{bill.summary}\", " \
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
-                            f"WHERE titleStripped = \"{bill.title_stripped}\""
+                            f"WHERE titleStripped = \'{bill.title_stripped + 'test'}\'"
     print(f"update command string {update_command_string}")
     #cursor.execute(update_command_string)
-    cursor = db_agent.interact(update_command_string)
+    db_agent.interact(update_command_string)
 
 
 def execute_insert_new_vote_into_mpvotes_table(cursor, division_title, stage, bill_id, mp_id, aye=True):
@@ -436,7 +436,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     cursor = None
 
     bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
-    mock_datetime = datetime.datetime(2021,1,1,12,0,0,0)
+    mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.reset_datetime_last_scraped()
     bills_overview.mock_datetime_last_scraped(mock_datetime)
 
