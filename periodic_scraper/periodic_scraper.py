@@ -222,17 +222,29 @@ def bill_id_in_bills_table(conn, cursor, bill):
 
     #cursor.execute(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
-    count = db_agent.select(count_command_string)
+    count_from_interaction = db_agent.select(count_command_string)
     #cursor = db_agent.select(f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
 
-    print(f"type count: {type(count)}")
-    print(f"count: {count}")
+    print(f"type count from interaction: {type(count)}")
+    print(f"count from interaction: {count}")
 
-    #if cursor != 0:
-    select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
-    bill_id = db_agent.select(select_bill_id_string)
-    print(f"type bill id: {type(bill_id)}")
-    print(f"bill id: {bill_id}")
+    for c in count_from_interaction:
+        count = c
+
+    print(f"type count: {type(c)}")
+    print(f"count: {c}")
+
+    if count != 0:
+        select_bill_id_string = f"SELECT billID FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\""
+        bill_id_interaction = db_agent.select(select_bill_id_string)
+        print(f"type bill id interaction: {type(bill_id_interaction)}")
+        print(f"bill id interaction: {bill_id_interaction}")
+
+        for i in bill_id_interaction:
+            bill_id = i
+
+        print(f"bill_id: {bill_id}")
+        print(f"bill_id type: {type(bill_id)}")
     raise Exception("deliberately quitting")
 
     #else:
