@@ -331,7 +331,7 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             #conn.commit()
 
 
-def insert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"):
+def upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="2019-21"):
     if fresh == True:
         os.remove("datetime_last_scraped.p")
         clear_table(conn, cursor, "MPVotes")
@@ -356,7 +356,7 @@ def reload_all_tables(conn, cursor):
     insert_party_data(conn, cursor)
     insert_mp_data(conn, cursor)
     insert_dead_mp_placeholder(conn, cursor)
-    insert_bills_and_divisions_data(conn, cursor, fresh=True, session="All")
+    upsert_bills_and_divisions_data(conn, cursor, fresh=True, session="All")
 
 
 def mock_datetime_pickle():
@@ -420,7 +420,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
             print("not a designated day to update MP and Party, or updating these has been disabled by parameter")
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
-        insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
+        upsert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
         print("finished inserting bills and divisions data")
 
 
