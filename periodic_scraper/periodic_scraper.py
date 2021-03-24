@@ -228,8 +228,12 @@ def bill_id_in_bills_table(conn, cursor, bill):
     print(f"type count from interaction: {type(count_from_interaction)}")
     print(f"count from interaction: {count_from_interaction}")
 
-    for c in count_from_interaction:
-        count = c
+    # remove opening 2 brackets
+    count = count_from_interaction[2:]
+    # remove closing 2 brackets
+    count = count[:-2]
+    count = count.split(",", maxsplit=1)
+    count = int(count)
 
     print(f"type count: {type(c)}")
     print(f"count: {c}")
