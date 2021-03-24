@@ -348,7 +348,12 @@ def put_bill_and_division_data_in_db(conn, cursor, bills_overview):
             bill_id = bill_id_in_bills_table(conn, cursor, bill)
         else:
             print(f"bill {bill.title_stripped} already in Bills table")
+            row_before_op = db_agent.select(f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+            print(f"row before: {row_before_op}")
             execute_update_bill(conn, cursor, bill)
+            row_after_op = db_agent.select(
+                f"SELECT COUNT(*) FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\"")
+            print(f"row after: {row_after_op}")
         # todo: otherwise, modify the row to put in the data which may have changed (we dont know what has changed, so
         #  insert all of it
         #conn.commit()
