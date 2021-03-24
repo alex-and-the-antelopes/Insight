@@ -396,10 +396,14 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
     global db_name
     db_name = "bill_data"
 
+    # you may want to first populate the table from your desktop as app engine will time out. Then uncomment the below
+    # so that datetime is mocked as sometime recent, this way the app engine wont time out
+    """
     bills_overview = blf.BillsOverview(run_on_app_engine=True,project_name="bills-app-305000")
     mock_datetime = datetime.datetime(2021, 3, 20, 12, 0, 0, 0)
     bills_overview.reset_datetime_last_scraped()
     bills_overview.mock_datetime_last_scraped(mock_datetime)
+    """
 
     # if this is the first time the script is run on app engine, you will want to run with completely_fresh
     if completely_fresh:
