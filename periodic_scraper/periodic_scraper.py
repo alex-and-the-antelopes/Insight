@@ -143,6 +143,7 @@ def execute_update_mp_data_in_db(cursor, conn, first_name, second_name, email, c
 
 # does not assume table is empty
 def upsert_mp_data(conn, cursor):
+    print("in upsert_mp_data")
     mp_fetcher = mf.MPOverview()
 
     # todo: uncomment and delete below
