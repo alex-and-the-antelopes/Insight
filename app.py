@@ -74,6 +74,9 @@ def bills():
     return jsonify(bill_list)  # todo add docstring
 
 
+# ////// End region ////// todo: remove region above
+
+
 def entry_to_json_dict(entry):
     bill = {
         "id": entry[0],
@@ -96,19 +99,6 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "dislikes": random.randint(0, 4)
     }
     return bill  # Todo rework (use todict) and comment
-
-
-def parse_text(text: str) -> str:
-    """
-    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
-    :param text: The string to be parsed.
-    :return: The parsed string.
-    """
-    if "\r" in text:
-        text = text.replace("\r", "")  # Remove linux next line char
-    if "\n" in text:
-        text = text.replace("\n", "")  # Remove mac & windows next line char
-    return text
 
 
 @app.route('/login', methods=['POST'])
@@ -433,6 +423,19 @@ def fetch_mp_by_postcode(postcode: str) -> int:
     if not constituency:
         raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
     return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
+
+
+def parse_text(text: str) -> str:
+    """
+    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
+    :param text: The string to be parsed.
+    :return: The parsed string.
+    """
+    if "\r" in text:
+        text = text.replace("\r", "")  # Remove linux next line char
+    if "\n" in text:
+        text = text.replace("\n", "")  # Remove mac & windows next line char
+    return text
 
 
 if __name__ == '__main__':
