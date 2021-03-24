@@ -421,6 +421,7 @@ def insert_and_update_data(completely_fresh=False, day_frequency_for_party_and_m
 
         # todo in final version the session_name must be "All" - but check the script works on Google cloud first
         insert_bills_and_divisions_data(conn, cursor, fresh=False, session="All")
+        print("finished inserting bills and divisions data")
 
 
 
