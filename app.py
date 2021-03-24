@@ -20,7 +20,7 @@ CONFIG = core.CONFIG
 
 @app.route('/')
 def landing_page():
-    return redirect(CONFIG["default_url"])  # TODO remove
+    return redirect(CONFIG["default_url"])  # todo remove
 
 
 @app.route('/testdb')
@@ -38,12 +38,13 @@ def get_bill(bill_id):
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
 
-    return jsonify({"error": "query_failed"})  # todo add docstring
+    return jsonify({"error": "query_failed"})  # todo add docstring and migrate to secure endpoint with POST
 
 
 @app.route('/bills/<mp_id>')
 def mp_voted_bills(mp_id):
     """
+    DEPRECATED, new endpoint & function --> get_mp_bills() [use POST request for verification)
     Find and return the bills voted on by the given MP.
     :param mp_id:
     :return: A list of bills voted by the given MP, in a suitable format.
@@ -61,7 +62,7 @@ def mp_voted_bills(mp_id):
     for bill in response:
         bill_list.append(entry_to_json_dict_mp_vote_bill(bill))
 
-    return jsonify(bill_list)
+    return jsonify(bill_list)  # todo remove (secure version added) --> get_mp_bills
 
 
 @app.route('/bills')
@@ -75,10 +76,10 @@ def bills():
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
-    return jsonify(bill_list)  # todo add docstring
+    return jsonify(bill_list)  # todo add docstring and migrate to secure endpoint with POST
 
 
-# ////// End region ////// todo: remove region above
+# ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
 @app.route('/get_mp_bills', methods=['POST'])
