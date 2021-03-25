@@ -98,23 +98,6 @@ def entry_to_json_dict_mp_vote_bill(entry):
 # ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
-def fetch_bill(bill_id: str) -> core.Bill or None:
-    """
-    Finds the bill with the given ID, constructs and returns the Bill object.
-    :param bill_id: The id of the bill to fetch.
-    :return: A Bill object with the bill's details if it exists, None otherwise.
-    """
-    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
-                                 f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
-    bill = None
-    if bill_query:  # If the query was successful (the bill exists), build the Bill object
-        bill_data = bill_query[0]  # Get the bill's information
-        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
-                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Construct the Bill
-
-    return bill  # Return the Bill object
-
-
 @app.route('/get_bills', methods=['POST'])
 def get_bills():
     """
@@ -479,6 +462,23 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
         parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
                                                   mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
     return parliament_member
+
+
+def fetch_bill(bill_id: str) -> core.Bill or None:
+    """
+    Finds the bill with the given ID, constructs and returns the Bill object.
+    :param bill_id: The id of the bill to fetch.
+    :return: A Bill object with the bill's details if it exists, None otherwise.
+    """
+    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
+                                 f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
+    bill = None
+    if bill_query:  # If the query was successful (the bill exists), build the Bill object
+        bill_data = bill_query[0]  # Get the bill's information
+        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Construct the Bill
+
+    return bill  # Return the Bill object
 
 
 def verify_user(email: str, session_token: str) -> bool:
