@@ -490,6 +490,20 @@ def fetch_bill(bill_id: str) -> core.Bill or None:
     return bill  # Return the Bill object
 
 
+def fetch_recent_bills(limit: int = 50) -> list or None:
+    """
+    Fetches and returns a list containing the ids of the most recently updated bills.
+    :param limit: The number of bills to fetch. Default number of bills is 50.
+    :return: A list containing the ids of the most recently updated bills, or None.
+    """
+    if type(limit) is not int:
+        raise TypeError(f"Expected type <class 'int'> but got {type(limit)}")  # Given unexpected limit type
+    if limit <= 0:
+        limit = 50  # If given an invalid value, default to 50
+    bills_query = database.select(f"SELECT billID FROM Bills ORDER BY billID DESC LIMIT {limit};")
+    return bills_query
+
+
 def fetch_user_id(email_address: str) -> str:
     """
     For a given email address, finds the user's id from the database.
