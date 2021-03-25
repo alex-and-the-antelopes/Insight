@@ -123,7 +123,7 @@ class Bill:
     """
 
     def __init__(self, bill_id, title, desc, date_added, expiration, status,
-                 short_desc=None, photo=CONFIG["default_img"], link=CONFIG["default_url"]):
+                 short_desc=None, photo=CONFIG["default_img"], link=None):
         self.link = link
         self.status = status
         self.expiration = expiration
