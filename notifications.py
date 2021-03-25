@@ -72,18 +72,3 @@ def build_notification(destination: str, title: str, body: str) -> PushMessage:
                                sound="default")  # Build the push message (notification)
 
     return notification
-
-
-if __name__ == "__main__":
-    # Simple demo for notifications
-    token = None  # Holds the ExpoToken, more info at: https://docs.expo.io/push-notifications/overview/
-    # In this case, the token is read in from a file.
-    try:
-        with open("tokens.txt", "r") as file:
-            token = file.readline().strip()  # Read the test token from token file
-    except FileNotFoundError:
-        print("No tokens.txt file found. Notifications tokens need to be in the tokens.txt file", file=sys.stderr)
-
-    token = "ExponentPushToken[" + token + "]"  # Convert to valid format for push tokens
-    user = User("joehd@emai.com", "password_hash", token, "AB24EZ", "asaQSA2")  # Example User
-    send_notification(user, "Insight Update!", "New bills have been updated. Take 5 minutes to go through them.")
