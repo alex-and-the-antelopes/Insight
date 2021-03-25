@@ -32,13 +32,16 @@ def db_testing():
 
 
 @app.route('/bill/<bill_id>')
-def get_bill(bill_id):
+def get_bill_old(bill_id):
+    """
+    DEPRECATED, new endpoint & function --> get_bill() [use POST request for verification)
+    """
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
                                f"'{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
 
-    return jsonify({"error": "query_failed"})  # todo add docstring and migrate to secure endpoint with POST
+    return jsonify({"error": "query_failed"})  # todo remove (secure version added) --> get_bill
 
 
 @app.route('/bills/<mp_id>')
@@ -82,17 +85,6 @@ def bills():
 # ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
-def entry_to_json_dict(entry):
-    bill = {
-        "id": entry[0],
-        "title": entry[1],
-        "description": parse_text(entry[6]),
-        "date_added": entry[4],
-        "link": entry[11]
-    }
-    return bill  # Todo rework (use todict) and comment
-
-
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
@@ -106,6 +98,33 @@ def entry_to_json_dict_mp_vote_bill(entry):
     return bill  # Todo rework (use todict) and comment
 
 
+@app.route('/get_bill', methods=['POST'])
+def get_bill():
+    """
+    Find and return the bill with the given bill id.
+    Requires user verification and the Bill's id.
+    :return: The bill, in a suitable format if successful, an error message otherwise.
+    """
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    bill_id = request.form['bill_id']  # The id of the bill to fetch
+
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status FROM "
+                                 f"Bills WHERE billID='{bill_id}';")  # Get the bill with the specified bill id
+    if not bill_query:
+        return jsonify({"error": "query_failed"})  # Query failed, no bills with the given id
+
+    # Construct the Bill object
+    bill_data = bill_query[0]  # Get the bill data from the query
+    bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                     bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
+    return jsonify(bill.to_dict())  # Return the Bill as a dictionary
+
+
 @app.route('/get_mp_bills', methods=['POST'])
 def get_mp_bills():
     """
@@ -116,9 +135,8 @@ def get_mp_bills():
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
-    # Get information to send email
-    mp_id = request.form['mp_id']
-    # Verify the user:
+    mp_id = request.form['mp_id']  # Get ParliamentMember id
+
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
@@ -132,7 +150,7 @@ def get_mp_bills():
     bill_list = []  # Holds the list of bills to be transmitted
     for bill_data in bill_query:  # Put all bills in the query in the correct format
         bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
-                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Create MP object
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = random.randint(0, 4)
         bill_dict['dislikes'] = random.randint(0, 4)
