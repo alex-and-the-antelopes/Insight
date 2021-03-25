@@ -44,19 +44,18 @@ def get_bills():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill_list = []
-    for i in range(10):
-        #bill_id = str(random.randint(1, 2028))  # Generate random bill id
+    for i in range(9, 22):
+        bill = fetch_bill(str(i))  # Fetch and construct the bill with the given id
 
-        bill = fetch_bill(i)  # Fetch and construct the bill with the given id
+        if bill:
+            bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
+            bill_dict['likes'] = fetch_number_of_likes(bill.id)
+            bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+            bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
+            bill_list.append(bill_dict)  # Add the bill to the bill list
 
-        if not bill:
-            return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
-
-        bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-        bill_dict['likes'] = fetch_number_of_likes(bill.id)
-        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
-        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
-        bill_list.append(bill_dict)  # Add the bill to the bill list
+    if not bill_list:
+        return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
     return jsonify(bill_list)  # Return the list of bills
 
