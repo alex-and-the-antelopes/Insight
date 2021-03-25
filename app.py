@@ -54,7 +54,7 @@ def get_bills():
             user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
             bill_dict['likes'] = user_interactions[0]  # Get number of likes
             bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-            bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
+            bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
     if not bill_list:
@@ -87,7 +87,7 @@ def get_bill():
     user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
     bill_dict['likes'] = user_interactions[0]  # Get number of likes
     bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-    bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
+    bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
 
@@ -122,7 +122,7 @@ def get_mp_bills():
         user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
         bill_dict['likes'] = user_interactions[0]  # Get number of likes
         bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
+        bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
     return jsonify(bill_list)  # Return the list of bills
 
@@ -360,7 +360,7 @@ def set_user_vote():
 # ////// End region //////
 
 
-def fetch_user_id(email_address: str) -> int:
+def fetch_user_id(email_address: str) -> str:
     """
     For a given email address, finds the user's id from the database.
     :param email_address: The email address of the User.
