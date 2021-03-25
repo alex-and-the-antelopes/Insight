@@ -99,15 +99,18 @@ def entry_to_json_dict_mp_vote_bill(entry):
 
 
 def fetch_bill(bill_id: str) -> core.Bill or None:
+    """
+    Finds the bill with the given ID, constructs and returns the Bill object.
+    :param bill_id: The id of the bill to fetch.
+    :return: A Bill object with the bill's details if it exists, None otherwise.
+    """
     bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
                                  f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
-    if not bill_query:
-        return None  # If the query does not return a bill, return None
-
-    bill_data = bill_query[0]  # Get the bill
-
-    bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
-                     bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Construct the Bill
+    bill = None
+    if bill_query:  # If the query was successful (the bill exists), build the Bill object
+        bill_data = bill_query[0]  # Get the bill's information
+        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Construct the Bill
 
     return bill  # Return the Bill object
 
