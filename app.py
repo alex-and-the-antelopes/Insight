@@ -334,9 +334,8 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)
-    time = datetime.datetime.now()
     database.interact(
-        f"INSERT INTO Votes VALUES ('{positive}', '{bill_id}', '{user_id}', '{time}');")  # Get the user with the given email
+        f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP);")  # Get the user with the given email
 
 
 
