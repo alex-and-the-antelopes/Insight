@@ -142,10 +142,14 @@ def get_bills():
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    bill_list = []
-    for i in range(9, 22):
-        bill = fetch_bill(str(i))  # Fetch and construct the bill with the given id
+    bill_id_list = fetch_recent_bills()  # Get the 50 most recent bills
 
+    if not bill_id_list:
+        return jsonify({"error": "query_failed"})  # Query failed, no bills in database
+
+    bill_list = []
+    for bill_id in bill_id_list:
+        bill = fetch_bill(str(bill_id))  # Fetch and construct the bill with the given id
         if bill:
             bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
             user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
@@ -501,7 +505,7 @@ def fetch_recent_bills(limit: int = 50) -> list or None:
     if limit <= 0:
         limit = 50  # If given an invalid value, default to 50
     bills_query = database.select(f"SELECT billID FROM Bills ORDER BY billID DESC LIMIT {limit};")
-    return bills_query
+    return bills_query  # Return the list of bill ids
 
 
 def fetch_user_id(email_address: str) -> str:
