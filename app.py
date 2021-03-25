@@ -334,8 +334,14 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)
-    database.interact(
-        f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());")  # Get the user with the given email
+
+    try:
+        database.interact(
+            f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());")  # Get the user with the given email
+    except RuntimeWarning:
+        return jsonify({"error": "query_error"})  # Error when executing sql statement
+
+    return jsonify({"success": "insert complete"})
 
 
 
