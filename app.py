@@ -48,9 +48,9 @@ def get_bills():
 
     bill_list = []
     for i in range(10):
-        bill_id = str(random.randint(1, 2028))  # Generate random bill id
+        #bill_id = str(random.randint(1, 2028))  # Generate random bill id
 
-        bill = fetch_bill(bill_id)  # Fetch and construct the bill with the given id
+        bill = fetch_bill(i)  # Fetch and construct the bill with the given id
 
         if not bill:
             return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
