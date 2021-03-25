@@ -344,8 +344,6 @@ def add_vote():
     return jsonify({"success": "insert complete"})
 
 
-
-
 # ////// End region //////
 
 
@@ -354,19 +352,18 @@ def fetch_user_id(email_address):
         f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user with the given email
     if not query:
         return False  # If the query returns a populated list, return False
-    return query[0][0] # If the query returns an empty list return True
+    return query[0][0]  # If the query returns an empty list return True
 
 
 def fetch_number_of_likes(bill_id):
     """
     return: number of likes
     """
-    query = database.select(
-        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")  # Get the user with the given email
+    # Get the user with the given email:
+    query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
     if not query:
-        return 0
-    else:
-        return query[0][0]
+        return 0  # No likes
+    return query[0][0]
 
 
 def fetch_number_of_dislikes(bill_id):
@@ -377,8 +374,7 @@ def fetch_number_of_dislikes(bill_id):
         f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")  # Get the user with the given email
     if not query:
         return 0
-    else:
-        return query[0][0]
+    return query[0][0]
 
 
 def fetch_user_liked(email_address, bill_id):
@@ -388,10 +384,9 @@ def fetch_user_liked(email_address, bill_id):
              2 - User hasn't voted on bill
     """
     user_id = fetch_user_id(email_address)
-    if user_id is not False:
-        # find if the user has voted on a bill
-        query = database.select(
-            f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")  # Get the user with the given email
+    if user_id:
+        # Get the user with the given email:
+        query = database.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")
         if not query:
             return 2  # If the query returns an empty list, return False
         else:
