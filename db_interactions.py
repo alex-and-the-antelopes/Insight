@@ -3,7 +3,6 @@ import secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config: dict):
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
     Fetches secrets from the secret manager adn creates an sqlalchemy connection pool through
     the connection engine.
@@ -35,7 +34,6 @@ def init_tcp_connection_engine(db_config: dict):
 
 
 def init_connection_engine():
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
     Function that starts the database connection pool with the configurations specified below.
 
@@ -50,11 +48,10 @@ def init_connection_engine():
     return init_tcp_connection_engine(db_config)
 
 
-db = init_connection_engine() #starts the database connection where db is the pool of connections
+db = init_connection_engine()  # Start the database connection where db is the pool of connections
 
 
 def interact(statement: str):
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
     :param statement: The SQL statement to carry out. (including ;)
