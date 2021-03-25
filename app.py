@@ -368,6 +368,21 @@ def create_session_token() -> str:
     return token  # Return the unique token
 
 
+def verify_user(email: str, session_token: str) -> bool:
+    """
+    Verify the user using their email and token. Checks if the email address is used, and verifies the token.
+    :param email: The email address of the user.
+    :param session_token: The session token of the user.
+    :return: True if the user was verified, False otherwise.
+    """
+    if is_new_address(email):  # Check if the email corresponds to a User
+        return False
+    user = fetch_user(email)  # Get the user form the database using their email
+    if user and user.verify_token(session_token):
+        return True  # Login successful
+    return False  # Tokens do not match
+
+
 def is_new_address(email_address: str) -> bool:
     """
     Checks the database to see if the given email address is already in use.
@@ -542,21 +557,6 @@ def fetch_mp_by_postcode(postcode: str) -> int:
     if not constituency:
         raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
     return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
-
-
-def verify_user(email: str, session_token: str) -> bool:
-    """
-    Verify the user using their email and token. Checks if the email address is used, and verifies the token.
-    :param email: The email address of the user.
-    :param session_token: The session token of the user.
-    :return: True if the user was verified, False otherwise.
-    """
-    if is_new_address(email):  # Check if the email corresponds to a User
-        return False
-    user = fetch_user(email)  # Get the user form the database using their email
-    if user and user.verify_token(session_token):
-        return True  # Login successful
-    return False  # Tokens do not match
 
 
 def clean_mp_votes(bill_votes: list) -> list:
