@@ -317,8 +317,8 @@ def update_postcode():
     return jsonify({"success": "postcode_updated"})  # Return success message
 
 
-@app.route('/add_vote', methods=['POST']) # Todo fix
-def add_vote():
+@app.route('/set_user_vote', methods=['POST'])
+def set_user_vote():
     """
     Update the User's vote (like or dislike) to the given bill. Interacts with the database to update user interaction.
     Can handle removing votes (un-like or un-dislike) by updating the respective entry in the database.
@@ -334,12 +334,12 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)  # Fetch and construct the User object from the database
-    like_state = fetch_user_liked(user_id, bill_id)  # Gets the current reaction state of the bill for the user
+    vote_state = fetch_user_liked(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
     # Construct the appropriate SQL statement
     if positive is '2':  # Remove interaction (remove like/dislike)
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-    elif like_state == 2 and positive != 2:  # First time interaction with the bill
+    elif vote_state == 2 and positive != 2:  # First time interaction with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
                     f"'{user_id}', CURRENT_TIMESTAMP());"
     else:  # Change existing user interaction with the bill
