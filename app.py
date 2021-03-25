@@ -33,12 +33,15 @@ def db_testing():
 
 @app.route('/bill/<bill_id>')
 def get_bill_old(bill_id):
+    """
+    DEPRECATED, new endpoint & function --> get_bill() [use POST request for verification)
+    """
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
                                f"'{bill_id}';")
     if response:
         return jsonify(entry_to_json_dict_mp_vote_bill(response[0]))
 
-    return jsonify({"error": "query_failed"})  # todo add docstring and migrate to secure endpoint with POST
+    return jsonify({"error": "query_failed"})  # todo remove (secure version added) --> get_bill
 
 
 @app.route('/bills/<mp_id>')
