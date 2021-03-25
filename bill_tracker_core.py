@@ -2,11 +2,19 @@
 class User(object):
     """
     Represents a User entity.
-    Has an email, password, email address, notification, session token and postcode.
+    Has an email address, password hash, email address, notification, session token and postcode.
     """
-    def __init__(self, email, password, notification_token, postcode, session_token):
+    def __init__(self, email: str, password_hash: str, notification_token: str, postcode: str, session_token: str):
+        """
+        Constructs a new User Object with the given details.
+        :param email: The User's email address.
+        :param password_hash: The User's hashed password.
+        :param notification_token: The User's (ExponentPushToken) notification token. Unique to each User and device.
+        :param postcode: The User's postcode.
+        :param session_token: The User's unique session token.
+        """
         self.email = email
-        self.password_hash = password
+        self.password_hash = password_hash
         self.notification_token = notification_token
         self.postcode = postcode
         self.session_token = session_token
@@ -64,17 +72,17 @@ class ParliamentMember:
     def __init__(self, mp_id: int or str, first_name: str, last_name: str, email: str, address: str,
                  party_id: int or str, photo_path: str, phone_num: str, area: str, current: int or str):
         """
-
-        :param mp_id:
-        :param first_name:
-        :param last_name:
-        :param email:
-        :param address:
-        :param party_id:
-        :param photo_path:
-        :param phone_num:
-        :param area:
-        :param current:
+        Constructs a new ParliamentMember Object with the given details.
+        :param mp_id: The MP's id.
+        :param first_name: The MP's first name.
+        :param last_name: The MP's last name.
+        :param email: The email address of the MP.
+        :param address: The physical (mailing) address of the MP.
+        :param party_id: The id of the party which they are a part of.
+        :param photo_path: A path to the MP's photo.
+        :param phone_num: The MP's phone number.
+        :param area: The area (constituency) which the MP represents.
+        :param current: A flag indicating if the MP is active or not. Possible values: 0 --> inactive, 1 --> active.
         """
         self.mp_id = mp_id
         self.first_name = first_name
@@ -115,7 +123,7 @@ class Bill:
     def __init__(self, bill_id: int or str, title: str, desc: str, date_added: str, expiration_date: str, status: str,
                  short_desc: str = None, link: str = "https://bills.parliament.uk/"):
         """
-        Creates a representation of a Bill.
+        Constructs a new Bill Object with the given details. Optional parameters: short_desc and link.
         :param bill_id: The id of the bill.
         :param title: The title of the bill.
         :param desc: The scraped description of the bill.
@@ -125,7 +133,8 @@ class Bill:
         Stages.
         :param short_desc: A short description of the Bill. Defaults to None. If not given one, the description (desc)
         will be used to generate a short version.
-        :param link: The bill's page on the https://bills.parliament.uk/. Contains more details for the Bill.
+        :param link: The bill's page on the https://bills.parliament.uk/. Contains more details for the Bill. Defaults
+        to the general parliament website, if not given one.
         """
         self.id = bill_id
         self.title = title
