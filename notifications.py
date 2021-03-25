@@ -27,7 +27,8 @@ def send_notification_to_clients(clients: list, title: str, body: str) -> None:
 
 def send_notification(client: User, title: str, body: str) -> None:
     """
-    Send a notification with the given title and body to the client. Can raise TypeError.
+    Send a notification with the given title and body to the client. Can raise TypeError. Uses the Exponent Server
+    Software Development Kit. Further documentation available at: https://docs.expo.io/push-notifications/overview/
     :param client: The intended recipient of the notification to.
     :param title: The title of the notification.
     :param body: The body of the notification.
@@ -74,18 +75,15 @@ def build_notification(destination: str, title: str, body: str) -> PushMessage:
 
 
 if __name__ == "__main__":
-    # Simple tests for notifications todo: remove or move to test file
-    token = None
+    # Simple demo for notifications
+    token = None  # Holds the ExpoToken, more info at: https://docs.expo.io/push-notifications/overview/
+    # In this case, the token is read in from a file.
     try:
         with open("tokens.txt", "r") as file:
             token = file.readline().strip()  # Read the test token from token file
     except FileNotFoundError:
         print("No tokens.txt file found. Notifications tokens need to be in the tokens.txt file", file=sys.stderr)
+
     token = "ExponentPushToken[" + token + "]"  # Convert to valid format for push tokens
-    user1 = User("joehd@emai.com", "pass1", token, "AB24EZ", "asaQSA2")
-    # user2 = User("Joe", "pass2", token, "AB2 AB2", "SESSION TOKEN")
-    # user3 = User("Alex", "pass3", token, "AB2 AB2", "SESSION TOKEN")
-    # users = [user1, user2, user3]
-    # send_notification(user1, "Test 4", "Example message body for user test")  # Send to single user
-    # send_notification_to_clients(users, "Testing for many clients", "Example message body")  # Send to list of users
-    send_notification(user1, "Insight Update!", "New bills have been updated. Take 5 minutes to go through them.")
+    user = User("joehd@emai.com", "password_hash", token, "AB24EZ", "asaQSA2")  # Example User
+    send_notification(user, "Insight Update!", "New bills have been updated. Take 5 minutes to go through them.")
