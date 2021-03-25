@@ -48,18 +48,42 @@ def create_message(subject: str = "Insight message!", main_body: str = None) -> 
     return message  # Return the constructed email
 
 
+def send_email(recipient_email: str, email_subject: str, email_body: str) -> None:
+    """
+    Constructs and sends an email to the given email address. Includes error checking for type, value errors and
+    invalid email addresses.
+    :param recipient_email: The intended party's email address.
+    :param email_subject: The subject for the email (title/header).
+    :param email_body: The email's body.
+    :return: None
+    """
+    # Check for type errors:
+    if type(email_subject) is not str:  # Check the email subject
+        raise TypeError("Expected type <class 'str'> got type ", type(email_subject), " for email_subject")
+    if type(email_body) is not str:  # Check the email body
+        raise TypeError("Expected type <class 'str'> got type ", type(email_body), " for email_body")
+    if type(recipient_email) is not str:  # Check the recipient's email address
+        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+    if type(recipient_email) is not str:  # Email is not a str
+        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+    if not is_valid_email(recipient_email):  # Email is a str but is not a valid address
+        raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
+
+    message = create_message(email_subject, email_body)  # Construct the message (Format subject and body)
+    send_message(recipient_email, message)  # Send the email to the intended recipient
+    return
+
+
 def is_valid_email(email_address: str) -> bool:
     """
     Checks if the given email address is a valid address.
     :param email_address: The email address to validate.
     :return: True if the given email is valid, False otherwise.
     """
-
-    # Part of email we're processing, as there are different rules for each part of the email.
-    state = "local"
-
     local_legal_chars = r"[a-zA-Z0-9!#$%&'*+\-\/=?^_`{|}~]"
     domain_legal_chars = r"[a-zA-Z0-9]"
+
+    state = "local"  # The portion (state) of the email currently being read
 
     for i, c in enumerate(email_address):
         if state == "local":
@@ -91,39 +115,10 @@ def is_valid_email(email_address: str) -> bool:
     return True
 
 
-def send_email(recipient_email: str, email_subject: str, email_body: str) -> None:
-    """
-    Constructs and sends an email to the given email address. Includes error checking for type, value errors and
-    invalid email addresses.
-    :param recipient_email: The intended party's email address.
-    :param email_subject: The subject for the email (title/header).
-    :param email_body: The email's body.
-    :return: None
-    """
-    # Check for type errors:
-    if type(email_subject) is not str:  # Check the email subject
-        raise TypeError("Expected type <class 'str'> got type ", type(email_subject), " for email_subject")
-    if type(email_body) is not str:  # Check the email body
-        raise TypeError("Expected type <class 'str'> got type ", type(email_body), " for email_body")
-    if type(recipient_email) is not str:  # Check the recipient's email address
-        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
-    if type(recipient_email) is not str:  # Email is not a str
-        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
-    if not is_valid_email(recipient_email):  # Email is a str but is not a valid address
-        raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
-
-    message = create_message(email_subject, email_body)  # Construct the message (Format subject and body)
-    send_message(recipient_email, message)  # Send the email to the intended recipient
-    return
-
-
 if __name__ == '__main__':
-    # send_email("dummy@gmail.com", "okay", "23.23")
     # Test email checker: todo move to a test file
     test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", "dummy@bath.ac.uk",
                       ""]
     for address in test_addresses:
         # print(check_email_address(address), address)
         print(is_valid_email(address), address)
-    # Test email sender
-    # send_email("dummyemail@gmail.com", "EXAMPLE TITLE", "EXAMPLE TEXT FOR THE MAIN BODY HERE.")
