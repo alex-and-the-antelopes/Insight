@@ -84,8 +84,9 @@ def get_bill():
         return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
     bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-    bill_dict['likes'] = fetch_number_of_likes(bill.id)
-    bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+    user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+    bill_dict['likes'] = user_interactions[0]  # Get number of likes
+    bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
     bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
@@ -118,8 +119,9 @@ def get_mp_bills():
         bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                          bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Create MP object
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
-        bill_dict['likes'] = fetch_number_of_likes(bill.id)
-        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+        user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+        bill_dict['likes'] = user_interactions[0]  # Get number of likes
+        bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
         bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
     return jsonify(bill_list)  # Return the list of bills
@@ -386,29 +388,6 @@ def fetch_user_interactions(bill_id: str) -> tuple:
     if dislikes_query:
         dislikes_count = dislikes_query[0][0]
     return likes_count, dislikes_count  # Return the number of likes/dislikes as a tuple
-
-
-def fetch_number_of_likes(bill_id: str):
-    """
-    Finds the number of likes for a given bill_id Todo: remove
-    :return: number of likes
-    """
-    # Get the user with the given email:
-    likes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
-    if not likes_query:
-        return 0  # No likes
-    return likes_query[0][0]
-
-
-def fetch_number_of_dislikes(bill_id):
-    """
-    Finds the number of dislikes for a given bill_id Todo: remove
-    return: number of likes
-    """
-    dislikes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")
-    if not dislikes_query:
-        return 0
-    return dislikes_query[0][0]
 
 
 def fetch_user_liked(user_id, bill_id):
