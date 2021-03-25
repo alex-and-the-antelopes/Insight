@@ -335,7 +335,7 @@ def add_vote():
 
     user_id = fetch_user_id(email)
     database.interact(
-        f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP);")  # Get the user with the given email
+        f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());")  # Get the user with the given email
 
 
 
