@@ -122,7 +122,10 @@ def get_bill():
     bill_data = bill_query[0]  # Get the bill data from the query
     bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                      bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
-    return jsonify(bill.to_dict())  # Return the Bill as a dictionary
+    bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
+    bill_dict['likes'] = random.randint(0, 4)
+    bill_dict['dislikes'] = random.randint(0, 4)
+    return jsonify(bill_dict)  # Return the Bill as a dictionary
 
 
 @app.route('/get_mp_bills', methods=['POST'])
