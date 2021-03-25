@@ -119,34 +119,24 @@ class ParliamentMember:
 class Bill:
     """
     Represents a bill entry.
-    Has title, desc, date added, expiration, status, short_desc, photo and link.
+    Has title, desc, date added, expiration, status, short_desc and link.
     """
-
-    def __init__(self, bill_id, title, desc, date_added, expiration, status,
-                 short_desc=None, photo=CONFIG["default_img"], link=None):
-        self.link = link
-        self.status = status
-        self.expiration = expiration
-        self.date_added = date_added
-        self.desc = desc
-        self.title = title
+    def __init__(self, bill_id, title, desc, date_added, expiration, status, short_desc=None, link=None):
         self.id = bill_id
+        self.title = title
+        self.desc = desc
+        self.date_added = date_added
+        self.expiration = expiration
+        self.status = status
+        self.short_desc = short_desc if short_desc else self.desc[:CONFIG["short_desc_default_length"]]
+        self.link = link
 
         # Generate short desc from long desc if one isn't given
-        if short_desc is None:
-            # Length of this is dictated by CONFIG
-            self.short_desc = desc[:CONFIG["short_desc_default_length"]]
-        else:
-            self.short_desc = short_desc
-
-        # Check if img extension is valid
-        # todo: Is there a better way of checking extension? Should we even be
-        #  checking the extension here? Might be better to check filetype at upload.
-        if photo.split(".")[-1] in CONFIG["valid_img_extensions"]:
-            self.img_url = get_img_url(photo)
-        else:
-            # Use default invalid image if the image is the wrong file type
-            self.img_url = get_img_url(CONFIG["invalid_img"])
+        # if short_desc is None:
+        #     Length of this is dictated by CONFIG
+            # self.short_desc = desc[:CONFIG["short_desc_default_length"]]
+        # else:
+        #     self.short_desc = short_desc
 
     def __str__(self) -> str:
         """
