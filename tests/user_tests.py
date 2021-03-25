@@ -10,23 +10,6 @@ class UserTestCases(unittest.TestCase):
     Depend on/Affected by:
     > hash_password
     """
-
-    def test_username(self):
-        """
-        Check that username is correct
-        Could remove (I realized this wasn't needed too late)
-        """
-        user = User("admin", "pass", "notification token")
-        # Check for actual value:
-        self.assertEqual("admin", user.email)
-        # Check for wrong values:
-        self.assertNotEqual("Admin", user.email)
-        self.assertNotEqual("", user.email)
-        # Checking Wrong Types:
-        self.assertNotEqual(None, user.email)
-        self.assertNotEqual(("admin", "admin"), user.email)
-        self.assertNotEqual(13.012, user.email)
-
     def test_verify_password(self):
         """
         Test the verify_password() in User
