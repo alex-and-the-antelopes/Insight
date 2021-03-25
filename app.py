@@ -560,10 +560,11 @@ def notify_users(title: str, body: str) -> None:
     if not user_emails:
         raise KeyError("No users found in the database.")  # Database query failed
     user_list = []
-    for user_email in user_emails:
-        user = fetch_user(user_email)
-        user_list.append(user)
-    notifications.send_notification_to_clients(user_list, title, body)  # Send the notification
+    for user_email in user_emails:  # Go through each user email and construct the User object
+        user = fetch_user(user_email)  # Construct the User object
+        if user:
+            user_list.append(user)  # Add User to the list of users
+    notifications.send_notification_to_clients(user_list, title, body)  # Build and send the notification to all users
     return
 
 
