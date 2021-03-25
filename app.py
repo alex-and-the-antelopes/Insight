@@ -8,7 +8,6 @@ import logging
 import string
 import random
 
-
 app = Flask(__name__)
 logger = logging.getLogger()
 CORS(app)
@@ -46,17 +45,17 @@ def get_bills():
 
     bill_list = []
     for i in range(10):
-        bill_id = str(random.randint(1, 2028))  # Generate random bill id
+        #bill_id = str(random.randint(1, 2028))  # Generate random bill id
 
-        bill = fetch_bill(bill_id)  # Fetch and construct the bill with the given id
+        bill = fetch_bill(i)  # Fetch and construct the bill with the given id
 
         if not bill:
             return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
         bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-        bill_dict['likes'] = random.randint(0, 4)
-        bill_dict['dislikes'] = random.randint(0, 4)
-
+        bill_dict['likes'] = fetch_number_of_likes(bill.id)
+        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Add the bill to the bill list
 
     return jsonify(bill_list)  # Return the list of bills
@@ -84,8 +83,8 @@ def get_bill():
 
     bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
     bill_dict['likes'] = fetch_number_of_likes(bill.id)
-    bill_dict['dislikes'] =  fetch_number_of_dislikes(bill.id)
-    bill_dict['user_liked'] = fetch_user_liked(email, bill.id)
+    bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+    bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
 
@@ -119,8 +118,8 @@ def get_mp_bills():
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = fetch_number_of_likes(bill.id)
         bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
-
     return jsonify(bill_list)  # Return the list of bills
 
 
@@ -331,10 +330,15 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)
-
+    like_state = fetch_user_liked(user_id, bill_id)  # gets the current like status of the bill
+    if positive == 2: #removing their reaction on the bill
+        statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
+    elif like_state == 2:  # user has not interacted with the bill
+        statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());"
+    else:  # user has interacted with the bill
+        statement = f"UPDATE Votes SET positive = {positive}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id} AND userID = {user_id};"
     try:
-        database.interact(
-            f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());")  # Get the user with the given email
+        database.interact(statement)  # Get the user with the given email
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
@@ -345,6 +349,10 @@ def add_vote():
 
 
 def fetch_user_id(email_address):
+    """
+    For a given email address, finds the user_id from the database
+    return: user_id correlating to that email address in the database
+    """
     query = database.select(
         f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user with the given email
     if not query:
@@ -354,6 +362,7 @@ def fetch_user_id(email_address):
 
 def fetch_number_of_likes(bill_id):
     """
+    Finds the number of likes for a given bill_id
     return: number of likes
     """
     # Get the user with the given email:
@@ -365,6 +374,7 @@ def fetch_number_of_likes(bill_id):
 
 def fetch_number_of_dislikes(bill_id):
     """
+    Finds the number of dislikes for a given bill_id
     return: number of likes
     """
     query = database.select(
@@ -374,16 +384,18 @@ def fetch_number_of_dislikes(bill_id):
     return query[0][0]
 
 
-def fetch_user_liked(email_address, bill_id):
+def fetch_user_liked(user_id, bill_id):
     """
+    Finds whether a particular user has liked a bill.
     returns: 0 - user has disliked the bill
              1 - User has liked the bill
              2 - User hasn't voted on bill
     """
-    user_id = fetch_user_id(email_address)
-    if user_id:
-        # Get the user with the given email:
-        query = database.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")
+    if user_id is not False:
+        # find if the user has voted on a bill
+        query = database.select(
+            f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")  # Get the user with the given email
+
         if not query:
             return 2  # If the query returns an empty list, return False
         else:
