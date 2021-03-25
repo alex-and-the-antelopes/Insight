@@ -320,9 +320,9 @@ def update_postcode():
 @app.route('/add_vote', methods=['POST']) # Todo fix
 def add_vote():
     """
-    Adds a like/dislike to the database as well as handles unliking and undisliking of bills by
-    deleting that entry into the database.
-    :return: relevant success or error message
+    Update the User's vote (like or dislike) to the given bill. Interacts with the database to update user interaction.
+    Can handle removing votes (un-like or un-dislike) by updating the respective entry in the database.
+    :return: A success message, if no errors occurred, otherwise an error message
     """
     # Get user info for verification
     email = request.form['email']
@@ -333,20 +333,25 @@ def add_vote():
     if not verify_user(email, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    user_id = fetch_user_id(email)
-    like_state = fetch_user_liked(user_id, bill_id)  # gets the current like status of the bill
-    if positive is '2':  # removing their reaction on the bill
+    user_id = fetch_user_id(email)  # Fetch and construct the User object from the database
+    like_state = fetch_user_liked(user_id, bill_id)  # Gets the current reaction state of the bill for the user
+
+    # Construct the appropriate SQL statement
+    if positive is '2':  # Remove interaction (remove like/dislike)
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-    elif like_state == 2 and positive != 2:  # user has not interacted with the bill
-        statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());"
-    else:  # user has interacted with the bill
-        statement = f"UPDATE Votes SET positive = {positive}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id} AND userID = {user_id};"
+    elif like_state == 2 and positive != 2:  # First time interaction with the bill
+        statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
+                    f"'{user_id}', CURRENT_TIMESTAMP());"
+    else:  # Change existing user interaction with the bill
+        statement = f"UPDATE Votes SET positive = {positive}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id}" \
+                    f" AND userID = {user_id};"
+
     try:
-        database.interact(statement)  # Get the user with the given email
+        database.interact(statement)  # Carry out the relevant SQL statement
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
-    return jsonify({"success": "insert complete"})
+    return jsonify({"success": "update_successful"})  # Return success message
 
 
 # ////// End region //////
