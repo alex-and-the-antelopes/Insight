@@ -5,9 +5,10 @@ import secret_manager as secret
 def init_tcp_connection_engine(db_config: dict):
     # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
-
-    :param db_config:
-    :return:
+    Fetches secrets from the secret manager adn creates an sqlalchemy connection pool through
+    the connection engine.
+    :param db_config: The configuration for the database
+    :return: pool of database connections or None if failed to connect.
     """
     db_user = secret.get_version("db_user")
     db_pass = secret.get_version("db_pass")
@@ -36,37 +37,34 @@ def init_tcp_connection_engine(db_config: dict):
 def init_connection_engine():
     # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
+    Function that starts the database connection pool with the configurations specified below.
 
-    :return:
+    :return: a pool of database connection or None if connection failed.
     """
     db_config = {
         "pool_size": 5,  # Max number of permanent connections
-        "max_overflow": 2,  # Handle 2 extra connections if pool_size is exceeded (effective pool size: 7).
+        "max_overflow": 2,  # Handle 2 extra connections if pool_size is exceeded (total pool size: 7).
         "pool_timeout": 30,  # Max seconds to wait to retrieve a connection. If time is exceeded an error is thrown
         "pool_recycle": 1800,  # Max seconds a connection can persist
     }
     return init_tcp_connection_engine(db_config)
 
 
-db = init_connection_engine()
+db = init_connection_engine() #starts the database connection where db is the pool of connections
 
 
 def interact(statement: str):
     # Todo add docstring and method signature (return type) i know it's None or conn.execute
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
-    :param statement: The SQL statement to carry out.
-    :return:
+    :param statement: The SQL statement to carry out. (including ;)
+    :return: The response from the database after the action was carried out
     """
     try:
-        # Using a with statement ensures that the connection is always released
-        # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
             return conn.execute(statement)
     except Exception as e:
-        # If something goes wrong, handle the error in this section. This might
-        # involve retrying or adjusting parameters depending on the situation.
-        # [START_EXCLUDE]
+        # Raises the error that the statement could not execute
         raise RuntimeWarning(f"Interaction database failed with message: {str(e)}")
 
 
@@ -78,12 +76,8 @@ def select(statement: str) -> list or None:
     :return: The resulting query from the database in the form of a list.
     """
     try:
-        # Using a with statement ensures that the connection is always released
-        # back into the pool at the end of statement (even if an error occurs)
         with db.connect() as conn:
             return list(conn.execute(statement).fetchall())  # Return the result as a list
     except Exception as e:
-        # If something goes wrong, handle the error in this section. This might
-        # involve retrying or adjusting parameters depending on the situation.
-        # [START_EXCLUDE]
+        # Raises an error that the statement could not finish execution.
         raise RuntimeWarning(f"Selection database failed with message: {str(e)}")
