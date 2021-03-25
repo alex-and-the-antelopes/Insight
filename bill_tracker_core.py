@@ -112,7 +112,7 @@ class ParliamentMember:
         """
         mp_str = f"id: {self.mp_id}, last name: {self.last_name}, first name: {self.first_name}, email: {self.email}," \
                  f" address: {self.address}, party id: {self.party_id}, photo path: {self.photo_path}, phone number:" \
-                 f" {self.phone_num}, area: {self.area} and current: {self.current}"
+                 f" {self.phone_num}, area: {self.area}, current: {self.current}"
         return mp_str
 
 
@@ -148,7 +148,17 @@ class Bill:
             # Use default invalid image if the image is the wrong file type
             self.img_url = get_img_url(CONFIG["invalid_img"])
 
-    # Return self as key-value pair dict
+    def __str__(self) -> str:
+        """
+        Creates and returns a string representation of the current Bill object. The string contains the
+        id, title, description, date added, expiration, status, a short description and a link to the bill.
+        :return: A string (str) containing the Bill's information.
+        """
+        bill_str = f"id: {self.id}, title: {self.title}, description: {self.desc}, date added: {self.date_added}, " \
+                   f"expiration: {self.expiration}, status: {self.status}, short description: {self.short_desc}, " \
+                   f"link: {self.link}"
+        return bill_str
+
     def to_dict(self) -> dict:
         """
         Creates and returns a dictionary representation of the current Bill object.
