@@ -145,7 +145,7 @@ def get_bills():
     bill_id_list = fetch_recent_bills()  # Get the 50 most recent bills
 
     if not bill_id_list:
-        return jsonify({"error": "query_failed"})  # Query failed, no bills in database
+        return jsonify({"error": "bill_id_query_failed"})  # Query failed, no bills in database
 
     bill_list = []
     for bill_id in bill_id_list:
@@ -159,7 +159,7 @@ def get_bills():
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
     if not bill_list:
-        return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
+        return jsonify({"error": "bill_query_failed"})  # Query failed, no such bill exists
 
     return jsonify(bill_list)  # Return the list of bills
 
