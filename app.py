@@ -115,6 +115,7 @@ def get_bills():
     bill_list = []
     for i in range(10):
         bill_id = random.randint(1, 2028)
+        # todo, use fetch_bill and then convert to dict & add user votes
         bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
                                      f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
         if not bill_query:
@@ -147,7 +148,7 @@ def get_bill():
 
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
-
+    # todo, use fetch_bill and then convert to dict & add user votes
     bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status FROM "
                                  f"Bills WHERE billID='{bill_id}';")  # Get the bill with the specified bill id
     if not bill_query:
