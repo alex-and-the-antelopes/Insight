@@ -55,7 +55,7 @@ def send_notification(client: User, title: str, body: str) -> None:
 def build_notification(destination: str, title: str, body: str) -> PushMessage:
     """
     Creates and returns a valid notification, ready to be broadcast. Can raise TypeError and ValueError.
-    :param destination: expo client notification token.
+    :param destination: The client's notification token (ExponentPushToken).
     :param title: The notification's title.
     :param body: The main body of the notification.
     :return: The built notification to broadcast.

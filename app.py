@@ -213,13 +213,12 @@ def send_message():
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    return jsonify({"success": "email_sent"})  # todo REMOVE BEFORE FINAL VERSION. ONLY USED FOR PROTOTYPE
-
     mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
 
     if mp:  # If the MP was successfully constructed
         try:
-            email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email
+            email_sender.send_email("joehdownard@gmail.com", "Insight Update!", message)  # Send the email todo remove
+            # email_sender.send_email(mp.email, "Insight Update!", message)  # Send the email
             return jsonify({"success": "email_sent"})  # If sent without errors, return success message
         except Exception:
             return jsonify({"error": "email_failed_to_send"})  # Error with mail sending
@@ -318,7 +317,7 @@ def update_postcode():
     return jsonify({"success": "postcode_updated"})  # Return success message
 
 
-@app.route('/add_vote', methods=['POST'])
+@app.route('/add_vote', methods=['POST']) # Todo fix
 def add_vote():
     # Get user info for verification
     email = request.form['email']
@@ -331,7 +330,7 @@ def add_vote():
 
     user_id = fetch_user_id(email)
     like_state = fetch_user_liked(user_id, bill_id)  # gets the current like status of the bill
-    if positive is '2': #removing their reaction on the bill
+    if positive is '2':  # removing their reaction on the bill
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
     elif like_state == 2 and positive != 2:  # user has not interacted with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());"
@@ -362,7 +361,7 @@ def fetch_user_id(email_address):
 
 def fetch_number_of_likes(bill_id):
     """
-    Finds the number of likes for a given bill_id
+    Finds the number of likes for a given bill_id Todo: fix
     return: number of likes
     """
     # Get the user with the given email:
@@ -374,7 +373,7 @@ def fetch_number_of_likes(bill_id):
 
 def fetch_number_of_dislikes(bill_id):
     """
-    Finds the number of dislikes for a given bill_id
+    Finds the number of dislikes for a given bill_id Todo: fix
     return: number of likes
     """
     query = database.select(
@@ -386,7 +385,7 @@ def fetch_number_of_dislikes(bill_id):
 
 def fetch_user_liked(user_id, bill_id):
     """
-    Finds whether a particular user has liked a bill.
+    Finds whether a particular user has liked a bill. Todo: fix
     returns: 0 - user has disliked the bill
              1 - User has liked the bill
              2 - User hasn't voted on bill
@@ -433,8 +432,8 @@ def is_new_address(email_address: str) -> bool:
 def add_user_to_database(user: core.User) -> None:
     """
     Add the given User to the database.
-    :param user: User object
-    :return: None
+    :param user: User object.
+    :return: None.
     """
     if not user:  # Ignore None
         return
@@ -549,15 +548,23 @@ def fetch_mp_by_postcode(postcode: str) -> int:
     return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
 
 
-def notify_users(title, body):
+def notify_users(title: str, body: str) -> None:
     """
-    Sends notification to every client
-
-    :param title: title of the notification (str)
-    :param body: body of the notification (str)
+    Fetches the notification token (ExponentPushToken) for all Users, builds and sends a notification with the given
+    title and body.
+    :param title: The title of the notification.
+    :param body: The body of the notification.
+    :return: None.
     """
-    list_of_tokens = database.select("SELECT notificationToken FROM Users;")
-    notifications.send_notification_to_clients(list_of_tokens, title, body)
+    user_emails = database.select("SELECT email FROM Users;")  # Get all the user email addresses
+    if not user_emails:
+        raise KeyError("No users found in the database.")  # Database query failed
+    user_list = []
+    for user_email in user_emails:
+        user = fetch_user(user_email)
+        user_list.append(user)
+    notifications.send_notification_to_clients(user_list, title, body)  # Send the notification
+    return
 
 
 def parse_text(text: str) -> str:
