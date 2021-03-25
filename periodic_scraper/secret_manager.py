@@ -12,7 +12,8 @@ def get_version(secret_id: str, version_name: str = "latest"):
     try:
         project_id = os.environ["PROJECT_ID"]
     except KeyError as e:
-        raise RuntimeWarning(f"Could not access secret manager: {str(e)}")
+        project_id = "bills-app-305000"
+        # raise RuntimeWarning(f"Could not access secret manager: {str(e)}")
 
     client = secretmanager.SecretManagerServiceClient()
 
