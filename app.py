@@ -82,17 +82,6 @@ def bills():
 # ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
-def entry_to_json_dict(entry):
-    bill = {
-        "id": entry[0],
-        "title": entry[1],
-        "description": parse_text(entry[6]),
-        "date_added": entry[4],
-        "link": entry[11]
-    }
-    return bill  # Todo rework (use todict) and comment
-
-
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
