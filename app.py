@@ -319,6 +319,11 @@ def update_postcode():
 
 @app.route('/add_vote', methods=['POST']) # Todo fix
 def add_vote():
+    """
+    Adds a like/dislike to the database as well as handles unliking and undisliking of bills by
+    deleting that entry into the database.
+    :return: relevant success or error message
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
@@ -393,7 +398,6 @@ def fetch_user_liked(user_id, bill_id):
     if user_id is not False:
         query = database.select(
             f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")  # Get the user with the given email
-
         if not query:
             return 2  # If the query returns an empty list, return False
         else:
