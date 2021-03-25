@@ -122,17 +122,17 @@ def get_mp_bills():
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    bill_query = database.select(
-        f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, Bills.link FROM MPVotes RIGHT JOIN Bills"
-        f" ON MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
+    bill_query = database.select(f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, expiration, "
+                                 f"Bills.link, description, status FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = "
+                                 f"Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
 
     if not bill_query:
         return jsonify({"error": "query_failed"})  # Query failed
 
     bill_list = []  # Holds the list of bills to be transmitted
     for bill_data in bill_query:  # Put all bills in the query in the correct format
-        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""), None, None,
-                         bill_data[2], link=bill_data[4])
+        bill = core.Bill(bill_data[0], bill_data[1], parse_text(bill_data[6]), str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[7], parse_text(bill_data[2]), link=bill_data[5])
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = random.randint(0, 4)
         bill_dict['dislikes'] = random.randint(0, 4)
