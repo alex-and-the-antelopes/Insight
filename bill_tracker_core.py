@@ -121,22 +121,27 @@ class Bill:
     Represents a bill entry.
     Has title, desc, date added, expiration, status, short_desc and link.
     """
-    def __init__(self, bill_id, title, desc, date_added, expiration, status, short_desc=None, link=None):
+    def __init__(self, bill_id: int or str, title: str, desc: str, date_added: str, expiration: str, status: str,
+                 short_desc: str = None, link: str = None):
+        """
+        Creates a representation of a Bill.
+        :param bill_id: The id of the bill.
+        :param title:
+        :param desc:
+        :param date_added:
+        :param expiration:
+        :param status:
+        :param short_desc:
+        :param link:
+        """
         self.id = bill_id
         self.title = title
         self.desc = desc
         self.date_added = date_added
         self.expiration = expiration
         self.status = status
-        self.short_desc = short_desc if short_desc else self.desc[:CONFIG["short_desc_default_length"]]
+        self.short_desc = short_desc if short_desc else self.desc[:30]  # If no short description provided use self.desc
         self.link = link
-
-        # Generate short desc from long desc if one isn't given
-        # if short_desc is None:
-        #     Length of this is dictated by CONFIG
-            # self.short_desc = desc[:CONFIG["short_desc_default_length"]]
-        # else:
-        #     self.short_desc = short_desc
 
     def __str__(self) -> str:
         """
