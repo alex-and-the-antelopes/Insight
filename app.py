@@ -20,10 +20,15 @@ CONFIG = core.CONFIG
 
 @app.route('/')
 def landing_page():
-    return redirect(CONFIG["default_url"])  # todo remove
+    """
+    The landing page for the API redirects visitors to the github repository. There they get access to the readme,
+    the source code and the documentation for the project.
+    :return: Redirects visitors to the github repository.
+    """
+    return redirect("https://github.com/alex-and-the-antelopes/BillTracker")
 
 
-# ////// End region ////// todo: remove above region
+# ////// End region //////
 
 
 @app.route('/get_bills', methods=['POST'])
