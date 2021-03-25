@@ -296,7 +296,7 @@ def send_message():
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
 
-@app.route('/mp_bills', methods=['POST'])
+@app.route('/get_mp_votes', methods=['POST'])
 def get_mp_votes():
     """
     Fetches all of the MP's votes on bills from the database and returns it in a suitable format.
