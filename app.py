@@ -359,14 +359,15 @@ def set_user_vote():
 
 def fetch_user_id(email_address):
     """
-    For a given email address, finds the user_id from the database
-    return: user_id correlating to that email address in the database
+    For a given email address, finds the user's id from the database.
+    :param email_address: The email address of the User.
+    :return: The id of the User with the given email address.
     """
-    query = database.select(
-        f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user with the given email
-    if not query:
-        return False  # If the query returns a populated list, return False
-    return query[0][0]  # If the query returns an empty list return True
+    user_query = database.select(f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user
+    if not user_query:
+        raise KeyError(f"No user has email: {email_address}.")  # Query failed, no such User exists
+    return user_query[0][0]  # Return the user's id
+
 
 
 def fetch_number_of_likes(bill_id):
