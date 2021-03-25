@@ -34,7 +34,7 @@ def db_testing():
 @app.route('/bill/<bill_id>')
 def get_bill_old(bill_id):
     """
-    DEPRECATED, new endpoint & function --> get_bill() [use POST request for verification)
+    DEPRECATED, new endpoint & function --> get_bill() [use POST request for verification]
     """
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
                                f"'{bill_id}';")
@@ -47,7 +47,7 @@ def get_bill_old(bill_id):
 @app.route('/bills/<mp_id>')
 def mp_voted_bills(mp_id):
     """
-    DEPRECATED, new endpoint & function --> get_mp_bills() [use POST request for verification)
+    DEPRECATED, new endpoint & function --> get_mp_bills() [use POST request for verification]
     Find and return the bills voted on by the given MP.
     :param mp_id:
     :return: A list of bills voted by the given MP, in a suitable format.
@@ -70,6 +70,9 @@ def mp_voted_bills(mp_id):
 
 @app.route('/bills')
 def bills():
+    """
+    DEPRECATED, new endpoint & function --> get_bills() [use POST request for verification]
+    """
     bill_list = []
     for i in range(10):
         bill_id = random.randint(1, 2028)
@@ -79,7 +82,7 @@ def bills():
             return jsonify({"error": "query_failed"})  # Query failed
         bill_list.append(entry_to_json_dict_mp_vote_bill(response[0]))  # Add the bill to the bill list
 
-    return jsonify(bill_list)  # todo add docstring and migrate to secure endpoint with POST
+    return jsonify(bill_list)  # todo remove (secure version added) --> get_bills
 
 
 def entry_to_json_dict_mp_vote_bill(entry):
