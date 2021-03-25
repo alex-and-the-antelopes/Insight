@@ -149,7 +149,7 @@ def get_bills():
 
     bill_list = []
     for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id))  # Fetch and construct the bill with the given id
+        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
         if bill:
             bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
             user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
