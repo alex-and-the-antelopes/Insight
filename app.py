@@ -116,8 +116,9 @@ def get_mp_bills():
         bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                          bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Create MP object
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
-        bill_dict['likes'] = random.randint(0, 4)
-        bill_dict['dislikes'] = random.randint(0, 4)
+        bill_dict['likes'] = fetch_number_of_likes(bill.bill_id)
+        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.bill_id)
+        bill_dict['user_liked'] = fetch_user_liked(email, bill.bill_id)
         bill_list.append(bill_dict)  # Append the bill to the list
 
     return jsonify(bill_list)  # Return the list of bills
@@ -317,7 +318,79 @@ def update_postcode():
     return jsonify({"success": "postcode_updated"})  # Return success message
 
 
+@app.route('/add_vote', methods=['POST'])
+def add_vote():
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+    bill_id = request.form['bill_id']
+    positive = request.form['positive']
+
+    # Verify the user:
+    if not verify_user(email, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    user_id = fetch_user_id(email)
+    database.interact(
+        f"INSERT INTO Votes VALUES ({positive}, {bill_id}, {user_id}, datetime.datetime.now())")  # Get the user with the given email
+
+
+
+
 # ////// End region //////
+
+
+def fetch_user_id(email_address):
+    query = database.select(
+        f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user with the given email
+    if not query:
+        return False  # If the query returns a populated list, return False
+    return query[0][0] # If the query returns an empty list return True
+
+
+def fetch_number_of_likes(bill_id):
+    """
+    return: number of likes
+    """
+    query = database.select(
+        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1")  # Get the user with the given email
+    if not query:
+        return 0
+    else:
+        return query[0][0]
+
+
+def fetch_number_of_dislikes(bill_id):
+    """
+    return: number of likes
+    """
+    query = database.select(
+        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")  # Get the user with the given email
+    if not query:
+        return 0
+    else:
+        return query[0][0]
+
+
+def fetch_user_liked(email_address, bill_id):
+    """
+    returns: 0 - user has disliked the bill
+             1 - User has liked the bill
+             2 - User hasn't voted on bill
+    """
+    user_id = fetch_user_id(email_address)
+    if user_id is not False:
+        # find if the user has voted on a bill
+        query = database.select(
+            f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")  # Get the user with the given email
+        if not query:
+            return 2  # If the query returns an empty list, return False
+        else:
+            if query[0][0] == 1:
+                return 1
+            elif query[0][0] == 0:
+                return 0
+    return 2  # If the query returns an empty list return True
 
 
 def create_session_token() -> str:
