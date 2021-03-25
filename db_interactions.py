@@ -22,11 +22,11 @@ def init_tcp_connection_engine(db_config: dict):
         # Equivalent URL: mysql+pymysql://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
         sqlalchemy.engine.url.URL(
             drivername="mysql+pymysql",
-            username=db_user,  # e.g. "my-database-user"
-            password=db_pass,  # e.g. "my-database-password"
-            host=db_hostname,  # e.g. "127.0.0.1"
-            port=db_port,  # e.g. 3306
-            database=db_name,  # e.g. "my-database-name"
+            username=db_user,
+            password=db_pass,
+            host=db_hostname,
+            port=db_port,
+            database=db_name,
         ),
         **db_config
     )
@@ -40,20 +40,10 @@ def init_connection_engine():
     :return:
     """
     db_config = {
-        # Pool size is the maximum number of permanent connections to keep.
-        "pool_size": 5,
-        # Temporarily exceeds the set pool_size if no connections are available.
-        "max_overflow": 2,
-        # The total number of concurrent connections for your application will be
-        # a total of pool_size and max_overflow.
-        # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
-        # new connection from the pool. After the specified amount of time, an
-        # exception will be thrown.
-        "pool_timeout": 30,  # 30 seconds
-        # 'pool_recycle' is the maximum number of seconds a connection can persist.
-        # Connections that live longer than the specified amount of time will be
-        # reestablished
-        "pool_recycle": 1800,  # 30 minutes
+        "pool_size": 5,  # Max number of permanent connections
+        "max_overflow": 2,  # Handle 2 extra connections if pool_size is exceeded (effective pool size: 7).
+        "pool_timeout": 30,  # Max seconds to wait to retrieve a connection. If time is exceeded an error is thrown
+        "pool_recycle": 1800,  # Max seconds a connection can persist
     }
     return init_tcp_connection_engine(db_config)
 
