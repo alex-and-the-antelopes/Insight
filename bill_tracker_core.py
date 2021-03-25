@@ -112,7 +112,9 @@ class Bill:
         self.date_added = date_added
         self.expiration_date = expiration_date
         self.status = status
-        self.short_desc = short_desc if short_desc else self.desc[:30]  # If no short description provided use self.desc
+        if not short_desc:  # If no short description provided use self.desc
+            short_desc = self.desc[:30] if self.desc else None
+        self.short_desc = short_desc
         self.link = link
 
     def __str__(self) -> str:
