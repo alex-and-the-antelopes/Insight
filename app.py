@@ -334,7 +334,9 @@ def add_vote():
 
     user_id = fetch_user_id(email)
     like_state = fetch_user_liked(user_id, bill_id)  # gets the current like status of the bill
-    if like_state == 2:  # user has not interacted with the bill
+    if positive == 2: #removing their reaction on the bill
+        statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
+    elif like_state == 2:  # user has not interacted with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP());"
     else:  # user has interacted with the bill
         statement = f"UPDATE Votes SET positive = {positive}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id} AND userID = {user_id};"
