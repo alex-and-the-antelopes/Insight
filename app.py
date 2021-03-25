@@ -131,9 +131,9 @@ def get_bill():
 @app.route('/get_bills', methods=['POST'])
 def get_bills():
     """
-    Find and return 10 random bills. TODO change it to get recently changed bills
+    Find and return the 50 bills that were most recently updated.
     Requires user verification.
-    :return: The bills in a suitable format, if successful, or an error message.
+    :return: The bills in a suitable format if successful, otherwise an error message.
     """
     # Get user info for verification
     email = request.form['email']
@@ -159,7 +159,7 @@ def get_bills():
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
     if not bill_list:
-        return jsonify({"error": "bill_query_failed"})  # Query failed, no such bill exists
+        return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
 
     return jsonify(bill_list)  # Return the list of bills
 
@@ -494,7 +494,7 @@ def fetch_bill(bill_id: str) -> core.Bill or None:
     return bill  # Return the Bill object
 
 
-def fetch_recent_bills(limit: int = 50) -> list or None:
+def fetch_recent_bills(limit: int = 50) -> list:
     """
     Fetches and returns a list containing the ids of the most recently updated bills.
     :param limit: The number of bills to fetch. Default number of bills is 50.
