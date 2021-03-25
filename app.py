@@ -32,7 +32,7 @@ def db_testing():
 
 
 @app.route('/bill/<bill_id>')
-def get_bill(bill_id):
+def get_bill_old(bill_id):
     response = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, link FROM Bills WHERE billID="
                                f"'{bill_id}';")
     if response:
@@ -105,8 +105,7 @@ def get_mp_bills():
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
-    # Get information to send email
-    mp_id = request.form['mp_id']
+    mp_id = request.form['mp_id']  # Get ParliamentMember id
     # Verify the user:
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
@@ -121,7 +120,7 @@ def get_mp_bills():
     bill_list = []  # Holds the list of bills to be transmitted
     for bill_data in bill_query:  # Put all bills in the query in the correct format
         bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
-                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Create MP object
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = random.randint(0, 4)
         bill_dict['dislikes'] = random.randint(0, 4)
