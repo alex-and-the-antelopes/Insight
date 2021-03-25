@@ -8,7 +8,6 @@ from exponent_server_sdk import (
 from requests.exceptions import ConnectionError, HTTPError
 import sys
 from bill_tracker_core import User
-import db_interactions as database
 
 
 def send_notification_to_clients(clients, title, body):
@@ -24,16 +23,7 @@ def send_notification_to_clients(clients, title, body):
     for client in clients:  # Loop through each client in the list
         send_notification(client, title, body)  # Send message to each client
 
-
-def send_to_all_clients(title, body):
-    """
-    Sends notification to every client
-
-    :param title: title of the notification (str)
-    :param body: body of the notification (str)
-    """
-    list_of_tokens = database.select("SELECT notificationToken FROM Users;")
-    send_notification_to_clients(list_of_tokens, title, body)
+    return
 
 
 def send_notification(client, title, body):
@@ -59,6 +49,8 @@ def send_notification(client, title, body):
         print("Device not registered", file=sys.stderr)  # Todo: Should remove device (or ignore), or request new token
     except PushResponseError:  # Did not deliver the notification
         print("PushResponseError")
+
+    return
 
 
 def build_notification(destination, title, body):

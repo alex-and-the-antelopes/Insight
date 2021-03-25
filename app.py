@@ -8,6 +8,8 @@ import logging
 import string
 import random
 
+import notifications
+
 app = Flask(__name__)
 logger = logging.getLogger()
 CORS(app)
@@ -547,6 +549,17 @@ def fetch_mp_by_postcode(postcode: str) -> int:
     if not constituency:
         raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
     return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
+
+
+def notify_users(title, body):
+    """
+    Sends notification to every client
+
+    :param title: title of the notification (str)
+    :param body: body of the notification (str)
+    """
+    list_of_tokens = database.select("SELECT notificationToken FROM Users;")
+    notifications.send_notification_to_clients(list_of_tokens, title, body)
 
 
 def parse_text(text: str) -> str:
