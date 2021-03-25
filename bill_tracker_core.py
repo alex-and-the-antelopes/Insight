@@ -1,34 +1,4 @@
 
-# Configuration constants
-CONFIG = {
-    # Image Directory, for storing icons
-    "img_dir": "res/img/",
-
-    # Default image name
-    "default_img": "no_photo.jpg",
-
-    # External resources path
-    "external_res_path": "/res/",
-
-    # Invalid image name
-    "invalid_img": "invalid_photo.jpg",
-
-    # File extensions for valid images
-    "valid_img_extensions": {
-        "png", "PNG",
-        "jpg", "jpeg", "JPG"
-    },
-
-    # Length of short description when it must be generated from the (long) description
-    "short_desc_default_length": 20
-}
-
-
-# Returns the URL for the given filename
-def get_img_url(filename):
-    return CONFIG["external_res_path"] + filename
-
-
 class User(object):
     """
     Represents a User entity.
@@ -121,24 +91,26 @@ class Bill:
     Represents a bill entry.
     Has title, desc, date added, expiration, status, short_desc and link.
     """
-    def __init__(self, bill_id: int or str, title: str, desc: str, date_added: str, expiration: str, status: str,
-                 short_desc: str = None, link: str = None):
+    def __init__(self, bill_id: int or str, title: str, desc: str, date_added: str, expiration_date: str, status: str,
+                 short_desc: str = None, link: str = "https://bills.parliament.uk/"):
         """
         Creates a representation of a Bill.
         :param bill_id: The id of the bill.
-        :param title:
-        :param desc:
-        :param date_added:
-        :param expiration:
-        :param status:
-        :param short_desc:
-        :param link:
+        :param title: The title of the bill.
+        :param desc: The scraped description of the bill.
+        :param date_added: The date the bill was added to the database (or last updated).
+        :param expiration_date: The date the bill is set to expire.
+        :param status: The status of the bill. The bill's passage, can be: House of Commons, House of Lords or Final
+        Stages.
+        :param short_desc: A short description of the Bill. Defaults to None. If not given one, the description (desc)
+        will be used to generate a short version.
+        :param link: The bill's page on the https://bills.parliament.uk/. Contains more details for the Bill.
         """
         self.id = bill_id
         self.title = title
         self.desc = desc
         self.date_added = date_added
-        self.expiration = expiration
+        self.expiration_date = expiration_date
         self.status = status
         self.short_desc = short_desc if short_desc else self.desc[:30]  # If no short description provided use self.desc
         self.link = link
@@ -150,8 +122,8 @@ class Bill:
         :return: A string (str) containing the Bill's information.
         """
         bill_str = f"id: {self.id}, title: {self.title}, description: {self.desc}, date added: {self.date_added}, " \
-                   f"expiration: {self.expiration}, status: {self.status}, short description: {self.short_desc}, " \
-                   f"link: {self.link}"
+                   f"expiration: {self.expiration_date}, status: {self.status}, short description: {self.short_desc}," \
+                   f" link: {self.link}"
         return bill_str
 
     def to_dict(self) -> dict:

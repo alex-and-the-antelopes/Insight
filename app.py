@@ -7,14 +7,11 @@ import email_sender
 import logging
 import string
 import random
-import datetime
 
 
 app = Flask(__name__)
 logger = logging.getLogger()
 CORS(app)
-# Get config from core
-CONFIG = core.CONFIG
 
 
 # ////// End region //////
