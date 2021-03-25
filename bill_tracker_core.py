@@ -55,7 +55,27 @@ class User(object):
 
 
 class ParliamentMember:
-    def __init__(self, mp_id, first_name, last_name, email, address, party_id, photo_path, phone_num, area, current):
+    """
+    Represents a Member of Parliament (MP).
+    Has mp_id, first name, last name, email address, physical (mailing) address, party_id (represent party), path to
+    their picture (photo_path), phone number, area (constituency) and a current flag (indicates if they are the active
+    MP for the constituency).
+   """
+    def __init__(self, mp_id: int or str, first_name: str, last_name: str, email: str, address: str,
+                 party_id: int or str, photo_path: str, phone_num: str, area: str, current: int or str):
+        """
+
+        :param mp_id:
+        :param first_name:
+        :param last_name:
+        :param email:
+        :param address:
+        :param party_id:
+        :param photo_path:
+        :param phone_num:
+        :param area:
+        :param current:
+        """
         self.mp_id = mp_id
         self.first_name = first_name
         self.last_name = last_name
@@ -88,8 +108,9 @@ class ParliamentMember:
 
 class Bill:
     """
-    Represents a bill entry.
-    Has title, desc, date added, expiration, status, short_desc and link.
+    Represents a Bill entity.
+    Has id, title, description, date added to the database (or last updated), expiration date, status, a short
+    description and a link to the bill's page on the https://bills.parliament.uk/.
     """
     def __init__(self, bill_id: int or str, title: str, desc: str, date_added: str, expiration_date: str, status: str,
                  short_desc: str = None, link: str = "https://bills.parliament.uk/"):
