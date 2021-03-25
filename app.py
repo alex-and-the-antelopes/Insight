@@ -82,9 +82,6 @@ def bills():
     return jsonify(bill_list)  # todo add docstring and migrate to secure endpoint with POST
 
 
-# ////// End region ////// todo: remove region above after all necessary functions have been migrated
-
-
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
@@ -96,6 +93,9 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "dislikes": random.randint(0, 4)
     }
     return bill  # Todo rework (use todict) and comment
+
+
+# ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
 @app.route('/get_bill', methods=['POST'])
