@@ -86,9 +86,9 @@ def get_bill():
         return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
     bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-    bill_dict['likes'] = fetch_number_of_likes(bill.bill_id)
-    bill_dict['dislikes'] =  fetch_number_of_dislikes(bill.bill_id)
-    bill_dict['user_liked'] = fetch_user_liked(email, bill.bill_id)
+    bill_dict['likes'] = fetch_number_of_likes(bill.id)
+    bill_dict['dislikes'] =  fetch_number_of_dislikes(bill.id)
+    bill_dict['user_liked'] = fetch_user_liked(email, bill.id)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
 
@@ -120,8 +120,8 @@ def get_mp_bills():
         bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                          bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Create MP object
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
-        bill_dict['likes'] = fetch_number_of_likes(bill.bill_id)
-        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.bill_id)
+        bill_dict['likes'] = fetch_number_of_likes(bill.id)
+        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
 
     return jsonify(bill_list)  # Return the list of bills
