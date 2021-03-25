@@ -1,6 +1,10 @@
+# sets the runtime environment of the app engine
 runtime: python37
+
+# changes entry point of the app engine
 entrypoint: gunicorn -b :$PORT app:app
 
+# path to our VPC connector to access at runtime
 vpc_access_connector:
   name: projects/bills-app-305000/locations/europe-west1/connectors/db-connector
 
