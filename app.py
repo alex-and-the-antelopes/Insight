@@ -51,8 +51,9 @@ def get_bills():
 
         if bill:
             bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-            bill_dict['likes'] = fetch_number_of_likes(bill.id)
-            bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+            user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+            bill_dict['likes'] = user_interactions[0]  # Get number of likes
+            bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
             bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
@@ -357,7 +358,7 @@ def set_user_vote():
 # ////// End region //////
 
 
-def fetch_user_id(email_address):
+def fetch_user_id(email_address: str) -> int:
     """
     For a given email address, finds the user's id from the database.
     :param email_address: The email address of the User.
@@ -369,29 +370,45 @@ def fetch_user_id(email_address):
     return user_query[0][0]  # Return the user's id
 
 
-
-def fetch_number_of_likes(bill_id):
+def fetch_user_interactions(bill_id: str) -> tuple:
     """
-    Finds the number of likes for a given bill_id Todo: fix
-    return: number of likes
+    Fetches the users' votes (interaction) on the given bill.
+    :param bill_id: The id of the bill.
+    :return: A tuple containing the likes and dislikes (# of likes, # of dislikes).
+    """
+    likes_count, dislikes_count = 0, 0  # Hold the number of likes and dislikes for the bill
+    # Get number of like:
+    likes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
+    if likes_query:
+        likes_count = likes_query[0][0]
+    # Get number of dislikes:
+    dislikes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")
+    if dislikes_query:
+        dislikes_count = dislikes_query[0][0]
+    return likes_count, dislikes_count  # Return the number of likes/dislikes as a tuple
+
+
+def fetch_number_of_likes(bill_id: str):
+    """
+    Finds the number of likes for a given bill_id Todo: remove
+    :return: number of likes
     """
     # Get the user with the given email:
-    query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
-    if not query:
+    likes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
+    if not likes_query:
         return 0  # No likes
-    return query[0][0]
+    return likes_query[0][0]
 
 
 def fetch_number_of_dislikes(bill_id):
     """
-    Finds the number of dislikes for a given bill_id Todo: fix
+    Finds the number of dislikes for a given bill_id Todo: remove
     return: number of likes
     """
-    query = database.select(
-        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")  # Get the user with the given email
-    if not query:
+    dislikes_query = database.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")
+    if not dislikes_query:
         return 0
-    return query[0][0]
+    return dislikes_query[0][0]
 
 
 def fetch_user_liked(user_id, bill_id):
