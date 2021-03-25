@@ -56,9 +56,9 @@ def get_bills():
             return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
         bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
-        bill_dict['likes'] = random.randint(0, 4)
-        bill_dict['dislikes'] = random.randint(0, 4)
-
+        bill_dict['likes'] = fetch_number_of_likes(bill.id)
+        bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Add the bill to the bill list
 
     return jsonify(bill_list)  # Return the list of bills
@@ -121,8 +121,8 @@ def get_mp_bills():
         bill_dict = bill.to_dict()  # Get the dictionary representation of the bill
         bill_dict['likes'] = fetch_number_of_likes(bill.id)
         bill_dict['dislikes'] = fetch_number_of_dislikes(bill.id)
+        bill_dict['like_state'] = fetch_user_liked(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
-
     return jsonify(bill_list)  # Return the list of bills
 
 
