@@ -20,10 +20,7 @@ CONFIG = {
     },
 
     # Length of short description when it must be generated from the (long) description
-    "short_desc_default_length": 20,
-
-    # Default URL for bills
-    "default_url": "https://www.youtube.com/watch?v=hXIArhNhD0g"
+    "short_desc_default_length": 20
 }
 
 
