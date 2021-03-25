@@ -54,7 +54,7 @@ def get_bills():
             user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
             bill_dict['likes'] = user_interactions[0]  # Get number of likes
             bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-            bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
+            bill_dict['user_vote'] = fetch_user_interaction(fetch_user_id(email), bill.id)
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
     if not bill_list:
@@ -87,7 +87,7 @@ def get_bill():
     user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
     bill_dict['likes'] = user_interactions[0]  # Get number of likes
     bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-    bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
+    bill_dict['user_vote'] = fetch_user_interaction(fetch_user_id(email), bill.id)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
 
@@ -122,7 +122,7 @@ def get_mp_bills():
         user_interactions = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
         bill_dict['likes'] = user_interactions[0]  # Get number of likes
         bill_dict['dislikes'] = user_interactions[1]  # Get number of dislikes
-        bill_dict['user_vote'] = fetch_user_liked(fetch_user_id(email), bill.id)
+        bill_dict['user_vote'] = fetch_user_interaction(fetch_user_id(email), bill.id)
         bill_list.append(bill_dict)  # Append the bill to the list
     return jsonify(bill_list)  # Return the list of bills
 
@@ -337,7 +337,7 @@ def set_user_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)  # Fetch and construct the User object from the database
-    vote_state = fetch_user_liked(user_id, bill_id)  # Gets the current reaction state of the bill for the user
+    vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
     # Construct the appropriate SQL statement
     if positive is '2':  # Remove interaction (remove like/dislike)
@@ -390,24 +390,20 @@ def fetch_user_interactions(bill_id: str) -> tuple:
     return likes_count, dislikes_count  # Return the number of likes/dislikes as a tuple
 
 
-def fetch_user_liked(user_id, bill_id):
+def fetch_user_interaction(user_id: str, bill_id: str) -> int:
     """
-    Finds whether a particular user has liked a bill. Todo: fix
-    returns: 0 - user has disliked the bill
-             1 - User has liked the bill
-             2 - User hasn't voted on bill
+    Finds whether the user has reacted to the given bill.
+    :param user_id: The id of the user.
+    :param bill_id: The id of the bill.
+    :return: An int value (0,1,2) indicating the user's interaction with the bill. 0 --> User has disliked the bill,
+    1 --> User has liked the bill, 2 --> User has not interacted with the bill
     """
-    if user_id is not False:
-        query = database.select(
-            f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")  # Get the user with the given email
-        if not query:
-            return 2  # If the query returns an empty list, return False
-        else:
-            if query[0][0] == 1:
-                return 1
-            elif query[0][0] == 0:
-                return 0
-    return 2  # If the query returns an empty list return True
+    # Get the user's interaction with the bill:
+    user_vote_query = database.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")
+
+    if not user_vote_query:
+        return 2  # If the query returns an empty list, return False
+    return user_vote_query[0][0]  # If the query returns an empty list return True
 
 
 def create_session_token() -> str:
