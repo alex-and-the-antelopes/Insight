@@ -76,49 +76,61 @@ def send_email(recipient_email: str, email_subject: str, email_body: str) -> Non
 
 def is_valid_email(email_address: str) -> bool:
     """
-    Checks if the given email address is a valid address.
+    Checks if the given email address is valid.
+    Comments, IP literals, quotes and many other "quirks" of email addresses are NOT supported.
     :param email_address: The email address to validate.
     :return: True if the given email is valid, False otherwise.
     """
+    # To check if email is valid, we break the email up into <local>@<domain>.<tld>
+    # This is basically a state machine, where specific characters move us on to the next part.
+
+
+    # Legal characters for local part
     local_legal_chars = r"[a-zA-Z0-9!#$%&'*+\-\/=?^_`{|}~]"
+
+    # Legal characters for domain and tld part
     domain_legal_chars = r"[a-zA-Z0-9]"
 
-    state = "local"  # The portion (state) of the email currently being read
+    # The "state" of our calculations
+    # i.e. the part of the email we're currently att
+    state = "local"
 
     for i, c in enumerate(email_address):
         if state == "local":
+            # Ignore allowed chars
             if re.search(local_legal_chars, c):
                 pass
+            # Move on to domain if we find an @
             elif c == '@':
                 state = "domain"
+            # Check for consecutive .s
             elif c == '.':
                 if i == len(email_address) - 1 or email_address[i + 1] == '.':
                     return False
+            # Return False if any other character is encountered
             else:
                 return False
         elif state == "domain" or state == "tld":
+            # Ignore allowed chars
             if re.search(domain_legal_chars, c):
                 pass
+            # Check for consecutive .s
+            # A dot moves us on to the tld state
             elif c == '.':
                 if i == len(email_address) - 1 or email_address[i + 1] == '.':
                     return False
                 state = "tld"
-            elif c == "_":
+            # No hyphens at the beginning or end of <domain><tld>
+            elif c == "-":
                 if email_address[i - 1] == '@' or i == len(email_address) - 1:
                     return False
+            # Return False if any other character is encountered
             else:
                 return False
 
+    # If we haven't made it to the "tld" state, this email is invalid, as it doesn't have the necessary parts.
     if state != "tld":
         return False
 
+    # Otherwise, this email is valid
     return True
-
-
-if __name__ == '__main__':
-    # Test email checker: todo move to a test file
-    test_addresses = ["dummy@gmail.com", "dummy@com", "dummy@gmail", "dummy.com", "dummy@gmail.com", "dummy@bath.ac.uk",
-                      ""]
-    for address in test_addresses:
-        # print(check_email_address(address), address)
-        print(is_valid_email(address), address)
