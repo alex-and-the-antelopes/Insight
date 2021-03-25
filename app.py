@@ -98,6 +98,36 @@ def entry_to_json_dict_mp_vote_bill(entry):
 # ////// End region ////// todo: remove region above after all necessary functions have been migrated
 
 
+@app.route('/get_bills', methods=['POST'])
+def get_bills():
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    bill_list = []
+    for i in range(10):
+        bill_id = random.randint(1, 2028)
+        bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
+                                     f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
+        if not bill_query:
+            return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
+
+        # Construct the Bill object
+        bill_data = bill_query[0]  # Get the bill data from the query
+        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
+        bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
+        bill_dict['likes'] = random.randint(0, 4)
+        bill_dict['dislikes'] = random.randint(0, 4)
+
+        bill_list.append(entry_to_json_dict_mp_vote_bill(bill_query[0]))  # Add the bill to the bill list
+
+    return jsonify(bill_list)  # Return the list of bills
+
+
 @app.route('/get_bill', methods=['POST'])
 def get_bill():
     """
