@@ -334,9 +334,8 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)
-    time = datetime.datetime.now()
     database.interact(
-        f"INSERT INTO Votes VALUES ('{positive}', '{bill_id}', '{user_id}', '{time}');")  # Get the user with the given email
+        f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', '{user_id}', CURRENT_TIMESTAMP);")  # Get the user with the given email
 
 
 
@@ -473,7 +472,7 @@ def fetch_bill(bill_id: str) -> core.Bill or None:
     :param bill_id: The id of the bill to fetch.
     :return: A Bill object with the bill's details if it exists, None otherwise.
     """
-    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, Bills.link, status "
+    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
                                  f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
     bill = None
     if bill_query:  # If the query was successful (the bill exists), build the Bill object
