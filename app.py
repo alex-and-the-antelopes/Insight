@@ -97,6 +97,11 @@ def entry_to_json_dict_mp_vote_bill(entry):
 
 @app.route('/get_bill', methods=['POST'])
 def get_bill():
+    """
+    Find and return the bill with the given bill id.
+    Requires user verification and the Bill's id.
+    :return: The bill, in a suitable format if successful, an error message otherwise.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
@@ -110,11 +115,11 @@ def get_bill():
     if not bill_query:
         return jsonify({"error": "query_failed"})  # Query failed, no bills with the given id
 
-    # Construct the bill object
+    # Construct the Bill object
     bill_data = bill_query[0]  # Get the bill data from the query
     bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                      bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
-    return jsonify(bill.to_dict())  # todo add docstring
+    return jsonify(bill.to_dict())  # Return the Bill as a dictionary
 
 
 @app.route('/get_mp_bills', methods=['POST'])
