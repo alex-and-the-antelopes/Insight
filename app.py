@@ -7,6 +7,8 @@ import email_sender
 import logging
 import string
 import random
+import datetime
+
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -332,8 +334,9 @@ def add_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email)
+    time = datetime.datetime.now()
     database.interact(
-        f"INSERT INTO Votes VALUES ({positive}, {bill_id}, {user_id}, datetime.datetime.now())")  # Get the user with the given email
+        f"INSERT INTO Votes VALUES ('{positive}', '{bill_id}', '{user_id}', '{time}');")  # Get the user with the given email
 
 
 
@@ -354,7 +357,7 @@ def fetch_number_of_likes(bill_id):
     return: number of likes
     """
     query = database.select(
-        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1")  # Get the user with the given email
+        f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")  # Get the user with the given email
     if not query:
         return 0
     else:
@@ -521,7 +524,7 @@ def fetch_mp_votes(mp_id: str) -> list:
     :param mp_id: The id of the ParliamentMember.
     :return: A list of all the MP's votes on bills.
     """
-    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}'"
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}';"
     bill_votes = database.select(db_statement)
     return bill_votes
 
