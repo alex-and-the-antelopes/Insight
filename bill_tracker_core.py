@@ -1,5 +1,5 @@
 
-class User(object):
+class User:
     """
     Represents a User entity.
     Has an email address, password hash, email address, notification, session token and postcode.
