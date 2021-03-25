@@ -82,9 +82,6 @@ def bills():
     return jsonify(bill_list)  # todo add docstring and migrate to secure endpoint with POST
 
 
-# ////// End region ////// todo: remove region above after all necessary functions have been migrated
-
-
 def entry_to_json_dict_mp_vote_bill(entry):
     bill = {
         "id": entry[0],
@@ -96,6 +93,45 @@ def entry_to_json_dict_mp_vote_bill(entry):
         "dislikes": random.randint(0, 4)
     }
     return bill  # Todo rework (use todict) and comment
+
+
+# ////// End region ////// todo: remove region above after all necessary functions have been migrated
+
+
+@app.route('/get_bills', methods=['POST'])
+def get_bills():
+    """
+    Find and return 10 random bills. TODO change it to work with recently changed bills
+    Requires user verification.
+    :return: The bills in a suitable format, if successful, or an error message.
+    """
+    # Get user info for verification
+    email = request.form['email']
+    session_token = request.form['session_token']
+
+    if not verify_user(email, session_token):  # Verify the user
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    bill_list = []
+    for i in range(10):
+        bill_id = random.randint(1, 2028)
+        # todo, use fetch_bill and then convert to dict & add user votes
+        bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
+                                     f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
+        if not bill_query:
+            return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
+
+        # Construct the Bill object
+        bill_data = bill_query[0]  # Get the bill data from the query
+        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
+        bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
+        bill_dict['likes'] = random.randint(0, 4)
+        bill_dict['dislikes'] = random.randint(0, 4)
+
+        bill_list.append(entry_to_json_dict_mp_vote_bill(bill_query[0]))  # Add the bill to the bill list
+
+    return jsonify(bill_list)  # Return the list of bills
 
 
 @app.route('/get_bill', methods=['POST'])
@@ -112,7 +148,7 @@ def get_bill():
 
     if not verify_user(email, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
-
+    # todo, use fetch_bill and then convert to dict & add user votes
     bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status FROM "
                                  f"Bills WHERE billID='{bill_id}';")  # Get the bill with the specified bill id
     if not bill_query:
@@ -122,7 +158,10 @@ def get_bill():
     bill_data = bill_query[0]  # Get the bill data from the query
     bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
                      bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])
-    return jsonify(bill.to_dict())  # Return the Bill as a dictionary
+    bill_dict = bill.to_dict()  # Convert the bill to a suitable format to be transmitted
+    bill_dict['likes'] = random.randint(0, 4)
+    bill_dict['dislikes'] = random.randint(0, 4)
+    return jsonify(bill_dict)  # Return the Bill as a dictionary
 
 
 @app.route('/get_mp_bills', methods=['POST'])
@@ -424,6 +463,23 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
         parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
                                                   mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
     return parliament_member
+
+
+def fetch_bill(bill_id: str) -> core.Bill or None:
+    """
+    Finds the bill with the given ID, constructs and returns the Bill object.
+    :param bill_id: The id of the bill to fetch.
+    :return: A Bill object with the bill's details if it exists, None otherwise.
+    """
+    bill_query = database.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status "
+                                 f"FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given bill id
+    bill = None
+    if bill_query:  # If the query was successful (the bill exists), build the Bill object
+        bill_data = bill_query[0]  # Get the bill's information
+        bill = core.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
+                         bill_data[4], bill_data[6], parse_text(bill_data[2]), link=bill_data[5])  # Construct the Bill
+
+    return bill  # Return the Bill object
 
 
 def verify_user(email: str, session_token: str) -> bool:
