@@ -100,6 +100,11 @@ def entry_to_json_dict_mp_vote_bill(entry):
 
 @app.route('/get_bills', methods=['POST'])
 def get_bills():
+    """
+    Find and return 10 random bills. TODO change it to work with recently changed bills
+    Requires user verification.
+    :return: The bills in a suitable format, if successful, or an error message.
+    """
     # Get user info for verification
     email = request.form['email']
     session_token = request.form['session_token']
