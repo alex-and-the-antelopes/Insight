@@ -431,11 +431,11 @@ def is_new_address(email_address: str) -> bool:
 
 def add_user_to_database(user: core.User) -> None:
     """
-    Add the given User to the database.
+    Add the given User object to the database.
     :param user: User object.
     :return: None.
     """
-    if not user:  # Ignore None
+    if not user or type(user) is not core.User:  # If the given user is not a User object, return immediately
         return
     # The SQL statement to add the user into the Users table:
     statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
@@ -450,10 +450,10 @@ def fetch_user(email_address: str) -> core.User or None:
     :param email_address: The email address of the user.
     :return: The constructed User object.
     """
-    query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
+    user_query = database.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
     user = None
-    if query:
-        user_info = query[0]  # Get the user information
+    if user_query:
+        user_info = user_query[0]  # Get the user information
         user = core.User(user_info[1], user_info[2], user_info[4], user_info[3], user_info[5])  # Construct user
     return user
 
@@ -465,9 +465,9 @@ def fetch_mp(mp_id: int) -> core.ParliamentMember or None:
     :return: The constructed ParliamentMember object.
     """
     parliament_member = None
-    query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
-    if query:
-        mp_info = query[0]  # Extract the MP information
+    mp_query = database.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
+    if mp_query:
+        mp_info = mp_query[0]  # Extract the MP information
         # Construct MP object:
         parliament_member = core.ParliamentMember(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
                                                   mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
