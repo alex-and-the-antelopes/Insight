@@ -130,7 +130,7 @@ def get_bill():
             "dislikes": dislikes,
             "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
         }
-    )
+    )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
 
     return jsonify(bill_dict)  # Return the Bill as a dictionary
 
@@ -166,7 +166,7 @@ def get_bills():
                     "dislikes": dislikes,
                     "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
                 }
-            )
+            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
             bill_list.append(bill_dict)  # Add the bill to the bill list
 
     if not bill_list:
@@ -211,7 +211,7 @@ def get_mp_bills():
                 "dislikes": dislikes,
                 "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
             }
-        )
+        )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
         bill_list.append(bill_dict)  # Add the bill to the bill list
     return jsonify(bill_list)  # Return the list of bills
 
@@ -377,9 +377,10 @@ def set_user_vote():
 
 # ////// End region ////// Helper functions //////
 
-def prepare_bill(bill: insight.parliament.Bill, additional_values: {} = None) -> dict:
+
+def prepare_bill(bill: insight.parliament.Bill, additional_values: dict = None) -> dict:
     """
-    Prepares bill to be sent to front end, adding any extra fields that are expected (such as likes)
+    Prepares bill to be sent to front-end, adding any extra fields that are expected (such as likes)
     :param bill: Bill to prepare
     :param additional_values: Extra key-value pairs to add to result
     :return: Bill in dict form, with extra fields.
