@@ -356,13 +356,10 @@ def prepare_bill(bill: insight.parliament.Bill, additional_values: dict = None) 
     :param additional_values: Extra key-value pairs to add to result
     :return: Bill in dict form, with extra fields.
     """
-    bill_dict = bill.to_dict()
-
-    # Add extra values, if any are given
-    if additional_values is not None:
+    bill_dict = bill.to_dict()  # Get the Bills default dictionary representation
+    if additional_values:  # Check if additional values are given
         for key in additional_values:
-            bill_dict[key] = additional_values[key]
-
+            bill_dict[key] = additional_values[key]  # Add each new value to the dictionary representation
     return bill_dict
 
 
