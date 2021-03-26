@@ -1,3 +1,4 @@
+
 class Member:
     """
     Represents a Member of Parliament (MP).

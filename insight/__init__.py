@@ -1,5 +1,4 @@
 
-
 class User:
     """
     Represents a User entity.
@@ -61,5 +60,3 @@ class User:
         user_str = f"email: {self.email}, postcode: {self.postcode}, session token: {self.session_token}, " \
                    f"password hash: {self.password_hash}, notification token: {self.notification_token}"
         return user_str
-
-

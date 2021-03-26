@@ -23,5 +23,3 @@ def get_version(secret_id: str, version_name: str = "latest"):
     response = client.access_secret_version(request={"name": name})
 
     return response.payload.data.decode("UTF-8")
-
-
