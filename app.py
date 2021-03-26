@@ -5,6 +5,7 @@ from util.database import *
 from util import is_valid_postcode
 from communications import email
 import logging
+
 app = Flask(__name__)
 logger = logging.getLogger()
 CORS(app)
@@ -147,7 +148,7 @@ def get_bills():
     if not bill_id_list:
         return jsonify({"error": "bill_id_query_failed"})  # Query failed, no bills in database
 
-    bill_list = build_bills(bill_id_list, email_address)
+    bill_list = prepare_bills(bill_id_list, email_address)
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
@@ -174,7 +175,7 @@ def get_mp_bills():
     if not bill_id_list:
         return jsonify({"error": "no_mp_votes"})  # Query failed
 
-    bill_list = build_bills(bill_id_list, email_address)
+    bill_list = prepare_bills(bill_id_list, email_address)
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
@@ -182,12 +183,46 @@ def get_mp_bills():
     return jsonify(bill_list)  # Return the list of bills
 
 
+@app.route('/get_mp_votes', methods=['POST'])
+def get_mp_votes():
+    """
+    Fetches all of the MP's votes on bills and returns it in a suitable format.
+    :return: A dictionary containing the ids of the bills and the MP's votes. Format: {"bill_id": "mp_vote"}.
+    """
+    # Get user info for verification
+    email_address = request.form['email']
+    session_token = request.form['session_token']
+    # Get information to send email
+    mp_id = request.form['mp_id']
+
+    # Verify the user:
+    if not verify_email_and_session_token(email_address, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    if not fetch_mp(mp_id):  # Check if mp_id exists
+        return jsonify({"error": "mp_id_error"})  # Return an error if the mp does not exist
+
+    try:  # Get all the bills
+        bill_votes = fetch_mp_votes(mp_id)  # Get the MP's votes on the bills
+    except KeyError:
+        return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
+    # Clean list of bills
+    bill_votes = filter_votes(bill_votes)
+    if not bill_votes:
+        return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
+    # Put it in the final format:
+    mp_votes = {}  # Holds the ids of the bills and the mp's votes
+    for bill in bill_votes:  # Iterate through the list of bills voted
+        mp_votes[bill[0]] = bill[1]  # Add the bill_id as the key, and the mp_vote as the value
+    return jsonify(mp_votes)  # Return the list of {"bill_id": "mp_vote"}
+
+
 @app.route('/message', methods=['POST'])
 def send_message():
     """
     Sends an email to a member of parliament specified by the user.
     Requires user verification, MP id and the message itself.
-    :return: A success message, if the email was sent successfully, otherwise an error message
+    :return: A success message, if the email was sent successfully, otherwise an error message.
     """
     # Get user info for verification
     email_address = request.form['email']
@@ -213,96 +248,6 @@ def send_message():
             return jsonify({"error": "email_failed_to_send"})  # Error with sending email (connecting to smtp server)
 
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
-
-
-@app.route('/update_postcode', methods=['POST'])
-def update_postcode():
-    """
-    Updates the user's postcode with the given postcode. Verifies the user before updating the postcode.
-    :return: Success statement if the postcode was changed, an error statement otherwise.
-    """
-    # Get user info for verification
-    email_address = request.form['email']
-    session_token = request.form['session_token']
-    postcode = request.form['postcode']  # Get the new postcode
-
-    # Verify the user:
-    if not verify_email_and_session_token(email_address, session_token):
-        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
-
-    if not is_valid_postcode(postcode):  # Check that the postcode is valid
-        return jsonify({"error": "invalid_postcode"})
-
-    response = update_user_postcode(email_address, postcode)  # Update the user's postcode and get the result
-    if not response:  # If the update returned False then it failed
-        return jsonify({"error": "query_error"})  # Error when updating user's entry in the database
-
-    return jsonify({"success": "postcode_updated"})  # Return success message
-
-
-@app.route('/get_mp_votes', methods=['POST'])
-def get_mp_votes():
-    """
-    Fetches all of the MP's votes on bills from the database and returns it in a suitable format.
-    :return: A list of the MP's votes.
-    """
-    # Get user info for verification
-    email_address = request.form['email']
-    session_token = request.form['session_token']
-    # Get information to send email
-    mp_id = request.form['mp_id']
-
-    # Verify the user:
-    if not verify_email_and_session_token(email_address, session_token):
-        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
-
-    if not fetch_mp(mp_id):  # Check if mp_id exists
-        return jsonify({"error": "mp_id_error"})  # Return an error if the mp does not exist
-
-    try:  # Get all the bills
-        bill_votes = fetch_mp_votes(mp_id)  # Get the MP's votes on the bills
-    except KeyError:
-        return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
-    # Clean list of bills
-    bill_votes = filter_votes(bill_votes)
-    if not bill_votes:
-        return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
-    # Put it in the final format:
-    mp_votes = {}
-    for bill in bill_votes:  # Iterate through the list of bills voted
-        mp_votes[bill[0]] = bill[1]
-    return jsonify(mp_votes)  # Return the list of {billID and positive}
-
-
-@app.route('/local_mp', methods=['POST'])
-def get_local_mp():
-    """
-    Get the user's local MP. Verifies the user's identity, uses the user's postcode to construct and return the user's
-    local MP.
-    :return: The user's local MP if successful, an error message otherwise.
-    """
-    # Get user info for verification
-    email_address = request.form['email']
-    session_token = request.form['session_token']
-    # Verify the user:
-    if not verify_email_and_session_token(email_address, session_token):
-        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
-
-    user = fetch_user(email_address)  # Get the user's details
-    if not user:
-        return jsonify({"error": "user_error"})  # Verification unsuccessful
-
-    # Get the id of the MP for the user's constituency
-    try:
-        mp_id = fetch_mp_by_postcode(user.postcode)  # Construct the MP for the user's constituency
-    except KeyError:
-        return jsonify({"error": "mp_error"})  # Key error caused by invalid postcode
-
-    parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
-    if parliament_member:
-        return jsonify(parliament_member.to_dict())  # Return the user's local MP
-
-    return jsonify({"error": "construct_mp_error"})  # Return error message
 
 
 @app.route('/set_user_vote', methods=['POST'])
@@ -337,28 +282,60 @@ def set_user_vote():
     return jsonify({"success": "user_interaction_successful"})  # Return success message
 
 
-def build_bills(bill_id_list: list, email_address: str) -> list:
+@app.route('/update_postcode', methods=['POST'])
+def update_postcode():
     """
-    Builds a list containing the bills from the given list of bill ids. Constructs the Bill objects using the bill_ids.
-    Includes user interactions with the bills.
-    :param bill_id_list: A list containing the ids of the Bills to build.
-    :param email_address: The email address of the User. Used to get the user's interaction with the bills.
-    :return: A list containing the built Bills.
+    Updates the user's postcode with the given postcode. Verifies the user before updating the postcode.
+    :return: Success statement if the postcode was changed, an error statement otherwise.
     """
-    bill_list = []
-    for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
-        if bill:
-            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = bill.prepare(
-                {
-                    "likes": likes,
-                    "dislikes": dislikes,
-                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-                }
-            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-            bill_list.append(bill_dict)  # Add the bill to the bill list
-    return bill_list
+    # Get user info for verification
+    email_address = request.form['email']
+    session_token = request.form['session_token']
+    postcode = request.form['postcode']  # Get the new postcode
+
+    # Verify the user:
+    if not verify_email_and_session_token(email_address, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    if not is_valid_postcode(postcode):  # Check that the postcode is valid
+        return jsonify({"error": "invalid_postcode"})
+
+    response = update_user_postcode(email_address, postcode)  # Update the user's postcode and get the result
+    if not response:  # If the update returned False then it failed
+        return jsonify({"error": "query_error"})  # Error when updating user's entry in the database
+
+    return jsonify({"success": "postcode_updated"})  # Return success message
+
+
+@app.route('/local_mp', methods=['POST'])
+def get_local_mp():
+    """
+    Get the user's local MP. Verifies the user's identity, uses the user's postcode to construct and return the user's
+    local MP.
+    :return: The user's local MP if successful, an error message otherwise.
+    """
+    # Get user info for verification
+    email_address = request.form['email']
+    session_token = request.form['session_token']
+    # Verify the user:
+    if not verify_email_and_session_token(email_address, session_token):
+        return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
+
+    user = fetch_user(email_address)  # Get the user's details
+    if not user:
+        return jsonify({"error": "user_error"})  # Verification unsuccessful
+
+    # Get the id of the MP for the user's constituency
+    try:
+        mp_id = fetch_mp_by_postcode(user.postcode)  # Construct the MP for the user's constituency
+    except KeyError:
+        return jsonify({"error": "mp_error"})  # Key error caused by invalid postcode
+
+    parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
+    if parliament_member:
+        return jsonify(parliament_member.to_dict())  # Return the user's local MP
+
+    return jsonify({"error": "construct_mp_error"})  # Return error message
 
 
 if __name__ == '__main__':
