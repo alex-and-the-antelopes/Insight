@@ -13,6 +13,7 @@ username = "mastergk"
 with open("../secrets/user_pass", 'r') as reader:
     password = reader.read()
 
+# certs are also stored in secrets
 sql_config = {
     "user": username,
     "password": password,
