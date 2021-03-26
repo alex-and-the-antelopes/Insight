@@ -317,7 +317,7 @@ def set_user_vote():
     email_address = request.form['email']
     session_token = request.form['session_token']
     bill_id = request.form['bill_id']
-    positive = request.form['positive']
+    positive = int(request.form['positive'])
     # Verify the user:
     if not verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
@@ -325,22 +325,21 @@ def set_user_vote():
     user_id = fetch_user_id(email_address)  # Fetch and construct the User object from the database
     vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
-    # Construct the appropriate SQL statement
-    if int(positive) == 2:  # Remove interaction (remove like/dislike)
-        statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-    elif vote_state == 2:  # First time interaction with the bill
-        statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
-                    f"'{user_id}', CURRENT_TIMESTAMP());"
-    else:  # Change existing user interaction with the bill
-        statement = f"UPDATE Votes SET positive = {positive}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id}" \
-                    f" AND userID = {user_id};"
+    query_result = False
 
-    try:
-        database_engine.interact(statement)  # Carry out the relevant SQL statement todo fix
-    except RuntimeWarning:
+    # Construct the appropriate SQL statement
+    if positive == 2:  # Remove interaction (remove like/dislike)
+        # statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
+        query_result = remove_user_interaction(bill_id, user_id)
+    elif vote_state == 2:  # First time interaction with the bill
+        query_result = add_user_interaction(bill_id, user_id, positive)
+    else:  # Change existing user interaction with the bill
+        query_result = update_user_interaction(bill_id, user_id, positive)
+
+    if not query_result:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
-    return jsonify({"success": "update_successful"})  # Return success message
+    return jsonify({"success": "user_interaction_successful"})  # Return success message
 
 
 def build_bills(bill_id_list: list, email_address: str) -> list:
