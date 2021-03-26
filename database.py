@@ -15,7 +15,7 @@ def fetch_user(email_address: str) -> insight.User or None:
     :param email_address: The email address of the user.
     :return: The constructed User object.
     """
-    user_query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
+    user_query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get User from database
     user = None
     if user_query:
         user_info = user_query[0]  # Get the user information
@@ -30,7 +30,7 @@ def fetch_mp(mp_id: int) -> insight.parliament.Member or None:
     :return: The constructed ParliamentMember object.
     """
     parliament_member = None
-    mp_query = database_engine.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
+    mp_query = database_engine.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for MP
     if mp_query:
         mp_info = mp_query[0]  # Extract the MP information
         # Construct MP object:
@@ -45,8 +45,8 @@ def fetch_bill(bill_id: str) -> insight.parliament.Bill or None:
     :param bill_id: The id of the bill to fetch.
     :return: A Bill object with the bill's details if it exists, None otherwise.
     """
-    bill_query = database_engine.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status, "
-                                 f"description FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given id
+    bill_query = database_engine.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status,"
+                                        f" description FROM  Bills WHERE billID='{bill_id}';")  # Get the bill by id
     bill = None
     if bill_query:  # If the query was successful (the bill exists), build the Bill object
         bill_data = bill_query[0]  # Get the bill's information
@@ -122,9 +122,8 @@ def fetch_user_interaction(user_id: str, bill_id: str) -> int:
     :return: An int value (0,1,2) indicating the user's interaction with the bill. 0 --> User has disliked the bill,
     1 --> User has liked the bill, 2 --> User has not interacted with the bill
     """
-    # Get the user's interaction with the bill:
-    user_vote_query = database_engine.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")
-
+    user_vote_query = database_engine.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = "
+                                             f"'{bill_id}';")  # Get the user's interaction with the bill
     if not user_vote_query:
         return 2  # If the query returns an empty list, return False
     return user_vote_query[0][0]  # If the query returns an empty list return True
@@ -136,8 +135,10 @@ def fetch_mp_votes(mp_id: str) -> list:
     :param mp_id: The id of the ParliamentMember.
     :return: A list of all the MP's votes on bills.
     """
-    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}';"
-    bill_votes = database_engine.select(db_statement)
+    # Get the bills the MP has voted on from the database
+    bill_votes = database_engine.select(f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}';")
+    if not bill_votes:
+        raise KeyError(f"No user has mp_id: {mp_id}.")  # Query failed, no such MP exists
     return bill_votes
 
 
@@ -172,7 +173,7 @@ def is_new_address(email_address: str) -> bool:
     :param email_address: The email address to look up.
     :return: True if the email address is not being used, false otherwise.
     """
-    query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the given email
+    query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the email
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
@@ -191,6 +192,26 @@ def add_user_to_database(user: insight.User) -> None:
                 f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
     database_engine.interact(statement)  # Carry out the SQL statement
     return
+
+
+def update_user_postcode(user_email: str, postcode: str) -> bool:
+    """
+    Updates the user's postcode with the given postcode, returning a bool value to indicate success/failure.
+    :param user_email: The user's email address.
+    :param postcode: The new postcode.
+    :return: True if the postcode was updated successfully.
+    """
+    try:
+        # Update the user's postcode in the respective database entry
+        database_engine.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{user_email}';")
+    except RuntimeWarning:
+        return False  # Error occurred when trying to
+
+    return True  # Update successful
+
+
+def update_user_interaction():
+    pass
 
 
 def notify_users(title: str, body: str) -> None:
