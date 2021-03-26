@@ -323,20 +323,16 @@ def set_user_vote():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email_address)  # Fetch and construct the User object from the database
-    vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
-
-    query_result = False
-
-    # Construct the appropriate SQL statement
+    vote_state = fetch_user_interaction(user_id, bill_id)  # Get the current reaction state of the bill for the user
+    # Execute the corresponding SQL statement to 1. remove, 2. add, or 3. update the user's interaction with the bill:
     if positive == 2:  # Remove interaction (remove like/dislike)
-        # statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-        query_result = remove_user_interaction(bill_id, user_id)
+        query_result = remove_user_interaction(bill_id, user_id)  # Remove the user's interaction to the bill
     elif vote_state == 2:  # First time interaction with the bill
-        query_result = add_user_interaction(bill_id, user_id, positive)
+        query_result = add_user_interaction(bill_id, user_id, positive)  # Add the user's vote (0, 1) to the bill
     else:  # Change existing user interaction with the bill
-        query_result = update_user_interaction(bill_id, user_id, positive)
+        query_result = update_user_interaction(bill_id, user_id, positive)  # Update the user's vote (0, 1) to the bill
 
-    if not query_result:
+    if not query_result:  # Check the success of the SQL command
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
     return jsonify({"success": "user_interaction_successful"})  # Return success message
