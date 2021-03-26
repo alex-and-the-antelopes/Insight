@@ -4,21 +4,8 @@ Server for insight, a parliamentary bill tracker application, making democracy a
 This is a year-long project in a team of 7 to develop a system to solve a problem, for the *Integrated group-based project* unit at University of Bath 🛁.
 
 ## Installation
-This project has not been developed as a "product" in anyway, but these are the general steps, should you wish to use
-this code.
 
-1. Download source code as zip
-2. Extract contents to a new folder
-3. Ensure all modules in `/requirements.txt` are installed (and the correct version number)
-4. Install [ParlPy](https://github.com/Litharge/ParlPy).
-5. Add a file named `/email_details.py` with the contents:
-    ```python
-    # Holds the details for the gmail account
-    email_address = "bills@example.com"
-    password = "hunter2"
-    ```
-6. Setup MySQL database
-
+todo
 
 > **Note:** Although config files for use with Google Cloud Platform are included, ensure `entrypoint` in `app.yaml` is 
 > set to point to `app.py`.
