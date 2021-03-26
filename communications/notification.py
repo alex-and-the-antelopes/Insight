@@ -6,7 +6,7 @@ from exponent_server_sdk import (
     PushServerError,
 )
 from requests.exceptions import ConnectionError, HTTPError
-from bill_tracker_core import User
+from insight import User
 import sys
 
 
