@@ -138,7 +138,7 @@ def fetch_mp_votes(mp_id: str) -> list:
     # Get the bills the MP has voted on from the database
     bill_votes = database_engine.select(f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}';")
     if not bill_votes:
-        raise KeyError(f"No user has mp_id: {mp_id}.")  # Query failed, no such MP exists
+        raise KeyError(f"No MP has mp_id: {mp_id}.")  # Query failed, no such MP exists
     return bill_votes
 
 
@@ -211,6 +211,7 @@ def update_user_postcode(user_email: str, postcode: str) -> bool:
 
 
 def remove_user_interaction(bill_id: str, user_id: str):
+
     pass
 
 
