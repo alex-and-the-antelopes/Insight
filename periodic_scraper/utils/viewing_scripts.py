@@ -4,9 +4,11 @@ Module with functions to quickly view the status of the database
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
+# set these to the values of your Google Cloud SQL instance
 public_ip = "35.190.194.63"
 db_name = "bill_data"
 
+# secrets are stored in secrets dir
 with open("../secrets/user_pass", 'r') as reader:
     password = reader.read()
 
