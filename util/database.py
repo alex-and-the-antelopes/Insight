@@ -205,15 +205,34 @@ def update_user_postcode(user_email: str, postcode: str) -> bool:
         # Update the user's postcode in the respective database entry
         database_engine.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{user_email}';")
     except RuntimeWarning:
-        return False  # Error occurred when trying to
+        return False  # Error occurred when trying to update the database
     return True  # Update successful
 
 
-def remove_user_interaction(bill_id: str, user_id: str):
-    pass
+def remove_user_interaction(bill_id: str, user_id: str) -> bool:
+
+    remove_statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"  # Remove interaction
+    try:
+        database_engine.interact(remove_statement)  # Carry out the relevant SQL statement
+    except RuntimeWarning:
+        return False  # Error executing the SQL statement
+    return True
 
 
-def update_user_interaction(bill_id: str, user_id: str, vote_state: str) -> None:
+def add_user_interaction(bill_id: str, user_id: str, vote: int) -> bool:
+    if vote != 0 and vote != 1:
+        return False  # Should only be given 0 or 1 (0 --> dislike, 1 --> like)
+    add_statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{vote}', '{bill_id}', " \
+                    f"'{user_id}', CURRENT_TIMESTAMP());"
+    try:
+        database_engine.interact(add_statement)  # Carry out the relevant SQL statement
+    except RuntimeWarning:
+        return False  # Error executing the SQL statement
+    return True
+
+
+def update_user_interaction(bill_id: str, user_id: str, vote_state: str) -> bool:
+
     pass
 
 
