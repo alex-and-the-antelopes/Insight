@@ -50,17 +50,17 @@ def init_connection_engine() -> sqlalchemy.engine.Engine or None:
 db = init_connection_engine()  # Start the database connection where db is the pool of connections
 
 
-def interact(statement: str):
+def interact(statement: str) -> str:
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
     :param statement: The SQL statement to carry out. (Must include ";" in the end).
-    :return: The response from the database after the action was carried out
+    :return: The response from the database after the action was carried out.
     """
     if ";" not in statement:
         raise ValueError(f"\";\" not in given SQL statement: \"{statement}\"")  # Raise valueError if ; not in statement
     try:
         with db.connect() as conn:
-            return conn.execute(statement)
+            return str(conn.execute(statement))
     except Exception as e:
         # Raises the error that the statement could not execute
         raise RuntimeWarning(f"Interaction database failed with message: {str(e)}")
