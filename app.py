@@ -271,10 +271,9 @@ def get_mp_votes():
     if not bill_votes:
         return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
-    mp_votes = []
+    mp_votes = {}  # Dictionary holding (bill_id --> mp_vote)
     for bill in bill_votes:  # Iterate through the list of bills voted
-        bill_details = {"id": bill[0], "positive": bill[1]}
-        mp_votes.append(bill_details)
+        mp_votes[bill[0]] = bill[1]
     return jsonify(mp_votes)  # Return the list of {billID and positive}
 
 
