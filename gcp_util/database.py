@@ -2,7 +2,7 @@ import sqlalchemy
 import gcp_util.secret_manager as secret
 
 
-def init_tcp_connection_engine(db_config: dict):
+def init_tcp_connection_engine(db_config: dict) -> sqlalchemy.engine.Engine or None:
     """
     Fetches secrets from the secret manager adn creates an sqlalchemy connection pool through
     the connection engine.
@@ -33,11 +33,10 @@ def init_tcp_connection_engine(db_config: dict):
     return pool
 
 
-def init_connection_engine():
+def init_connection_engine() -> sqlalchemy.engine.Engine or None:
     """
     Function that starts the database connection pool with the configurations specified below.
-
-    :return: a pool of database connection or None if connection failed.
+    :return: A pool of database connections or None if connection failed.
     """
     db_config = {
         "pool_size": 5,  # Max number of permanent connections
@@ -51,27 +50,29 @@ def init_connection_engine():
 db = init_connection_engine()  # Start the database connection where db is the pool of connections
 
 
-def interact(statement: str):
+def interact(statement: str) -> list:
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
-    :param statement: The SQL statement to carry out. (including ;)
+    :param statement: The SQL statement to carry out. (Must include ";" in the end).
     :return: The response from the database after the action was carried out
     """
+    # Todo raise exception (ValueError) if ";" not in statement.
     try:
         with db.connect() as conn:
-            return conn.execute(statement)
+            return list(conn.execute(statement))
     except Exception as e:
         # Raises the error that the statement could not execute
         raise RuntimeWarning(f"Interaction database failed with message: {str(e)}")
 
 
-def select(statement: str) -> list or None:
+def select(statement: str) -> list:
     """
     Executes the given SQL statement. Used for SELECT and similar functions that require something to be returned from
     the database.
-    :param statement: The SQL statement to be carried out.
+    :param statement: The SQL statement to be carried out. Must include ";" in the end).
     :return: The resulting query from the database in the form of a list.
     """
+    # Todo raise exception (ValueError) if ";" not in statement.
     try:
         with db.connect() as conn:
             return list(conn.execute(statement).fetchall())  # Return the result as a list

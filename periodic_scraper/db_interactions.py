@@ -2,8 +2,7 @@ import sqlalchemy
 import secret_manager as secret
 
 
-def init_tcp_connection_engine(db_config: dict):
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
+def init_tcp_connection_engine(db_config: dict) -> sqlalchemy.engine.Engine or None:
     """
     Fetches secrets from the secret manager adn creates an sqlalchemy connection pool through
     the connection engine.
@@ -34,11 +33,9 @@ def init_tcp_connection_engine(db_config: dict):
     return pool
 
 
-def init_connection_engine():
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
+def init_connection_engine() -> sqlalchemy.engine.Engine or None:
     """
     Function that starts the database connection pool with the configurations specified below.
-
     :return: a pool of database connection or None if connection failed.
     """
     db_config = {
@@ -50,11 +47,10 @@ def init_connection_engine():
     return init_tcp_connection_engine(db_config)
 
 
-db = init_connection_engine() #starts the database connection where db is the pool of connections
+db = init_connection_engine()  # Starts the database connection where db is the pool of connections
 
 
-def interact(statement: str):
-    # Todo add docstring and method signature (return type) i know it's None or conn.execute
+def interact(statement: str) -> str:
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
     :param statement: The SQL statement to carry out. (including ;)
@@ -68,7 +64,7 @@ def interact(statement: str):
         raise RuntimeWarning(f"Interaction database failed with message: {str(e)}")
 
 
-def select(statement: str) -> list or None:
+def select(statement: str) -> str:
     """
     Executes the given SQL statement. Used for SELECT and similar functions that require something to be returned from
     the database.
