@@ -194,20 +194,22 @@ def add_user_to_database(user: insight.User) -> None:
     return
 
 
-def update_user_postcode(user_email: str, postcode: str) -> bool:
+def update_user_postcode(user_email: str, postcode: str) -> None:
     """
     Updates the user's postcode with the given postcode, returning a bool value to indicate success/failure.
     :param user_email: The user's email address.
     :param postcode: The new postcode.
     :return: True if the postcode was updated successfully.
     """
-    try:
-        # Update the user's postcode in the respective database entry
-        database_engine.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{user_email}';")
-    except RuntimeWarning:
-        return False  # Error occurred when trying to
-
-    return True  # Update successful
+    database_engine.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{user_email}';")
+    return
+    # try:
+    #     Update the user's postcode in the respective database entry
+    #
+    # except RuntimeWarning:
+    #     return False  # Error occurred when trying to
+    #
+    # return True  # Update successful
 
 
 def remove_user_interaction(bill_id: str, user_id: str):
