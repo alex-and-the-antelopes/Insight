@@ -233,12 +233,11 @@ def update_postcode():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not is_valid_postcode(postcode):  # Check that the postcode is valid
-        return jsonify({"error": "postcode_error"})
-    try:
-        database_engine.interact( # todo fix
-            f"UPDATE Users SET postcode='{postcode}' WHERE email='{email_address}';")  # Update user's postcode
-    except RuntimeWarning:
-        return jsonify({"error": "query_error"})  # Error when executing sql statement
+        return jsonify({"error": "invalid_postcode"})
+
+    response = update_user_postcode(email_address, postcode)  # Update the user's postcode and get the result
+    if not response:  # If the update returned False then it failed
+        return jsonify({"error": "query_error"})  # Error when updating user's entry in the database
 
     return jsonify({"success": "postcode_updated"})  # Return success message
 
