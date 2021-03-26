@@ -1,7 +1,11 @@
+"""
+Module with functions to quickly view the status of the database
+"""
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
 public_ip = "35.190.194.63"
+db_name = "bill_data"
 
 with open("../secrets/user_pass", 'r') as reader:
     password = reader.read()
@@ -15,8 +19,6 @@ sql_config = {
     "ssl_cert": "../secrets/client-cert.pem",
     "ssl_key": "../secrets/client-key.pem"
 }
-
-db_name = "bill_data"
 
 
 def clear_table(conn, cursor, table_name):
