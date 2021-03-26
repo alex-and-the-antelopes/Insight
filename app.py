@@ -369,6 +369,7 @@ def set_user_vote():
 
     return jsonify({"success": "update_successful"})  # Return success message
 
+
 def build_bills(bill_id_list: list, email_address: str) -> list:
     """
     Builds a list containing the bills from the given list of bill ids. Constructs the Bill objects using the bill_ids.
@@ -382,7 +383,7 @@ def build_bills(bill_id_list: list, email_address: str) -> list:
         bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
         if bill:
             likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = prepare_bill(
+            bill_dict = insight.parliament.Bill.prepare(
                 bill,
                 {
                     "likes": likes,
@@ -392,5 +393,7 @@ def build_bills(bill_id_list: list, email_address: str) -> list:
             )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
             bill_list.append(bill_dict)  # Add the bill to the bill list
     return bill_list
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=int("8080"), host="0.0.0.0")

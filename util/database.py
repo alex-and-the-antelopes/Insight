@@ -2,7 +2,7 @@ import random
 import string
 
 from parlpy.utils.constituency import get_constituencies_from_post_code
-from gcp_util import database_engine
+from util.gcp import database_engine
 import insight
 import app
 import insight.parliament
