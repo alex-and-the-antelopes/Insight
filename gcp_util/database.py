@@ -1,5 +1,5 @@
 import sqlalchemy
-import secret_manager as secret
+import gcp_util.secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config: dict):
