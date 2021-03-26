@@ -72,6 +72,18 @@ def fetch_recent_bills(limit: int = 50) -> list:
     return bills_query  # Return the list of bill ids
 
 
+def fetch_mp_bills(mp_id: str) -> list:
+    """
+    Fetch the id of the bills that the given MP has voted on.
+    :param mp_id: The id of the MP.
+    :return: A list of bills the MP has voted on, including their vote.
+    """
+    # Get all the bill ids the MP has voted on:
+    bill_id_query = database_engine.select(f"SELECT DISTINCT Bills.billID FROM MPVotes RIGHT JOIN Bills ON "
+                                           f"MPVotes.billID = Bills.billID WHERE MPVotes.mpID = {mp_id};")
+    return bill_id_query  # Return the list of bill ids the MP has voted on
+
+
 def fetch_user_id(email_address: str) -> str:
     """
     For a given email address, finds the user's id from the database.
