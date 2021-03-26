@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" height="300" src="res/img/icon1500x1500.png">
+  <img width="200" height="200" src="res/img/icon1500x1500.png">
 </p>
 
 # Insight
