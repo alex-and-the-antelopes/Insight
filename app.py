@@ -259,12 +259,11 @@ def update_postcode():
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not is_valid_postcode(postcode):  # Check that the postcode is valid
-        return jsonify({"error": "postcode_error"})
-    try:
-        database_engine.interact(  # todo fix
-            f"UPDATE Users SET postcode='{postcode}' WHERE email='{email_address}';")  # Update user's postcode
-    except RuntimeWarning:
-        return jsonify({"error": "query_error"})  # Error when executing sql statement
+        return jsonify({"error": "invalid_postcode"})
+
+    response = update_user_postcode(email_address, postcode)  # Update the user's postcode and get the result
+    if not response:  # If the update returned False then it failed
+        return jsonify({"error": "query_error"})  # Error when updating user's entry in the database
 
     return jsonify({"success": "postcode_updated"})  # Return success message
 
@@ -300,7 +299,7 @@ def get_mp_votes():
     mp_votes = []
     for bill in bill_votes:  # Iterate through the list of bills voted
         bill_details = {"id": bill[0], "positive": bill[1]}
-        mp_votes.append(bill_details)
+        mp_votes.append(bill_details)  # Add the bill vote to the list
     return jsonify(mp_votes)  # Return the list of {billID and positive}
 
 
@@ -355,9 +354,9 @@ def set_user_vote():
     vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
     # Construct the appropriate SQL statement
-    if positive is '2':  # Remove interaction (remove like/dislike)
+    if int(positive) == 2:  # Remove interaction (remove like/dislike)
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-    elif vote_state == 2 and positive != 2:  # First time interaction with the bill
+    elif vote_state == 2:  # First time interaction with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
                     f"'{user_id}', CURRENT_TIMESTAMP());"
     else:  # Change existing user interaction with the bill
@@ -371,6 +370,28 @@ def set_user_vote():
 
     return jsonify({"success": "update_successful"})  # Return success message
 
-
+def build_bills(bill_id_list: list, email_address: str) -> list:
+    """
+    Builds a list containing the bills from the given list of bill ids. Constructs the Bill objects using the bill_ids.
+    Includes user interactions with the bills.
+    :param bill_id_list: A list containing the ids of the Bills to build.
+    :param email_address: The email address of the User. Used to get the user's interaction with the bills.
+    :return: A list containing the built Bills.
+    """
+    bill_list = []
+    for bill_id in bill_id_list:
+        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
+        if bill:
+            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+            bill_dict = prepare_bill(
+                bill,
+                {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
+                }
+            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
+            bill_list.append(bill_dict)  # Add the bill to the bill list
+    return bill_list
 if __name__ == '__main__':
     app.run(debug=True, port=int("8080"), host="0.0.0.0")
