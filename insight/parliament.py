@@ -88,19 +88,15 @@ class Bill:
 
     def prepare(self, additional_values: dict = None) -> dict:
         """
-        Prepares bill to be sent to front-end, adding any extra fields that are expected (such as likes)
+        Prepares bill to be sent to front-end, adding any extra fields that are expected (such as user likes/dislikes).
         :param additional_values: Extra key-value pairs to add to result
         :return: Bill in dict form, with extra fields.
         """
-
-        bill_dict = self.to_dict()
-
-        # Add extra values, if any are given
-        if additional_values is not None:
+        bill_dict = self.to_dict()  # Get the dictionary representation of the Bill object
+        if additional_values:  # Check if extra values are given
             for key in additional_values:
-                bill_dict[key] = additional_values[key]
-
-        return bill_dict
+                bill_dict[key] = additional_values[key]  # Add the extra values to the dictionary
+        return bill_dict  # Return the final version of the bill
 
     def __str__(self) -> str:
         """
@@ -119,5 +115,3 @@ class Bill:
         :return: A dictionary containing the attributes of the current Bill.
         """
         return vars(self)
-
-
