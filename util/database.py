@@ -210,7 +210,12 @@ def update_user_postcode(user_email: str, postcode: str) -> bool:
 
 
 def remove_user_interaction(bill_id: str, user_id: str) -> bool:
-
+    """
+    Removes the user's interaction (like/dislike) from the Bill with the given bill id.
+    :param bill_id: The id of the Bill.
+    :param user_id: The id of the User.
+    :return: True if the reaction was removed successfully, False otherwise.
+    """
     remove_statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"  # Remove interaction
     try:
         database_engine.interact(remove_statement)  # Carry out the relevant SQL statement
