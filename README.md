@@ -8,13 +8,6 @@ Server for **Insight**: a Parliamentary Bill tracker, making democracy accessibl
 
 This is a year-long project in a team of 7, for the *Integrated group-based project* unit at University of Bath 🛁.
 
-## Installation
-
-todo
-
-> **Note:** Although config files for use with Google Cloud Platform are included, ensure `entrypoint` in `app.yaml` is 
-> set to point to `app.py`.
-
 ## Taken from a Deliverable
 A system to allow users to both learn about and react to bills passing through Parliament, ultimately encouraging users to engage in the political process. We plan on using a social media style interface to present the bills and allow users to react, to provide young people with a familiar and modern interface to the political process. However, we simultaneously aim to make the interface formal enough that the content is engaged with in a meaningful way.
 
