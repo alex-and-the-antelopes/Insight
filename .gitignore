@@ -13,4 +13,7 @@ periodic_scraper/secrets
 # ignore pickle file in periodic_scraper
 periodic_scraper/*.p
 
+# ignore pipfile, app engine doesnt like these
+Pipfile*
+
 secrets/
