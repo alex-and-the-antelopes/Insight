@@ -166,7 +166,7 @@ def get_mp_bills():
     # Get user info for verification
     email_address = request.form['email']
     session_token = request.form['session_token']
-    mp_id = request.form['mp_id']  # Get ParliamentMember id
+    mp_id = request.form['mp_id']  # Get Member (MP) id
 
     if not verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
@@ -247,7 +247,7 @@ def send_message():
         except OSError:
             return jsonify({"error": "email_failed_to_send"})  # Error with sending email (connecting to smtp server)
 
-    return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
+    return jsonify({"error": "mp_database_error"})  # Could not build Member
 
 
 @app.route('/set_user_vote', methods=['POST'])
@@ -331,7 +331,7 @@ def get_local_mp():
     except KeyError:
         return jsonify({"error": "mp_error"})  # Key error caused by invalid postcode
 
-    parliament_member = fetch_mp(mp_id)  # Construct the ParliamentMember (MP) object
+    parliament_member = fetch_mp(mp_id)  # Construct the Member (MP) object
     if parliament_member:
         return jsonify(parliament_member.to_dict())  # Return the user's local MP
 

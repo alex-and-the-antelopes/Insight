@@ -25,9 +25,9 @@ def fetch_user(email_address: str) -> insight.User or None:
 
 def fetch_mp(mp_id: int) -> insight.parliament.Member or None:
     """
-    Finds the member of parliament with the given ID, constructs and returns the ParliamentMember object.
+    Finds the member of parliament with the given ID, constructs and returns the Member object.
     :param mp_id: The id of the MP.
-    :return: The constructed ParliamentMember object.
+    :return: The constructed Member object.
     """
     parliament_member = None
     mp_query = database_engine.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for MP
@@ -132,7 +132,7 @@ def fetch_user_interaction(user_id: str, bill_id: str) -> int:
 def fetch_mp_votes(mp_id: str) -> list:
     """
     Constructs and returns a list of all of the MP's votes on bills from the database.
-    :param mp_id: The id of the ParliamentMember.
+    :param mp_id: The id of the Member.
     :return: A list of all the MP's votes on bills.
     """
     # Get the bills the MP has voted on from the database
