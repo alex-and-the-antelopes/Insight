@@ -1,7 +1,8 @@
-# Insight ⚖️
+# <img width="50" height="50" src="/res/img/icon.png"> Insight
 
-Server for insight, a parliamentary bill tracker application, making democracy accessible to everyone.
-This is a year-long project in a team of 7 to develop a system to solve a problem, for the *Integrated group-based project* unit at University of Bath 🛁.
+Server for **Insight**: a Parliamentary Bill tracker, making democracy accessible to everyone.
+
+This is a year-long project in a team of 7, for the *Integrated group-based project* unit at University of Bath 🛁.
 
 ## Installation
 
