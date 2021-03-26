@@ -1,7 +1,6 @@
 import smtplib
-import sys
 import re
-from gcp_util import secret_manager as secret
+from util.gcp import secret_manager as secret
 from profanityfilter import ProfanityFilter
 
 

@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
 import insight.parliament
-from database import *
+from util.database import *
+from util import is_valid_postcode
 from communications import email
 import logging
-import requests
+
+from insight import filter_votes
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -92,7 +94,8 @@ def login_with_token():
     # Get form information:
     email_address = request.form['email']
     session_token = request.form['session_token']
-    if verify_user(email_address, session_token):  # Verify the user using email and session token
+    if insight.User.verify_email_and_session_token(email_address,
+                                                   session_token):  # Verify the user using email and session token
         return jsonify({"success": "login_successful"})  # Return success message
     return jsonify({"error": "login_unsuccessful"})  # Given the wrong token
 
@@ -109,7 +112,7 @@ def get_bill():
     session_token = request.form['session_token']
     bill_id = request.form['bill_id']  # The id of the bill to fetch
 
-    if not verify_user(email_address, session_token):  # Verify the user
+    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill = fetch_bill(str(bill_id))  # Fetch and construct the bill with the given id
@@ -118,8 +121,7 @@ def get_bill():
         return jsonify({"error": "query_failed"})  # Query failed, no such bill exists
 
     likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-    bill_dict = prepare_bill(
-        bill,
+    bill_dict = bill.prepare(
         {
             "likes": likes,
             "dislikes": dislikes,
@@ -141,7 +143,7 @@ def get_bills():
     email_address = request.form['email']
     session_token = request.form['session_token']
 
-    if not verify_user(email_address, session_token):  # Verify the user
+    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill_id_list = fetch_recent_bills()  # Get the 50 most recent bills
@@ -154,8 +156,7 @@ def get_bills():
         bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
         if bill:
             likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = prepare_bill(
-                bill,
+            bill_dict = bill.prepare(
                 {
                     "likes": likes,
                     "dislikes": dislikes,
@@ -182,7 +183,7 @@ def get_mp_bills():
     session_token = request.form['session_token']
     mp_id = request.form['mp_id']  # Get ParliamentMember id
 
-    if not verify_user(email_address, session_token):  # Verify the user
+    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill_id_list = fetch_mp_bills(mp_id)  # Get the list of bills the MP has voted on (and their votes)
@@ -194,8 +195,7 @@ def get_mp_bills():
         bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
         if bill:
             likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = prepare_bill(
-                bill,
+            bill_dict = bill.prepare(
                 {
                     "likes": likes,
                     "dislikes": dislikes,
@@ -224,7 +224,7 @@ def send_message():
     mp_id = request.form['mp_id']
     message = request.form['message']
     # Verify the user:
-    if not verify_user(email_address, session_token):  # Verify the user
+    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
@@ -255,13 +255,13 @@ def update_postcode():
     postcode = request.form['postcode']  # Get the new postcode
 
     # Verify the user:
-    if not verify_user(email_address, session_token):
+    if not insight.User.verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not is_valid_postcode(postcode):  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     try:
-        database_engine.interact( # todo fix
+        database_engine.interact(  # todo fix
             f"UPDATE Users SET postcode='{postcode}' WHERE email='{email_address}';")  # Update user's postcode
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
@@ -282,7 +282,7 @@ def get_mp_votes():
     mp_id = request.form['mp_id']
 
     # Verify the user:
-    if not verify_user(email_address, session_token):
+    if not insight.User.verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not fetch_mp(mp_id):  # Check if mp_id exists
@@ -293,7 +293,7 @@ def get_mp_votes():
     if not bill_votes:
         return jsonify({"error": "bill_votes_error"})  # Return an error if the mp has not voted on any bills
     # Clean list of bills
-    bill_votes = clean_mp_votes(bill_votes)
+    bill_votes = filter_votes(bill_votes)
     if not bill_votes:
         return jsonify({"error": "cleaned_bill_votes_error"})  # Return an error if the cleaned votes are empty
     # Put it in the final format:
@@ -315,7 +315,7 @@ def get_local_mp():
     email_address = request.form['email']
     session_token = request.form['session_token']
     # Verify the user:
-    if not verify_user(email_address, session_token):
+    if not insight.User.verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user = fetch_user(email_address)  # Get the user's details
@@ -348,7 +348,7 @@ def set_user_vote():
     bill_id = request.form['bill_id']
     positive = request.form['positive']
     # Verify the user:
-    if not verify_user(email_address, session_token):
+    if not insight.User.verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email_address)  # Fetch and construct the User object from the database
@@ -370,92 +370,6 @@ def set_user_vote():
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
     return jsonify({"success": "update_successful"})  # Return success message
-
-
-# ////// End region ////// Helper functions //////
-
-
-def prepare_bill(bill: insight.parliament.Bill, additional_values: dict = None) -> dict:
-    """
-    Prepares bill to be sent to front-end, adding any extra fields that are expected (such as likes)
-    :param bill: Bill to prepare
-    :param additional_values: Extra key-value pairs to add to result
-    :return: Bill in dict form, with extra fields.
-    """
-    bill_dict = bill.to_dict()
-
-    # Add extra values, if any are given
-    if additional_values is not None:
-        for key in additional_values:
-            bill_dict[key] = additional_values[key]
-
-    return bill_dict
-
-
-def verify_user(email_address: str, session_token: str) -> bool:
-    """
-    Verify the user using their email and token. Checks if the email address is used, and verifies the token.
-    :param email_address: The email address of the user.
-    :param session_token: The session token of the user.
-    :return: True if the user was verified, False otherwise.
-    """
-    if is_new_address(email_address):  # Check if the email corresponds to a User
-        return False
-    user = fetch_user(email_address)  # Get the user form the database using their email
-    if user and user.verify_token(session_token):
-        return True  # Login successful
-    return False  # Tokens do not match
-
-
-def clean_mp_votes(bill_votes: list) -> list:
-    """
-    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
-    readings.
-    :param bill_votes: The list of bill votes to clean/filter.
-    :return: The filtered list of bill votes.
-    """
-    clean_votes = []
-    prev_id = '-1'  # Used to filter out deprecated bills from the final list
-    for bill in bill_votes:
-        if "amendments" in bill[2]:  # Ignore amendments
-            continue
-        if prev_id == bill[0]:
-            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
-        clean_votes.append(bill)  # Add the bill to the cleaned list
-        prev_id = bill[0]  # Update the previous id for next iteration
-    return clean_votes
-
-
-def is_valid_postcode(postcode: str) -> bool:
-    """
-    Checks if the given postcode is a valid postcode using the https://api.postcodes.io/ API.
-    :param postcode: The postcode to evaluate.
-    :return: True if the postcode is valid, False otherwise.
-    """
-    # Use the postcode.io API to validate postcodes
-    url = f"https://api.postcodes.io/postcodes/{postcode}/validate"
-    response = requests.get(url).json()
-
-    # Request was processed properly
-    if response['status'] == 200:
-        # Get the API's evaluation
-        return response['result']
-
-    # API refused to evaluate the request (typeError)
-    return False
-
-
-def strip_text(text: str) -> str:
-    """
-    Finds and removes the escape characters in the given string. Checks for linux and windows escape characters.
-    :param text: The string to be parsed.
-    :return: The parsed string.
-    """
-    if "\r" in text:
-        text = text.replace("\r", "")  # Remove linux next line char
-    if "\n" in text:
-        text = text.replace("\n", "")  # Remove mac & windows next line char
-    return text
 
 
 if __name__ == '__main__':

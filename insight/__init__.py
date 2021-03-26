@@ -1,4 +1,22 @@
+from util.database import is_new_address, fetch_user
+
+
 class User:
+    @staticmethod
+    def verify_email_and_session_token(email_address: str, session_token: str) -> bool:
+        """
+        Verify the user using their email and token. Checks if the email address is used, and verifies the token.
+        :param email_address: The email address of the user.
+        :param session_token: The session token of the user.
+        :return: True if the user was verified, False otherwise.
+        """
+        if is_new_address(email_address):  # Check if the email corresponds to a User
+            return False
+        user = fetch_user(email_address)  # Get the user form the database using their email
+        if user and user.verify_token(session_token):
+            return True  # Login successful
+        return False  # Tokens do not match
+
     """
     Represents a User entity.
     Has an email address, password hash, email address, notification, session token and postcode.
@@ -59,3 +77,22 @@ class User:
         user_str = f"email: {self.email}, postcode: {self.postcode}, session token: {self.session_token}, " \
                    f"password hash: {self.password_hash}, notification token: {self.notification_token}"
         return user_str
+
+
+def filter_votes(bill_votes: list) -> list:
+    """
+    Cleans the given list of bill votes to only include relevant bill votes. Filters out amendments and deprecated
+    readings.
+    :param bill_votes: The list of bill votes to clean/filter.
+    :return: The filtered list of bill votes.
+    """
+    clean_votes = []
+    prev_id = '-1'  # Used to filter out deprecated bills from the final list
+    for bill in bill_votes:
+        if "amendments" in bill[2]:  # Ignore amendments
+            continue
+        if prev_id == bill[0]:
+            clean_votes.pop()  # If bill id appears twice, remove the deprecated version
+        clean_votes.append(bill)  # Add the bill to the cleaned list
+        prev_id = bill[0]  # Update the previous id for next iteration
+    return clean_votes

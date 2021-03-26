@@ -2,10 +2,10 @@ import random
 import string
 
 from parlpy.utils.constituency import get_constituencies_from_post_code
-from gcp_util import database_engine
+from util.gcp import database_engine
 import insight
 import insight.parliament
-from app import strip_text
+from util import strip_text
 from communications import notification
 
 
