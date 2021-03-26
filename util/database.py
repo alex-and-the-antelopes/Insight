@@ -245,7 +245,14 @@ def add_user_interaction(bill_id: str, user_id: str, vote: int) -> bool:
 
 
 def update_user_interaction(bill_id: str, user_id: str, vote: int) -> bool:
-
+    """
+    Update the user's interaction (like/dislike) for the Bill with the given id. The new interaction can be either 0
+    (dislike) or 1 (like).
+    :param bill_id: The id of the Bill.
+    :param user_id: The id of the User.
+    :param vote: The updated User vote. Must be 0 or 1. Values: 0 --> dislike, 1 --> like.
+    :return: True if the reaction was removed successfully, False otherwise.
+    """
     if vote != 0 and vote != 1:
         return False  # Should only be given 0 or 1 (0 --> dislike, 1 --> like)
     update_statement = f"UPDATE Votes SET positive = {vote}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id}" \
