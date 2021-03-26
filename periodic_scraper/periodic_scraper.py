@@ -287,7 +287,7 @@ def execute_update_bill(bill):
 
 
 def execute_insert_new_vote_into_mpvotes_table(division_title, stage, bill_id, mp_id, aye=True):
-    if aye == True:
+    if aye:
         positive = 1
     else:
         positive = 0
