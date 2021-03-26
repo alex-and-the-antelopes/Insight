@@ -5,7 +5,7 @@ from insight.parliament import Bill
 class MyTestCase(unittest.TestCase):
     """
     Tests for User. Covered functions:
-    > to_dict
+    > to_dict todo fix to_dict tests and add comments
     """
     def test_to_dict(self):
         """

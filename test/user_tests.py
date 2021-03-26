@@ -44,7 +44,7 @@ class UserTestCases(unittest.TestCase):
 
     def test_to_dict(self):
         """
-        Test the to_dict() in User
+        Test the to_dict() in User todo fix to_dict tests
         """
         user = User("admin", "pass", "n token")
         user_dict = user.to_dict()
