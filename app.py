@@ -327,7 +327,7 @@ def set_user_vote():
     vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
     # Construct the appropriate SQL statement
-    if positive == 2:  # Remove interaction (remove like/dislike)
+    if int(positive) == 2:  # Remove interaction (remove like/dislike)
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
     elif vote_state == 2:  # First time interaction with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
@@ -434,9 +434,7 @@ def is_valid_postcode(postcode: str) -> bool:
     if response['status'] == 200:
         # Get the API's evaluation
         return response['result']
-
-    # API refused to evaluate the request (typeError)
-    return False
+    return False  # API refused to evaluate the request (typeError)
 
 
 def strip_text(text: str) -> str:
