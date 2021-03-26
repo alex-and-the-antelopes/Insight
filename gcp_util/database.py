@@ -56,7 +56,8 @@ def interact(statement: str) -> list:
     :param statement: The SQL statement to carry out. (Must include ";" in the end).
     :return: The response from the database after the action was carried out
     """
-    # Todo raise exception (ValueError) if ";" not in statement.
+    if ";" not in statement:
+        raise ValueError(f"\";\" not in given SQL statement: \"{statement}\"")  # Raise valueError if ; not in statement
     try:
         with db.connect() as conn:
             return list(conn.execute(statement))
@@ -72,7 +73,8 @@ def select(statement: str) -> list:
     :param statement: The SQL statement to be carried out. Must include ";" in the end).
     :return: The resulting query from the database in the form of a list.
     """
-    # Todo raise exception (ValueError) if ";" not in statement.
+    if ";" not in statement:
+        raise ValueError(f"\";\" not in given SQL statement: \"{statement}\"")  # Raise valueError if ; not in statement
     try:
         with db.connect() as conn:
             return list(conn.execute(statement).fetchall())  # Return the result as a list
