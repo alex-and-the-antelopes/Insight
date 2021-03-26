@@ -7,6 +7,7 @@ import email_sender
 import logging
 import string
 import random
+import requests
 import notifications
 
 app = Flask(__name__)
@@ -43,7 +44,7 @@ def register():
         return jsonify({"error": "password_error"})
     if type(notification_token) is not str or "ExponentPushToken[" not in notification_token:
         return jsonify({"error": "notification_token_error"})
-    if type(postcode) is not str or len(postcode) < 5 or len(postcode) > 8:  # Check that the postcode is valid
+    if not is_valid_postcode(postcode):  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     if not email_sender.is_valid_email(email):  # Check that the given email is a valid email address
         return jsonify({"error": "email_error"})
@@ -243,7 +244,7 @@ def update_postcode():
     if not verify_user(email, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    if type(postcode) is not str or len(postcode) < 5 or len(postcode) > 8:  # Check that the postcode is valid
+    if not is_valid_postcode(postcode):  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     try:
         database.interact(f"UPDATE Users SET postcode='{postcode}' WHERE email='{email}';")  # Update user's postcode
@@ -397,6 +398,19 @@ def is_new_address(email_address: str) -> bool:
     if query:
         return False  # If the query returns a populated list, return False
     return True  # If the query returns an empty list return True
+
+
+def is_valid_postcode(postcode: str) -> bool:
+    """
+    Checks if the given postcode is a valid postcode using the https://api.postcodes.io/ API.
+    :param postcode: The postcode to evaluate.
+    :return: True if the postcode is valid, False otherwise.
+    """
+    url = f"https://api.postcodes.io/postcodes/{postcode}/validate"  # Use the postcode.io API to validate postcodes
+    response = requests.get(url).json()
+    if response['status'] == 200:  # Request was processed properly
+        return response['result']  # Get the API's evaluation
+    return False  # API refused to evaluate the request (typeError)
 
 
 def add_user_to_database(user: core.User) -> None:
