@@ -21,7 +21,7 @@ def landing_page():
     the source code and the documentation for the project.
     :return: Redirects visitors to the github repository.
     """
-    return redirect("https://github.com/alex-and-the-antelopes/BillTracker")
+    return redirect("https://github.com/alex-and-the-antelopes/Insight")
 
 
 @app.route('/register', methods=['POST'])
