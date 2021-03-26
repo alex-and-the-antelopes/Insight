@@ -6,7 +6,7 @@ from exponent_server_sdk import (
     PushServerError,
 )
 from requests.exceptions import ConnectionError, HTTPError
-from insight import User
+import insight
 import sys
 
 
@@ -25,7 +25,7 @@ def send_notification_to_clients(clients: list, title: str, body: str) -> None:
     return
 
 
-def send_notification(client: User, title: str, body: str) -> None:
+def send_notification(client: insight.User, title: str, body: str) -> None:
     """
     Send a notification with the given title and body to the client. Can raise TypeError. Uses the Exponent Server
     Software Development Kit. Further documentation available at: https://docs.expo.io/push-notifications/overview/
@@ -33,7 +33,7 @@ def send_notification(client: User, title: str, body: str) -> None:
     :param title: The title of the notification.
     :param body: The body of the notification.
     """
-    if type(client) is not User:  # Check that an instance of User is passed
+    if type(client) is not insight.User:  # Check that an instance of User is passed
         raise TypeError("Expected type <class 'User'> got type ", type(client))
 
     try:
