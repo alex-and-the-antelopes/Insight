@@ -5,9 +5,6 @@ from util.database import *
 from util import is_valid_postcode
 from communications import email
 import logging
-
-from util.database import filter_votes
-
 app = Flask(__name__)
 logger = logging.getLogger()
 CORS(app)
@@ -94,7 +91,7 @@ def login_with_token():
     # Get form information:
     email_address = request.form['email']
     session_token = request.form['session_token']
-    if insight.User.verify_email_and_session_token(email_address,
+    if verify_email_and_session_token(email_address,
                                                    session_token):  # Verify the user using email and session token
         return jsonify({"success": "login_successful"})  # Return success message
     return jsonify({"error": "login_unsuccessful"})  # Given the wrong token
@@ -112,7 +109,7 @@ def get_bill():
     session_token = request.form['session_token']
     bill_id = request.form['bill_id']  # The id of the bill to fetch
 
-    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
+    if not verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill = fetch_bill(str(bill_id))  # Fetch and construct the bill with the given id
@@ -143,7 +140,7 @@ def get_bills():
     email_address = request.form['email']
     session_token = request.form['session_token']
 
-    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
+    if not verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill_id_list = fetch_recent_bills()  # Get the 50 most recent bills
@@ -183,7 +180,7 @@ def get_mp_bills():
     session_token = request.form['session_token']
     mp_id = request.form['mp_id']  # Get ParliamentMember id
 
-    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
+    if not verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     bill_id_list = fetch_mp_bills(mp_id)  # Get the list of bills the MP has voted on (and their votes)
@@ -224,7 +221,7 @@ def send_message():
     mp_id = request.form['mp_id']
     message = request.form['message']
     # Verify the user:
-    if not insight.User.verify_email_and_session_token(email_address, session_token):  # Verify the user
+    if not verify_email_and_session_token(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     mp = fetch_mp(mp_id)  # Construct and return the parliament member by following given id
@@ -255,7 +252,7 @@ def update_postcode():
     postcode = request.form['postcode']  # Get the new postcode
 
     # Verify the user:
-    if not insight.User.verify_email_and_session_token(email_address, session_token):
+    if not verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not is_valid_postcode(postcode):  # Check that the postcode is valid
@@ -281,7 +278,7 @@ def get_mp_votes():
     mp_id = request.form['mp_id']
 
     # Verify the user:
-    if not insight.User.verify_email_and_session_token(email_address, session_token):
+    if not verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     if not fetch_mp(mp_id):  # Check if mp_id exists
@@ -313,7 +310,7 @@ def get_local_mp():
     email_address = request.form['email']
     session_token = request.form['session_token']
     # Verify the user:
-    if not insight.User.verify_email_and_session_token(email_address, session_token):
+    if not verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user = fetch_user(email_address)  # Get the user's details
@@ -346,7 +343,7 @@ def set_user_vote():
     bill_id = request.form['bill_id']
     positive = request.form['positive']
     # Verify the user:
-    if not insight.User.verify_email_and_session_token(email_address, session_token):
+    if not verify_email_and_session_token(email_address, session_token):
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
     user_id = fetch_user_id(email_address)  # Fetch and construct the User object from the database
