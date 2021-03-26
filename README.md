@@ -1,4 +1,4 @@
-# <img width="50" height="50" src="/res/img/icon.png"> Insight
+# <img width="50" height="50" src="/res/img/icon1500x1500.png"> Insight
 
 Server for **Insight**: a Parliamentary Bill tracker, making democracy accessible to everyone.
 
