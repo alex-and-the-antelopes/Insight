@@ -9,7 +9,7 @@ class Member:
     def __init__(self, mp_id: int or str, first_name: str, last_name: str, email: str, address: str,
                  party_id: int or str, photo_path: str, phone_num: str, area: str, current: int or str):
         """
-        Constructs a new ParliamentMember Object with the given details.
+        Constructs a new Member Object with the given details.
         :param mp_id: The MP's id.
         :param first_name: The MP's first name.
         :param last_name: The MP's last name.
@@ -34,16 +34,16 @@ class Member:
 
     def to_dict(self) -> dict:
         """
-        Creates and returns a dictionary representation of the current ParliamentMember (MP) object.
-        :return: A dictionary containing the attributes of the current ParliamentMember.
+        Creates and returns a dictionary representation of the current Member of Parliament (MP).
+        :return: A dictionary containing the attributes of the current Member object.
         """
         return vars(self)
 
     def __str__(self) -> str:
         """
-        Creates and returns a string representation of the current ParliamentMember object. The string contains the
+        Creates and returns a string representation of the current Member object. The string contains the
         email, id, address, party id, photo path, phone number and area of the MP.
-        :return: A string (str) containing the ParliamentMember's information.
+        :return: A string (str) containing the Member's information.
         """
         mp_str = f"id: {self.mp_id}, last name: {self.last_name}, first name: {self.first_name}, email: {self.email}," \
                  f" address: {self.address}, party id: {self.party_id}, photo path: {self.photo_path}, phone number:" \
@@ -59,8 +59,7 @@ class Bill:
     """
 
     def __init__(self, bill_id: int or str, title: str, desc: str or None, date_added: str, expiration_date: str,
-                 status: str,
-                 short_desc: str = None, link: str = "https://bills.parliament.uk/"):
+                 status: str, short_desc: str = None, link: str = "https://bills.parliament.uk/"):
         """
         Constructs a new Bill Object with the given details. Optional parameters: short_desc and link.
         :param bill_id: The id of the bill.
