@@ -5,6 +5,7 @@ class Member:
     their picture (photo_path), phone number, area (constituency) and a current flag (indicates if they are the active
     MP for the constituency).
    """
+
     def __init__(self, mp_id: int or str, first_name: str, last_name: str, email: str, address: str,
                  party_id: int or str, photo_path: str, phone_num: str, area: str, current: int or str):
         """
@@ -56,7 +57,9 @@ class Bill:
     Has id, title, description, date added to the database (or last updated), expiration date, status, a short
     description and a link to the bill's page on the https://bills.parliament.uk/.
     """
-    def __init__(self, bill_id: int or str, title: str, desc: str or None, date_added: str, expiration_date: str, status: str,
+
+    def __init__(self, bill_id: int or str, title: str, desc: str or None, date_added: str, expiration_date: str,
+                 status: str,
                  short_desc: str = None, link: str = "https://bills.parliament.uk/"):
         """
         Constructs a new Bill Object with the given details. Optional parameters: short_desc and link.
@@ -83,6 +86,22 @@ class Bill:
         self.short_desc = short_desc
         self.link = link
 
+    def prepare(self, additional_values: dict = None) -> dict:
+        """
+        Prepares bill to be sent to front-end, adding any extra fields that are expected (such as likes)
+        :param additional_values: Extra key-value pairs to add to result
+        :return: Bill in dict form, with extra fields.
+        """
+
+        bill_dict = self.to_dict()
+
+        # Add extra values, if any are given
+        if additional_values is not None:
+            for key in additional_values:
+                bill_dict[key] = additional_values[key]
+
+        return bill_dict
+
     def __str__(self) -> str:
         """
         Creates and returns a string representation of the current Bill object. The string contains the
@@ -100,3 +119,5 @@ class Bill:
         :return: A dictionary containing the attributes of the current Bill.
         """
         return vars(self)
+
+
