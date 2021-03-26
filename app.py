@@ -6,7 +6,7 @@ from util import is_valid_postcode
 from communications import email
 import logging
 
-from insight import filter_votes
+from util.database import filter_votes
 
 app = Flask(__name__)
 logger = logging.getLogger()
