@@ -1,5 +1,5 @@
 import unittest
-from bill_tracker_core import Bill
+from insight.parliament import Bill
 
 
 class MyTestCase(unittest.TestCase):

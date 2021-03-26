@@ -1,5 +1,5 @@
 import unittest
-from bill_tracker_core import User
+from insight import User
 
 
 class UserTestCases(unittest.TestCase):
