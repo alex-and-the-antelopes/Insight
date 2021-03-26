@@ -185,29 +185,28 @@ def get_mp_bills():
     if not verify_user(email_address, session_token):  # Verify the user
         return jsonify({"error": "invalid_credentials"})  # Verification unsuccessful
 
-    bill_query = database.select(f"SELECT DISTINCT Bills.billID, titleStripped, shortDesc, dateAdded, expiration, "
-                                 f"Bills.link, status FROM MPVotes RIGHT JOIN Bills ON MPVotes.billID = "
-                                 f"Bills.billID WHERE MPVotes.mpID = {mp_id};")  # Get all the bills the MP has voted on
+    bill_id_list = fetch_mp_bills(mp_id)  # Get the list of bills the MP has voted on (and their votes)
+    if not bill_id_list:
+        return jsonify({"error": "no_mp_votes"})  # Query failed
 
-    if not bill_query:
-        return jsonify({"error": "query_failed"})  # Query failed
+    bill_list = []
+    for bill_id in bill_id_list:
+        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
+        if bill:
+            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+            bill_dict = prepare_bill(
+                bill,
+                {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
+                }
+            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
+            bill_list.append(bill_dict)  # Add the bill to the bill list
 
-    bill_list = []  # Holds the list of bills to be transmitted
-    for bill_data in bill_query:  # Put all bills in the query in the correct format
-        bill = insight.parliament.Bill(bill_data[0], bill_data[1], None, str(bill_data[3])[:10].replace(" ", ""),
-                                       bill_data[4], bill_data[6], strip_text(bill_data[2]),
-                                       link=bill_data[5])  # Create MP object
+    if not bill_list:
+        return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
 
-        likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-        bill_dict = prepare_bill(
-            bill,
-            {
-                "likes": likes,
-                "dislikes": dislikes,
-                "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-            }
-        )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-        bill_list.append(bill_dict)  # Add the bill to the bill list
     return jsonify(bill_list)  # Return the list of bills
 
 
@@ -262,7 +261,7 @@ def update_postcode():
     if not is_valid_postcode(postcode):  # Check that the postcode is valid
         return jsonify({"error": "postcode_error"})
     try:
-        database.interact(
+        database_engine.interact( # todo fix
             f"UPDATE Users SET postcode='{postcode}' WHERE email='{email_address}';")  # Update user's postcode
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
@@ -366,7 +365,7 @@ def set_user_vote():
                     f" AND userID = {user_id};"
 
     try:
-        database.interact(statement)  # Carry out the relevant SQL statement
+        database_engine.interact(statement)  # Carry out the relevant SQL statement todo fix
     except RuntimeWarning:
         return jsonify({"error": "query_error"})  # Error when executing sql statement
 
