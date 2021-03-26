@@ -2,7 +2,8 @@ import parlpy.bills.bill_list_fetcher as blf
 import parlpy.bills.bill_details_iterator as bdi
 import parlpy.mps.mp_fetcher as mf
 import parlpy.mps.parties_fetcher as pf
-import db_interactions as db_agent
+#import db_interactions as db_agent
+import gcp_util.database_engine as db_agent
 
 import os
 import datetime
@@ -89,8 +90,7 @@ def is_in_field(table, field, val, type):
     else:
         raise ValueError("unrecog type")
 
-    count = extract_first_string_from_db_interaction(count_from_interaction)
-    count = int(count)
+    count = int(count_from_interaction[0])
 
     if count > 0:
         return True
@@ -187,16 +187,6 @@ def upsert_party_data():
             execute_insert_party_data(party.party_id, party.party_name)
 
 
-# gets xyz from string of form "[(xyz,...)]"
-def extract_first_string_from_db_interaction(interaction_string):
-    # remove opening 2 brackets
-    extracted_result = interaction_string[2:]
-    # remove closing 2 brackets
-    extracted_result = extracted_result[:-2]
-    extracted_result = extracted_result.split(",", maxsplit=1)[0]
-
-    return extracted_result
-
 # return the billID for the passed bill
 # todo: this needs to be more sophisticated, does not account for cases where the title is the same
 def bill_id_in_bills_table(bill):
@@ -209,8 +199,7 @@ def bill_id_in_bills_table(bill):
     print(f"count from interaction: {count_from_interaction}")
 
     # remove opening 2 brackets
-    count = extract_first_string_from_db_interaction(count_from_interaction)
-    count = int(count)
+    count = int(count_from_interaction[0])
 
     print(f"type count: {type(count)}")
     print(f"count: {count}")
@@ -224,8 +213,7 @@ def bill_id_in_bills_table(bill):
         print(f"type bill id interaction: {type(bill_id_from_interaction)}")
         print(f"bill id interaction: {bill_id_from_interaction}")
 
-        bill_id = extract_first_string_from_db_interaction(bill_id_from_interaction)
-        bill_id = int(bill_id)
+        bill_id = int(bill_id_from_interaction[0])
 
         print(f"bill_id: {bill_id}")
         print(f"bill_id type: {type(bill_id)}")
@@ -239,8 +227,7 @@ def division_in_mpvotes_table(division_name):
     count_command_string = f"SELECT COUNT(*) FROM {db_name}.MPVotes WHERE title = \"{division_name}\";"
 
     count_from_interaction = db_agent.select(count_command_string)
-    count = extract_first_string_from_db_interaction(count_from_interaction)
-    count = int(count)
+    count = int(count_from_interaction[0])
 
     if count > 0:
         return True
@@ -354,6 +341,7 @@ def reload_all_tables():
     insert_party_data()
     insert_mp_data()
     insert_dead_mp_placeholder()
+    # todo uncomment?
     #upsert_bills_and_divisions_data(fresh=True, session="All")
 
 
