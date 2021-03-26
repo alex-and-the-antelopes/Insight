@@ -210,7 +210,12 @@ def update_user_postcode(user_email: str, postcode: str) -> bool:
     return True  # Update successful
 
 
-def update_user_interaction():
+def remove_user_interaction(bill_id: str, user_id: str):
+    pass
+
+
+def update_user_interaction(bill_id: str, user_id: str, vote_state: str) -> None:
+
     pass
 
 
