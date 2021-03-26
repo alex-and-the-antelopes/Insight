@@ -149,20 +149,7 @@ def get_bills():
     if not bill_id_list:
         return jsonify({"error": "bill_id_query_failed"})  # Query failed, no bills in database
 
-    bill_list = []
-    for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
-        if bill:
-            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = prepare_bill(
-                bill,
-                {
-                    "likes": likes,
-                    "dislikes": dislikes,
-                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-                }
-            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-            bill_list.append(bill_dict)  # Add the bill to the bill list
+    bill_list = build_bills(bill_id_list, email_address)  # Get the built bills
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
@@ -189,20 +176,7 @@ def get_mp_bills():
     if not bill_id_list:
         return jsonify({"error": "no_mp_votes"})  # Query failed
 
-    bill_list = []
-    for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
-        if bill:
-            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = prepare_bill(
-                bill,
-                {
-                    "likes": likes,
-                    "dislikes": dislikes,
-                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-                }
-            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-            bill_list.append(bill_dict)  # Add the bill to the bill list
+    bill_list = build_bills(bill_id_list, email_address)  # Get the built bills
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
@@ -390,6 +364,31 @@ def prepare_bill(bill: insight.parliament.Bill, additional_values: dict = None) 
             bill_dict[key] = additional_values[key]
 
     return bill_dict
+
+
+def build_bills(bill_id_list: list, email_address: str) -> list:
+    """
+    Builds a list containing the bills from the given list of bill ids. Constructs the Bill objects using the bill_ids.
+    Includes user interactions with the bills.
+    :param bill_id_list: A list containing the ids of the Bills to build.
+    :param email_address: The email address of the User. Used to get the user's interaction with the bills.
+    :return: A list containing the built Bills.
+    """
+    bill_list = []
+    for bill_id in bill_id_list:
+        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
+        if bill:
+            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
+            bill_dict = prepare_bill(
+                bill,
+                {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
+                }
+            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
+            bill_list.append(bill_dict)  # Add the bill to the bill list
+    return bill_list
 
 
 def verify_user(email_address: str, session_token: str) -> bool:
