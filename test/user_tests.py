@@ -7,15 +7,13 @@ class UserTestCases(unittest.TestCase):
     Tests for User. Covered functions:
     > verify_password
     > to_dict
-    Depend on/Affected by:
-    > hash_password
     """
     def test_verify_password(self):
         """
-        Test the verify_password() in User
+        Test the verify_password() in User.
         """
-        #  email, password, notification_token, postcode, session_token):
-        user = User("email@email.com", "hashed_pass", "ExpoPushToken[XXXXXXX]", "BA27AY", "AhfO3sd")
+        #  email, password, notification_token, postcode, session_token:
+        user = User("email@email.com", "hashed_pass", "ExpoPushToken[1CAd241Xs]", "BA27AY", "AhfO3sd")
         # Check for actual value:
         self.assertTrue(user.verify_password("hashed_pass"))
         # Check for wrong values:
@@ -28,7 +26,7 @@ class UserTestCases(unittest.TestCase):
 
     def test_verify_token(self):
         """
-        Test the verify_token() in User
+        Test the verify_token() in User.
         """
         #  email, password, notification_token, postcode, session_token):
         user = User("email@email.com", "hashed_pass", "ExpoPushToken[XXXXXXX]", "BA27AY", "AhfO3sd")
