@@ -12,6 +12,7 @@ This is a year-long project in a team of 7, for the *Integrated group-based proj
 
 As this is only a single part of a bigger system, using it on it's own will take some tinkering. 
 
-For your reference, here is a HLA diagram of our working system.
+Here is a HLA diagram of our working system.
 
 todo: add HLA
+
