@@ -19,6 +19,19 @@ sql_config = {
 db_name = "bill_data"
 
 
+def clear_table(conn, cursor, table_name):
+    cursor.execute(f"DELETE FROM {db_name}.{table_name}")
+    cursor.execute(f"ALTER TABLE {db_name}.{table_name} AUTO_INCREMENT = 1")
+    conn.commit()
+
+
+def clear_all_4_tables(conn, cursor):
+    clear_table(conn, cursor, "MPVotes")
+    clear_table(conn, cursor, "Bills")
+    clear_table(conn, cursor, "MP")
+    clear_table(conn, cursor, "Party")
+
+
 def print_tables_in_db(cursor):
     cursor.execute(f"SHOW tables IN {db_name}")
     for x in cursor:
@@ -50,10 +63,10 @@ def investigate_db():
     print_table_structure(cursor, "Bills")
     print_table_structure(cursor, "MPVotes")
 
-    #print_all_rows_of_table(cursor, "Party")
+    print_all_rows_of_table(cursor, "Party")
     print_all_rows_of_table(cursor, "MP")
-    #print_all_rows_of_table(cursor, "Bills")
-    #print_all_rows_of_table(cursor, "MPVotes")
+    print_all_rows_of_table(cursor, "Bills")
+    print_all_rows_of_table(cursor, "MPVotes")
 
     cursor.close()
     conn.close()
