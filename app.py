@@ -239,9 +239,12 @@ def send_message():
         try:
             email.send_email(mp.email, "Insight Update!", message)  # Send the email
             return jsonify({"success": "email_sent"})  # If sent without errors, return success message
-        # todo: can this be more specific?
-        except Exception:
-            return jsonify({"error": "email_failed_to_send"})  # Error with mail sending
+        except ValueError:
+            return jsonify({"error": "invalid_recipient_address"})  # Destination email is invalid
+        except TypeError:
+            return jsonify({"error": "invalid_arguments"})  # Given an invalid argument (empty or not of type str)
+        except OSError:
+            return jsonify({"error": "email_failed_to_send"})  # Error with sending email (connecting to smtp server)
 
     return jsonify({"error": "mp_database_error"})  # Could not build ParliamentMember
 
