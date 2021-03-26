@@ -148,19 +148,7 @@ def get_bills():
     if not bill_id_list:
         return jsonify({"error": "bill_id_query_failed"})  # Query failed, no bills in database
 
-    bill_list = []
-    for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
-        if bill:
-            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = bill.prepare(
-                {
-                    "likes": likes,
-                    "dislikes": dislikes,
-                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-                }
-            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-            bill_list.append(bill_dict)  # Add the bill to the bill list
+    bill_list = build_bills(bill_id_list, email_address)
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
@@ -187,19 +175,7 @@ def get_mp_bills():
     if not bill_id_list:
         return jsonify({"error": "no_mp_votes"})  # Query failed
 
-    bill_list = []
-    for bill_id in bill_id_list:
-        bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
-        if bill:
-            likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = bill.prepare(
-                {
-                    "likes": likes,
-                    "dislikes": dislikes,
-                    "user_vote": fetch_user_interaction(fetch_user_id(email_address), bill.id),
-                }
-            )  # Prepare bill to be sent to the front-end (add likes, dislikes and user_vote)
-            bill_list.append(bill_dict)  # Add the bill to the bill list
+    bill_list = build_bills(bill_id_list, email_address)
 
     if not bill_list:
         return jsonify({"error": "bill_query_failed"})  # Query failed, no bills found using the bill ids
