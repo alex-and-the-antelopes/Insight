@@ -16,4 +16,4 @@ Here is a HLA diagram of our working system.
 
 todo: add HLA
 
-Have a look at "Linked Repositories", as these will most likely be helpful too.
+You will most likely also be interested in [ParlPy](https://github.com/Litharge/ParlPy), an open-source Houses of Parliament scraper.
