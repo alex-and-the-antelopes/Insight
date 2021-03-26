@@ -1,5 +1,5 @@
 import sqlalchemy
-import secret_manager as secret
+import gcp_util.secret_manager as secret
 
 
 def init_tcp_connection_engine(db_config: dict) -> sqlalchemy.engine.Engine or None:
@@ -36,7 +36,7 @@ def init_tcp_connection_engine(db_config: dict) -> sqlalchemy.engine.Engine or N
 def init_connection_engine() -> sqlalchemy.engine.Engine or None:
     """
     Function that starts the database connection pool with the configurations specified below.
-    :return: a pool of database connection or None if connection failed.
+    :return: A pool of database connections or None if connection failed.
     """
     db_config = {
         "pool_size": 5,  # Max number of permanent connections
@@ -47,33 +47,37 @@ def init_connection_engine() -> sqlalchemy.engine.Engine or None:
     return init_tcp_connection_engine(db_config)
 
 
-db = init_connection_engine()  # Starts the database connection where db is the pool of connections
+db = init_connection_engine()  # Start the database connection where db is the pool of connections
 
 
-def interact(statement: str) -> str:
+def interact(statement: str) -> list:
     """
     Executes the given SQL statement. Used for INSERT, DELETE, UPDATE SQL functions.
-    :param statement: The SQL statement to carry out. (including ;)
-    :return: The response from the database after the action was carried out as a string
+    :param statement: The SQL statement to carry out. (Must include ";" in the end).
+    :return: The response from the database after the action was carried out
     """
+    if ";" not in statement:
+        raise ValueError(f"\";\" not in given SQL statement: \"{statement}\"")  # Raise valueError if ; not in statement
     try:
         with db.connect() as conn:
-            return str(conn.execute(statement))
+            return list(conn.execute(statement))
     except Exception as e:
         # Raises the error that the statement could not execute
         raise RuntimeWarning(f"Interaction database failed with message: {str(e)}")
 
 
-def select(statement: str) -> str:
+def select(statement: str) -> list:
     """
     Executes the given SQL statement. Used for SELECT and similar functions that require something to be returned from
     the database.
-    :param statement: The SQL statement to be carried out.
-    :return: The resulting query from the database in the form of a string.
+    :param statement: The SQL statement to be carried out. Must include ";" in the end).
+    :return: The resulting query from the database in the form of a list.
     """
+    if ";" not in statement:
+        raise ValueError(f"\";\" not in given SQL statement: \"{statement}\"")  # Raise valueError if ; not in statement
     try:
         with db.connect() as conn:
-            return str(conn.execute(statement).fetchall())  # Return the result as a list
+            return list(conn.execute(statement).fetchall())  # Return the result as a list
     except Exception as e:
         # Raises an error that the statement could not finish execution.
         raise RuntimeWarning(f"Selection database failed with message: {str(e)}")

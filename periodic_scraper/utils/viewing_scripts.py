@@ -1,13 +1,21 @@
+"""
+Module with functions to quickly view the status of the database
+"""
 import mysql.connector
 from mysql.connector.constants import ClientFlag
 
+# set these to the values for your Google Cloud SQL instance
 public_ip = "35.190.194.63"
+db_name = "bill_data"
+username = "mastergk"
 
+# secrets are stored in secrets dir
 with open("../secrets/user_pass", 'r') as reader:
     password = reader.read()
 
+# certs are also stored in secrets
 sql_config = {
-    "user": "mastergk",
+    "user": username,
     "password": password,
     "host": public_ip,
     "client_flags": [ClientFlag.SSL],
@@ -15,8 +23,6 @@ sql_config = {
     "ssl_cert": "../secrets/client-cert.pem",
     "ssl_key": "../secrets/client-key.pem"
 }
-
-db_name = "bill_data"
 
 
 def clear_table(conn, cursor, table_name):
