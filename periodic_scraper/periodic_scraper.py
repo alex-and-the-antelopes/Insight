@@ -282,9 +282,6 @@ def execute_update_bill(bill):
                             f"sessions = \"{sessions_string}\", " \
                             f"link = \"{bill.url}\" " \
                             f"WHERE titleStripped = \'{bill.title_stripped}\'"
-    print(f"update command string {update_command_string}")
-    row_used = db_agent.select(f"SELECT * FROM {db_name}.Bills WHERE titleStripped = \"{bill.title_stripped}\";")
-    print(f"row used: {row_used}")
 
     db_agent.interact(update_command_string)
 
