@@ -91,8 +91,7 @@ def login_with_token():
     # Get form information:
     email_address = request.form['email']
     session_token = request.form['session_token']
-    if verify_email_and_session_token(email_address,
-                                                   session_token):  # Verify the user using email and session token
+    if verify_email_and_session_token(email_address, session_token):  # Verify the user using email and session token
         return jsonify({"success": "login_successful"})  # Return success message
     return jsonify({"error": "login_unsuccessful"})  # Given the wrong token
 
@@ -351,8 +350,7 @@ def build_bills(bill_id_list: list, email_address: str) -> list:
         bill = fetch_bill(str(bill_id[0]))  # Fetch and construct the bill with the given id
         if bill:
             likes, dislikes = fetch_user_interactions(bill.id)  # Get the user interactions for the bill
-            bill_dict = insight.parliament.Bill.prepare(
-                bill,
+            bill_dict = bill.prepare(
                 {
                     "likes": likes,
                     "dislikes": dislikes,
