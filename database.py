@@ -4,8 +4,8 @@ import string
 from parlpy.utils.constituency import get_constituencies_from_post_code
 from gcp_util import database_engine
 import insight
+import app
 import insight.parliament
-from app import strip_text
 from communications import notification
 
 
@@ -52,7 +52,7 @@ def fetch_bill(bill_id: str) -> insight.parliament.Bill or None:
         bill_data = bill_query[0]  # Get the bill's information
         bill = insight.parliament.Bill(bill_data[0], bill_data[1], bill_data[7],
                                        str(bill_data[3])[:10].replace(" ", ""),
-                                       bill_data[4], bill_data[6], strip_text(bill_data[2]),
+                                       bill_data[4], bill_data[6], app.strip_text(bill_data[2]),
                                        bill_data[5])  # Construct the Bill
 
     return bill  # Return the Bill object
