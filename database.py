@@ -1,0 +1,201 @@
+import random
+import string
+
+from parlpy.utils.constituency import get_constituencies_from_post_code
+from gcp_util import database_engine
+import insight
+import insight.parliament
+from app import strip_text
+from communications import notification
+
+
+def fetch_user(email_address: str) -> insight.User or None:
+    """
+    Finds the user with the given email address, constructs and returns the User object.
+    :param email_address: The email address of the user.
+    :return: The constructed User object.
+    """
+    user_query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Query database for the user
+    user = None
+    if user_query:
+        user_info = user_query[0]  # Get the user information
+        user = insight.User(user_info[1], user_info[2], user_info[4], user_info[3], user_info[5])  # Construct user
+    return user
+
+
+def fetch_mp(mp_id: int) -> insight.parliament.Member or None:
+    """
+    Finds the member of parliament with the given ID, constructs and returns the ParliamentMember object.
+    :param mp_id: The id of the MP.
+    :return: The constructed ParliamentMember object.
+    """
+    parliament_member = None
+    mp_query = database_engine.select(f"SELECT * FROM MP WHERE mpID='{mp_id}';")  # Query database for the member of parliament
+    if mp_query:
+        mp_info = mp_query[0]  # Extract the MP information
+        # Construct MP object:
+        parliament_member = insight.parliament.Member(mp_info[0], mp_info[1], mp_info[2], mp_info[3], mp_info[4],
+                                                      mp_info[5], mp_info[6], mp_info[7], mp_info[8], mp_info[9])
+    return parliament_member
+
+
+def fetch_bill(bill_id: str) -> insight.parliament.Bill or None:
+    """
+    Finds the bill with the given ID, constructs and returns the Bill object.
+    :param bill_id: The id of the bill to fetch.
+    :return: A Bill object with the bill's details if it exists, None otherwise.
+    """
+    bill_query = database_engine.select(f"SELECT billID, titleStripped, shortDesc, dateAdded, expiration, link, status, "
+                                 f"description FROM  Bills WHERE billID='{bill_id}';")  # Get the bill with the given id
+    bill = None
+    if bill_query:  # If the query was successful (the bill exists), build the Bill object
+        bill_data = bill_query[0]  # Get the bill's information
+        bill = insight.parliament.Bill(bill_data[0], bill_data[1], bill_data[7],
+                                       str(bill_data[3])[:10].replace(" ", ""),
+                                       bill_data[4], bill_data[6], strip_text(bill_data[2]),
+                                       bill_data[5])  # Construct the Bill
+
+    return bill  # Return the Bill object
+
+
+def fetch_recent_bills(limit: int = 50) -> list:
+    """
+    Fetches and returns a list containing the ids of the most recently updated bills.
+    :param limit: The number of bills to fetch. Default number of bills is 50.
+    :return: A list containing the ids of the most recently updated bills, or None.
+    """
+    if type(limit) is not int:
+        raise TypeError(f"Expected type <class 'int'> but got {type(limit)}")  # Given unexpected limit type
+    if limit <= 0:
+        limit = 50  # If given an invalid value, default to 50
+    bills_query = database_engine.select(f"SELECT billID FROM Bills ORDER BY billID DESC LIMIT {limit};")
+    return bills_query  # Return the list of bill ids
+
+
+def fetch_user_id(email_address: str) -> str:
+    """
+    For a given email address, finds the user's id from the database.
+    :param email_address: The email address of the User.
+    :return: The id of the User with the given email address.
+    """
+    user_query = database_engine.select(f"SELECT userID FROM Users WHERE email='{email_address}';")  # Get the user
+    if not user_query:
+        raise KeyError(f"No user has email: {email_address}.")  # Query failed, no such User exists
+    return user_query[0][0]  # Return the user's id
+
+
+def fetch_user_interactions(bill_id: str) -> (int, int):
+    """
+    Fetches the users' votes (interaction) on the given bill.
+    :param bill_id: The id of the bill.
+    :return: A tuple containing the likes and dislikes (# of likes, # of dislikes).
+    """
+    likes_count, dislikes_count = 0, 0  # Hold the number of likes and dislikes for the bill
+    # Get number of like:
+    likes_query = database_engine.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' AND positive = 1;")
+    if likes_query:
+        likes_count = likes_query[0][0]
+    # Get number of dislikes:
+    dislikes_query = database_engine.select(f"SELECT COUNT(*) FROM Votes WHERE billID = '{bill_id}' and positive = 0;")
+    if dislikes_query:
+        dislikes_count = dislikes_query[0][0]
+    return likes_count, dislikes_count  # Return the number of likes/dislikes as a tuple
+
+
+def fetch_user_interaction(user_id: str, bill_id: str) -> int:
+    """
+    Finds whether the user has reacted to the given bill.
+    :param user_id: The id of the user.
+    :param bill_id: The id of the bill.
+    :return: An int value (0,1,2) indicating the user's interaction with the bill. 0 --> User has disliked the bill,
+    1 --> User has liked the bill, 2 --> User has not interacted with the bill
+    """
+    # Get the user's interaction with the bill:
+    user_vote_query = database_engine.select(f"SELECT positive FROM Votes WHERE userID='{user_id}' AND billID = '{bill_id}';")
+
+    if not user_vote_query:
+        return 2  # If the query returns an empty list, return False
+    return user_vote_query[0][0]  # If the query returns an empty list return True
+
+
+def fetch_mp_votes(mp_id: str) -> list:
+    """
+    Constructs and returns a list of all of the MP's votes on bills from the database.
+    :param mp_id: The id of the ParliamentMember.
+    :return: A list of all the MP's votes on bills.
+    """
+    db_statement = f"SELECT billID, positive, stage FROM MPVotes WHERE mpID='{mp_id}';"
+    bill_votes = database_engine.select(db_statement)
+    return bill_votes
+
+
+def fetch_mp_by_postcode(postcode: str) -> int:
+    """
+    Find and return the MP of the constituency, based on the given postcode.
+    :param postcode: The postcode being searched.
+    :return: The id of the MP for the constituency.
+    """
+    constituency = get_constituencies_from_post_code(postcode)  # Get the constituency from ParlPy
+    if not constituency:
+        raise KeyError(f"Found no constituencies for postcode '{postcode}'.")  # No constituency exists, raise an error
+    return constituency[0]["currentRepresentation"]["member"]["value"]["id"]  # Return the MP for the constituency
+
+
+def create_session_token() -> str:
+    """
+    Generate a unique token using a combination of random digits, lowercase and uppercase letters.
+    :return: The unique, generated token.
+    """
+    token = ''.join(random.SystemRandom().choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
+                    for _ in range(8))  # Use digits, lowercase and uppercase letters, length 8
+    # Look if it's unique i.e. does not appear already in the db (if not repeat the process)
+    if database_engine.select(f"SELECT * FROM Users WHERE sessionToken='{token}';"):  # Check if the token is in use
+        return create_session_token()  # Repeat the process until a unique token is generated
+    return token  # Return the unique token
+
+
+def is_new_address(email_address: str) -> bool:
+    """
+    Checks the database to see if the given email address is already in use.
+    :param email_address: The email address to look up.
+    :return: True if the email address is not being used, false otherwise.
+    """
+    query = database_engine.select(f"SELECT * FROM Users WHERE email='{email_address}';")  # Get the user with the given email
+    if query:
+        return False  # If the query returns a populated list, return False
+    return True  # If the query returns an empty list return True
+
+
+def add_user_to_database(user: insight.User) -> None:
+    """
+    Add the given User object to the database.
+    :param user: User object.
+    :return: None.
+    """
+    if not user or type(user) is not insight.User:  # If the given user is not a User object, return immediately
+        return
+    # The SQL statement to add the user into the Users table:
+    statement = f"INSERT INTO Users (email,password,postcode,sessionToken,notificationToken) VALUES ('{user.email}','" \
+                f"{user.password_hash}','{user.postcode}','{user.session_token}','{user.notification_token}');"
+    database_engine.interact(statement)  # Carry out the SQL statement
+    return
+
+
+def notify_users(title: str, body: str) -> None:
+    """
+    Fetches the notification token (ExponentPushToken) for all Users, builds and sends a notification with the given
+    title and body.
+    :param title: The title of the notification.
+    :param body: The body of the notification.
+    :return: None.
+    """
+    user_emails = database_engine.select("SELECT email FROM Users;")  # Get all the user email addresses
+    if not user_emails:
+        raise KeyError("No users found in the database.")  # Database query failed
+    user_list = []
+    for user_email in user_emails:  # Go through each user email and construct the User object
+        user = fetch_user(user_email)  # Construct the User object
+        if user:
+            user_list.append(user)  # Add User to the list of users
+    notification.send_notification_to_clients(user_list, title, body)  # Build and send the notification to all users
+    return
