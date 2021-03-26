@@ -25,7 +25,7 @@ def send_message(recipient_address: str, message: str) -> None:
         server.sendmail(email_address, recipient_address, message)  # Send the constructed email
         server.quit()  # Exit the server
     except smtplib.SMTPResponseException:
-        print("Email failed to send.", file=sys.stderr)  # Print using error stream
+        raise OSError("Email failed to send.")  # Print using error stream
     return
 
 
@@ -39,9 +39,9 @@ def create_message(subject: str = "Insight message!", main_body: str = None) -> 
     """
     # Check for type errors:
     if type(subject) is not str:  # Check the email subject
-        raise TypeError("Expected type <class 'str'> got type ", type(subject), " for subject")
+        raise TypeError(f"Expected type <class 'str'> got type {type(subject)} for subject")
     if type(main_body) is not str:  # Check the email body
-        raise TypeError("Expected type <class 'str'> got type ", type(main_body), " for main_body")
+        raise TypeError(f"Expected type <class 'str'> got type {type(main_body)} for main_body")
     message = f'Subject: {subject}\n{main_body}'  # Bundle the contents in the appropriate format
     profanity_filter = ProfanityFilter()  # Create ProfanityFilter object
     message = profanity_filter.censor(message)  # Censor offensive content from the message
@@ -59,13 +59,13 @@ def send_email(recipient_email: str, email_subject: str, email_body: str) -> Non
     """
     # Check for type errors:
     if type(email_subject) is not str:  # Check the email subject
-        raise TypeError("Expected type <class 'str'> got type ", type(email_subject), " for email_subject")
+        raise TypeError(f"Expected type <class 'str'> got type {type(email_subject)} for email_subject")
     if type(email_body) is not str:  # Check the email body
-        raise TypeError("Expected type <class 'str'> got type ", type(email_body), " for email_body")
+        raise TypeError(f"Expected type <class 'str'> got type {type(email_body)} for email_body")
     if type(recipient_email) is not str:  # Check the recipient's email address
-        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+        raise TypeError(f"Expected type <class 'str'> got type {type(recipient_email)} for recipient_email")
     if type(recipient_email) is not str:  # Email is not a str
-        raise TypeError("Expected type <class 'str'> got type ", type(recipient_email), " for recipient_email")
+        raise TypeError(f"Expected type <class 'str'> got type {type(recipient_email)} for recipient_email")
     if not is_valid_email(recipient_email):  # Email is a str but is not a valid address
         raise ValueError(f"Expected a valid email address got: {recipient_email}")  # Raise value error for email
 
