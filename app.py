@@ -327,9 +327,9 @@ def set_user_vote():
     vote_state = fetch_user_interaction(user_id, bill_id)  # Gets the current reaction state of the bill for the user
 
     # Construct the appropriate SQL statement
-    if positive is '2':  # Remove interaction (remove like/dislike)
+    if positive == 2:  # Remove interaction (remove like/dislike)
         statement = f"DELETE FROM Votes WHERE billID = {bill_id} AND userID = {user_id};"
-    elif vote_state == 2 and positive != 2:  # First time interaction with the bill
+    elif vote_state == 2:  # First time interaction with the bill
         statement = f"INSERT INTO Votes (positive, billID, userID, voteTime) VALUES ('{positive}', '{bill_id}', " \
                     f"'{user_id}', CURRENT_TIMESTAMP());"
     else:  # Change existing user interaction with the bill
