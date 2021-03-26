@@ -1,3 +1,4 @@
+# specifies the build specification for the automated cloud build.
 steps:
 - name: "gcr.io/cloud-builders/gcloud"
   args: ["app", "deploy"]

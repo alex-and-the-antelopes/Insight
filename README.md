@@ -1,27 +1,12 @@
-# Insight ⚖️
+<p align="center">
+  <img width="200" height="200" src="res/img/icon1500x1500.png">
+</p>
 
-Server for insight, a parliamentary bill tracker application, making democracy accessible to everyone.
-This is a year-long project in a team of 7 to develop a system to solve a problem, for the *Integrated group-based project* unit at University of Bath 🛁.
+# Insight
 
-## Installation
-This project has not been developed as a "product" in anyway, but these are the general steps, should you wish to use
-this code.
+Server for **Insight**: a Parliamentary Bill tracker, making democracy accessible to everyone.
 
-1. Download source code as zip
-2. Extract contents to a new folder
-3. Ensure all modules in `/requirements.txt` are installed (and the correct version number)
-4. Install [ParlPy](https://github.com/Litharge/ParlPy).
-5. Add a file named `/email_details.py` with the contents:
-    ```python
-    # Holds the details for the gmail account
-    email_address = "bills@example.com"
-    password = "hunter2"
-    ```
-6. Setup MySQL database
-
-
-> **Note:** Although config files for use with Google Cloud Platform are included, ensure `entrypoint` in `app.yaml` is 
-> set to point to `app.py`.
+This is a year-long project in a team of 7, for the *Integrated group-based project* unit at University of Bath 🛁.
 
 ## Taken from a Deliverable
 A system to allow users to both learn about and react to bills passing through Parliament, ultimately encouraging users to engage in the political process. We plan on using a social media style interface to present the bills and allow users to react, to provide young people with a familiar and modern interface to the political process. However, we simultaneously aim to make the interface formal enough that the content is engaged with in a meaningful way.

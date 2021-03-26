@@ -9,3 +9,8 @@ requests~=2.25.1
 pandas~=1.2.3
 google-cloud-secret-manager==2.2.0
 google-cloud-logging==2.3.0
+profanityfilter~=2.0.6
+numpy~=1.20.1
+bs4~=0.0.1
+beautifulsoup4~=4.9.3
+exponent-server-sdk==1.0.1
