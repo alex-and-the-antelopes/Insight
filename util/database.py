@@ -244,9 +244,17 @@ def add_user_interaction(bill_id: str, user_id: str, vote: int) -> bool:
     return True
 
 
-def update_user_interaction(bill_id: str, user_id: str, vote_state: str) -> bool:
+def update_user_interaction(bill_id: str, user_id: str, vote: int) -> bool:
 
-    pass
+    if vote != 0 and vote != 1:
+        return False  # Should only be given 0 or 1 (0 --> dislike, 1 --> like)
+    update_statement = f"UPDATE Votes SET positive = {vote}, voteTime = CURRENT_TIMESTAMP() WHERE billID = {bill_id}" \
+                       f" AND userID = {user_id};"
+    try:
+        database_engine.interact(update_statement)  # Carry out the relevant SQL statement
+    except RuntimeWarning:
+        return False  # Error executing the SQL statement
+    return True
 
 
 def verify_email_and_session_token(email_address: str, session_token: str) -> bool:
