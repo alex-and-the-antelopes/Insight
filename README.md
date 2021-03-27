@@ -19,7 +19,7 @@ As this is only a single part of a bigger system, using it on it's own will take
 
 Here is a HLA diagram of our working system.
 
-![HLA diagram](docs/img/hla.png)
+![HLA diagram](docs/img/hla_2.png)
 
 ## How does it work?
 Insight follows both CRUD and REST architectures. ParlPy is run every hour to update our database with bill information, scraped from the Houses of Parliament website. This data is then served as a resource, when requested, following POST requests from the frontend. 
