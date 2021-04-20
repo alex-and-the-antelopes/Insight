@@ -238,7 +238,7 @@ def send_message():
 
     if mp:  # If the MP was successfully constructed
         try:
-            email.send_email(mp.email, "Insight Update!", message)  # Send the email
+            # email.send_email(mp.email, "Insight Update!", message)  # Send the email
             return jsonify({"success": "email_sent"})  # If sent without errors, return success message
         except ValueError:
             return jsonify({"error": "invalid_recipient_address"})  # Destination email is invalid
